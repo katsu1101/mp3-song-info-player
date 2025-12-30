@@ -20,7 +20,7 @@ declare global {
     getFile(): Promise<File>;
   }
 
-  interface FileSystemDirectoryHandle extends FileSystemHandle {
+  // interface FileSystemDirectoryHandle extends FileSystemHandle {
     // ここは敢えて空でOK（反復は scanMp3 側でキャストしてるため）
-  }
+  // }
 }
