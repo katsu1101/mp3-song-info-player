@@ -6,6 +6,10 @@ import Image            from "next/image";
 
 export default function Page() {
   const {
+    needsReconnect,
+    savedHandle,
+    reconnect,
+    forget,
     mp3List,
     folderName,
     errorMessage,
@@ -22,9 +26,18 @@ export default function Page() {
       <h1 style={{fontSize: 22, fontWeight: 700}}>MP3曲情報エディター（テスト）</h1>
 
       <div style={{display: "flex", gap: 12, alignItems: "center", marginTop: 12, flexWrap: "wrap"}}>
+
         <button onClick={pickFolderAndLoad} style={{padding: "8px 12px", borderRadius: 8, border: "1px solid #ccc"}}>
           フォルダを選ぶ
         </button>
+
+        {savedHandle && needsReconnect ? (
+          <button onClick={reconnect}>前回のフォルダに再接続</button>
+        ) : null}
+
+        {savedHandle ? (
+          <button onClick={forget}>記憶を消す</button>
+        ) : null}
         {folderName ? <div>選択中: <b>{folderName}</b></div> : <div>未選択</div>}
       </div>
 
