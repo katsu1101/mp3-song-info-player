@@ -7,7 +7,7 @@ import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import type {Mp3Entry}           from "@/types";
 import type {FantiaMappingEntry} from "@/types/mapping";
 import Image                     from "next/image";
-import {useMemo}                 from "react";
+import {useMemo, useState}       from "react";
 
 type SortKey = {
   hasMapping: boolean;
@@ -56,7 +56,19 @@ const compareSortKey = (a: SortKey, b: SortKey): number => {
   // 4) 最後は path で安定化
   return a.fallbackPath.localeCompare(b.fallbackPath, "ja");
 };
+const formatYm = (releaseYm: string): string => {
+  // "2022-04" -> "2022/04"
+  return releaseYm.replace("-", "/");
+};
 
+const formatOrder2 = (n: number): string => String(n).padStart(2, "0");
+
+const buildReleaseOrderLabel = (mapping: FantiaMappingEntry | undefined): string | null => {
+  if (!mapping) return null;
+  const ym = formatYm(mapping.releaseYm); // "YYYY/MM"
+  const order = formatOrder2(mapping.withinMonthIndex); // "01", "02"...
+  return `${ym} / ${order}`;
+};
 export default function Page() {
   const {
     needsReconnect,
@@ -72,18 +84,10 @@ export default function Page() {
     pickFolderAndLoad,
   } = useMp3Library();
 
+  const [showFilePath, setShowFilePath] = useState<boolean>(false);
   const {audioRef, nowPlaying, playEntry, stop} = useAudioPlayer();
 
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = useFantiaMapping();
-
-  const getDisplayTitle = useMemo(() => {
-    return (path: string, tagTitle: string | null): string | null => {
-      const prefixId = extractPrefixIdFromPath(path);
-      const mapped = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
-      // 対応表の曲名を最優先、なければタグ、どっちも無ければnull
-      return mapped?.title ?? tagTitle;
-    };
-  }, [mappingByPrefixId]);
 
   const sortedMp3List = useMemo(() => {
     // 安定ソートのため index を付ける（同一キーで順序が揺れないように）
@@ -112,6 +116,16 @@ export default function Page() {
         {savedHandle && needsReconnect ? <button onClick={reconnect}>前回のフォルダに再接続</button> : null}
         {savedHandle ? <button onClick={forget}>記憶を消す</button> : null}
         {folderName ? <div>選択中: <b>{folderName}</b></div> : <div>未選択</div>}
+        <div style={{marginTop: 8}}>
+          <button
+            onClick={() => setShowFilePath((v) => !v)}
+            className="text-xs"
+            style={{padding: "3px 5px", borderRadius: 4, border: "1px solid #ccc"}}
+          >
+            {showFilePath ? "file名を隠す" : "file名表示"}
+          </button>
+        </div>
+
       </div>
 
       {errorMessage ? <p style={{marginTop: 12, color: "crimson"}}>エラー: {errorMessage}</p> : null}
@@ -149,7 +163,13 @@ export default function Page() {
         <ul style={{marginTop: 12, paddingLeft: 0, listStyle: "none"}}>
           {sortedMp3List.map((item) => {
             const tagTitle = titleByPath[item.path] ?? null;
-            const displayTitle = getDisplayTitle(item.path, tagTitle);
+
+            const prefixId = extractPrefixIdFromPath(item.path);
+            const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
+
+            const displayTitle = mapping?.title ?? tagTitle ?? "（曲名なし）";
+            const releaseOrder = buildReleaseOrderLabel(mapping) ?? "年月不明";
+
             const coverUrl = coverUrlByPath[item.path];
 
             return (
@@ -169,8 +189,25 @@ export default function Page() {
                 </div>
 
                 <div style={{minWidth: 0, flex: "1 1 auto"}}>
-                  <div style={{fontWeight: 700}}>{displayTitle ?? "（曲名なし）"}</div>
-                  <div style={{fontSize: 12, opacity: 0.8, wordBreak: "break-all"}}>{item.path}</div>
+                  {/* 1行目: 曲名 */}
+                  <div style={{fontWeight: 800, fontSize: 18, lineHeight: 1.2}}>
+                    {displayTitle}
+                  </div>
+
+                  {/* 2行目: 年月＋曲順（追加） */}
+                  <div style={{fontSize: 13, opacity: 0.85, marginTop: 4}}>
+                    {releaseOrder}
+                    {mapping?.originalArtist ? (
+                      <span style={{opacity: 0.75}}> / 原曲: {mapping.originalArtist}</span>
+                    ) : null}
+                  </div>
+
+                  {/* 3行目: ファイル名（小さく or 非表示） */}
+                  {showFilePath ? (
+                    <div style={{fontSize: 11, opacity: 0.6, marginTop: 4, wordBreak: "break-all"}}>
+                      {item.path}
+                    </div>
+                  ) : null}
                 </div>
 
                 <button

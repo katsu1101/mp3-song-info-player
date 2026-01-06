@@ -28,8 +28,7 @@ export const useFantiaMapping = (): FantiaMappingState => {
         if (isCancelled) return;
         setError(e instanceof Error ? e.message : String(e));
       } finally {
-        if (isCancelled) return;
-        setIsLoading(false);
+        if (!isCancelled) setIsLoading(false);
       }
     })();
 
