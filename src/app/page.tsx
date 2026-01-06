@@ -1,13 +1,14 @@
 "use client";
 
-import {useAudioPlayer}          from "@/hooks/useAudioPlayer";
-import {useFantiaMapping}        from "@/hooks/useFantiaMapping";
-import {useMp3Library}           from "@/hooks/useMp3Library";
-import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
-import type {Mp3Entry}           from "@/types";
-import type {FantiaMappingEntry} from "@/types/mapping";
-import Image                     from "next/image";
-import {useMemo, useState}       from "react";
+import {useAudioPlayer}                                    from "@/hooks/useAudioPlayer";
+import {useFantiaMapping}                                  from "@/hooks/useFantiaMapping";
+import {useMp3Library}                                     from "@/hooks/useMp3Library";
+import {extractPrefixIdFromPath}                           from "@/lib/mapping/extractPrefixId";
+import type {Mp3Entry}                                     from "@/types";
+import type {FantiaMappingEntry}                           from "@/types/mapping";
+import Image                                               from "next/image";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+
 
 type SortKey = {
   hasMapping: boolean;
@@ -69,6 +70,8 @@ const buildReleaseOrderLabel = (mapping: FantiaMappingEntry | undefined): string
   const order = formatOrder2(mapping.withinMonthIndex); // "01", "02"...
   return `${ym} / ${order}`;
 };
+
+
 export default function Page() {
   const {
     needsReconnect,
@@ -88,6 +91,15 @@ export default function Page() {
   const {audioRef, nowPlaying, playEntry, stop} = useAudioPlayer();
 
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = useFantiaMapping();
+  const [isContinuous, setIsContinuous] = useState<boolean>(true);
+
+// endedハンドラが古い state を参照しないように ref を使う
+  const currentIndexRef = useRef<number | null>(null);
+  const isContinuousRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    isContinuousRef.current = isContinuous;
+  }, [isContinuous]);
 
   const sortedMp3List = useMemo(() => {
     // 安定ソートのため index を付ける（同一キーで順序が揺れないように）
@@ -103,6 +115,73 @@ export default function Page() {
 
     return decorated.map((x) => x.item);
   }, [mp3List, mappingByPrefixId]);
+
+  const displayTitleByPath = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const item of sortedMp3List) {
+      const tagTitle = titleByPath[item.path] ?? null;
+
+      const prefixId = extractPrefixIdFromPath(item.path);
+      const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
+
+      const displayTitle = mapping?.title ?? tagTitle;
+      map.set(item.path, displayTitle);
+    }
+    return map;
+  }, [sortedMp3List, titleByPath, mappingByPrefixId]);
+
+  const playAtIndex = useCallback(
+    async (index: number): Promise<void> => {
+      if (index < 0 || index >= sortedMp3List.length) return;
+
+      const item = sortedMp3List[index];
+      const title = displayTitleByPath.get(item.path) ?? null;
+
+      currentIndexRef.current = index;
+      await playEntry(item, title);
+    },
+    [sortedMp3List, displayTitleByPath, playEntry]
+  );
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onEnded = () => {
+      if (!isContinuousRef.current) return;
+
+      const idx = currentIndexRef.current;
+      if (idx === null) return;
+
+      const next = idx + 1;
+      if (next >= sortedMp3List.length) return; // 最後まで行ったら止める（必要ならリピート可）
+      void playAtIndex(next);
+    };
+
+    audio.addEventListener("ended", onEnded);
+    return () => audio.removeEventListener("ended", onEnded);
+  }, [audioRef, sortedMp3List.length, playAtIndex]);
+
+  const playNext = useCallback(async (): Promise<void> => {
+    const idx = currentIndexRef.current;
+    if (idx === null) return;
+    await playAtIndex(idx + 1);
+  }, [playAtIndex]);
+
+  const playPrev = useCallback(async (): Promise<void> => {
+    const idx = currentIndexRef.current;
+    if (idx === null) return;
+    await playAtIndex(idx - 1);
+  }, [playAtIndex]);
+
+  const stopAndReset = useCallback(() => {
+    stop();
+    currentIndexRef.current = null;
+  }, [stop]);
+
+  useEffect(() => {
+    currentIndexRef.current = null;
+  }, [folderName]);
 
   return (
     <main style={{padding: 16, maxWidth: 900, margin: "0 auto"}}>
@@ -144,9 +223,30 @@ export default function Page() {
           ) : (
             <div style={{opacity: 0.7}}>未再生</div>
           )}
-          <button onClick={stop} style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc"}}>
+          <button onClick={stopAndReset} style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc"}}>
             停止
           </button>
+          <button
+            onClick={() => setIsContinuous((v) => !v)}
+            style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc"}}
+          >
+            連続再生: {isContinuous ? "ON" : "OFF"}
+          </button>
+
+          <button
+            onClick={() => void playPrev()}
+            style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc"}}
+          >
+            ◀ 前へ
+          </button>
+
+          <button
+            onClick={() => void playNext()}
+            style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc"}}
+          >
+            次へ ▶
+          </button>
+
         </div>
 
         <div style={{marginTop: 10}}>
@@ -161,7 +261,7 @@ export default function Page() {
         </div>
 
         <ul style={{marginTop: 12, paddingLeft: 0, listStyle: "none"}}>
-          {sortedMp3List.map((item) => {
+          {sortedMp3List.map((item, index) => {
             const tagTitle = titleByPath[item.path] ?? null;
 
             const prefixId = extractPrefixIdFromPath(item.path);
@@ -211,7 +311,7 @@ export default function Page() {
                 </div>
 
                 <button
-                  onClick={() => void playEntry(item, displayTitle)}
+                  onClick={() => void playAtIndex(index)}
                   style={{padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc", flex: "0 0 auto"}}
                 >
                   ▶ 再生
