@@ -20,100 +20,227 @@ type TrackListProps = {
   trackViews: readonly TrackViewLike[];
   showFilePath: boolean;
 
-  mp3Count: number;
-  totalSizeBytes: number;
-
   onPlayAtIndexAction: (index: number) => void | Promise<void>;
-};
 
-const formatMegaBytes = (bytes: number): string => {
-  const megaBytes = bytes / (1024 * 1024);
-  return `${megaBytes.toFixed(2)} MB`;
+  nowPlayingPath: string | null; // ✅ 追加
 };
 
 export function TrackList(props: TrackListProps) {
-  const {trackViews, showFilePath, mp3Count, totalSizeBytes, onPlayAtIndexAction} = props;
+  const {trackViews, showFilePath, onPlayAtIndexAction, nowPlayingPath} = props;
+
+  const THUMB = 20;
 
   return (
-    <section style={{marginTop: 16}}>
-      {/* サマリー */}
-      <div style={{display: "flex", gap: 16, flexWrap: "wrap"}}>
-        <div>MP3件数: <b>{mp3Count}</b></div>
-        <div>合計サイズ: <b>{formatMegaBytes(totalSizeBytes)}</b></div>
-      </div>
+    <section style={{marginTop: 12}}>
+      {/* サマリー（コンパクト） */}
+      {/*<div style={{display: "flex", gap: 14, flexWrap: "wrap", fontSize: 12, opacity: 0.9}}>*/}
+      {/*  <div>MP3: <b>{mp3Count}</b></div>*/}
+      {/*  <div>合計: <b>{formatMegaBytes(totalSizeBytes)}</b></div>*/}
+      {/*</div>*/}
 
-      {/* リスト */}
       {trackViews.length === 0 ? (
-        <p style={{marginTop: 12, opacity: 0.7}}>曲がありません（フォルダを選択してください）</p>
+        <p style={{marginTop: 10, opacity: 0.7, fontSize: 13}}>曲がありません（フォルダを選択してください）</p>
       ) : (
-        <ul style={{marginTop: 12, paddingLeft: 0, listStyle: "none"}}>
-          {trackViews.map((t) => (
-            <li
-              key={t.item.path}
-              style={{
-                display: "flex",
-                gap: 10,
-                alignItems: "center",
-                padding: "8px 0",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
-              }}
-            >
-              {/* ジャケ */}
-              <div style={{
-                width: 44, height: 44, borderRadius: 8, border: "1px solid #ddd",
-                overflow: "hidden", display: "grid", placeItems: "center",
-                background: "#fafafa", flex: "0 0 auto",
-              }}>
-                {t.coverUrl ? (
-                  <Image
-                    src={t.coverUrl}
-                    alt=""
-                    width={44}
-                    height={44}
-                    unoptimized
-                    style={{width: "100%", height: "100%", objectFit: "cover"}}
-                  />
-                ) : (
-                  <span style={{fontSize: 12, opacity: 0.6}}>No Art</span>
-                )}
-              </div>
+        <div
+          style={{
+            marginTop: 8,
+            maxWidth: "100%",
+            overflowX: showFilePath ? "auto" : "hidden", // ✅ 普段ははみ出させない
+          }}
+        >
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              tableLayout: "fixed",
+            }}
+          >
+            <colgroup>
+              {[
+                <col key="art" style={{width: 28}}/>,
+                <col key="action" style={{width: 32}}/>,
+                // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
+                <col key="title"/>,
 
-              {/* 情報 */}
-              <div style={{minWidth: 0, flex: "1 1 auto"}}>
-                <div style={{fontWeight: 800, fontSize: 18, lineHeight: 1.2}}>
-                  {t.displayTitle}
-                </div>
+                // ✅ 右側は “狭い時は縮む / 広い時は広がりすぎない” clamp が強い
+                <col key="ym" style={{width: "clamp(60px, 9vw, 100px)"}}/>,
+                <col key="orig" style={{width: "clamp(60px, 9vw, 100px)"}}/>,
 
-                <div style={{fontSize: 13, opacity: 0.85, marginTop: 4}}>
-                  {t.releaseOrder}
-                  {t.originalArtist ? <span style={{opacity: 0.75}}> / 原曲: {t.originalArtist}</span> : null}
-                </div>
+                ...(showFilePath ? [<col key="path" style={{width: 260}}/>] : []),
+              ]}
+            </colgroup>
 
-                {showFilePath ? (
-                  <div style={{fontSize: 11, opacity: 0.6, marginTop: 4, wordBreak: "break-all"}}>
-                    {t.item.path}
-                  </div>
-                ) : null}
-              </div>
 
-              {/* 操作 */}
-              <button
-                onClick={() => void onPlayAtIndexAction(t.index)}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: 10,
-                  border: "1px solid #ccc",
-                  flex: "0 0 auto",
-                  fontWeight: 700,
-                }}
-                title="この曲を再生"
-              >
-                ▶ 再生
-              </button>
-            </li>
-          ))}
-        </ul>
+            <thead>
+            <tr style={{borderBottom: "1px solid rgba(255,255,255,0.10)"}}>
+              <th style={thStyle} aria-label="ジャケット"/>
+              <th style={{...thStyle, textAlign: "right"}}>再生</th>
+              <th style={thStyle}>曲名</th>
+              <th style={thStyle}>年月/順</th>
+              <th style={thStyle}>原曲</th>
+              {showFilePath ? <th style={thStyle}>ファイル</th> : null}
+            </tr>
+            </thead>
+
+            <tbody>
+            {trackViews.map((t) => {
+              const isNowPlaying = nowPlayingPath === t.item.path;
+              const releaseText = t.releaseOrder;
+              const originalText = t.originalArtist ?? "";
+
+              return (
+                <tr
+                  key={t.item.path}
+                  aria-current={isNowPlaying ? "true" : undefined}
+                  style={{
+                    borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    height: 24,
+                    background: isNowPlaying ? "rgba(255,255,255,0.06)" : "transparent",
+                    transition: "background 120ms ease",
+                  }}
+                >
+                  {/* art */}
+                  <td
+                    style={{
+                      ...tdStyle,
+                      padding: 0,
+                      borderLeft: isNowPlaying ? "3px solid rgba(255,255,255,0.65)" : "3px solid transparent",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: THUMB,
+                        height: THUMB,
+                        borderRadius: 8,
+                        overflow: "hidden",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "rgba(255,255,255,0.06)",
+                        display: "grid",
+                        placeItems: "center",
+                      }}
+                    >
+                      {t.coverUrl ? (
+                        <Image
+                          src={t.coverUrl}
+                          alt=""
+                          width={THUMB}
+                          height={THUMB}
+                          unoptimized
+                          style={{width: "100%", height: "100%", objectFit: "cover"}}
+                        />
+                      ) : (
+                        <span style={{fontSize: 10, opacity: 0.6}}>No</span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* action */}
+                  <td style={{...tdStyle, padding: 0}}>
+                    <div style={{display: "grid", placeItems: "center"}}>
+                      <button
+                        onClick={() => void onPlayAtIndexAction(t.index)}
+                        style={{
+                          height: 20,
+                          width: 28,
+                          padding: 0,
+                          borderRadius: 999,
+                          border: isNowPlaying
+                            ? "1px solid rgba(255,255,255,0.40)"
+                            : "1px solid rgba(255,255,255,0.18)",
+                          background: isNowPlaying ? "rgba(255,255,255,0.10)" : "transparent",
+                          color: "white",
+                          fontWeight: 800,
+                          lineHeight: "20px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        title="この曲を再生"
+                      >
+                        ▶
+                      </button>
+                    </div>
+                  </td>
+
+                  {/* title */}
+                  <td style={tdStyle}>
+                    <div style={oneLine15} title={t.displayTitle}>
+                      {t.displayTitle}
+                    </div>
+                  </td>
+
+                  {/* releaseOrder */}
+                  <td style={tdStyle}>
+                    <div style={oneLine12} title={releaseText}>
+                      {releaseText}
+                    </div>
+                  </td>
+
+                  {/* originalArtist */}
+                  <td style={tdStyle}>
+                    <div style={oneLine12} title={originalText}>
+                      {originalText || "—"}
+                    </div>
+                  </td>
+
+                  {/* path (optional) */}
+                  {showFilePath ? (
+                    <td style={tdStyle}>
+                      <div style={oneLine11dim} title={t.item.path}>
+                        {t.item.path}
+                      </div>
+                    </td>
+                  ) : null}
+
+                </tr>
+              );
+            })}
+            </tbody>
+
+          </table>
+        </div>
       )}
     </section>
   );
 }
+
+const thStyle: React.CSSProperties = {
+  padding: "2px 6px",
+  fontSize: 11,
+  fontWeight: 800,
+  opacity: 0.85,
+  textAlign: "left",
+  whiteSpace: "nowrap",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "0 6px",
+  verticalAlign: "middle",
+  lineHeight: "24px",      // ✅ 行高に吸着させる
+};
+
+const oneLine15: React.CSSProperties = {
+  fontSize: 14,
+  fontWeight: 900,
+  lineHeight: "24px",      // ✅ ここも吸着
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+const oneLine12: React.CSSProperties = {
+  fontSize: 12,
+  opacity: 0.75,
+  lineHeight: 1.1,           // ✅ 行間を締める
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+const oneLine11dim: React.CSSProperties = {
+  fontSize: 11,
+  opacity: 0.55,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};

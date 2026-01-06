@@ -1,3 +1,4 @@
+import {getDirname}                   from "@/hooks/src/lib/path/getDirname";
 import {extractPrefixIdFromPath}      from "@/lib/mapping/extractPrefixId";
 import {buildReleaseOrderLabel}       from "@/lib/playlist/label";
 import {buildSortKey, compareSortKey} from "@/lib/playlist/sort";
@@ -7,10 +8,10 @@ import {useMemo}                      from "react";
 
 export type TrackView = {
   item: Mp3Entry;
-  index: number;                 // ソート後のindex
-  displayTitle: string;          // mapping優先、なければタグ、なければ(曲名なし)
-  releaseOrder: string;          // "YYYY/MM / 01" or "年月不明"
-  originalArtist: string | null; // mapping由来
+  index: number;
+  displayTitle: string;
+  releaseOrder: string;
+  originalArtist: string | null;
   coverUrl: string | null;
 };
 
@@ -18,11 +19,15 @@ type UseTrackViewsArgs = {
   mp3List: Mp3Entry[];
   titleByPath: Record<string, string | null | undefined>;
   coverUrlByPath: Record<string, string | null | undefined>;
+
+  // ✅ 追加：フォルダ代表ジャケ
+  dirCoverUrlByDir: Record<string, string | null | undefined>;
+
   mappingByPrefixId: ReadonlyMap<string, FantiaMappingEntry>;
 };
 
 export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
-  const {mp3List, titleByPath, coverUrlByPath, mappingByPrefixId} = args;
+  const {mp3List, titleByPath, coverUrlByPath, dirCoverUrlByDir, mappingByPrefixId} = args;
 
   return useMemo(() => {
     const decorated = mp3List.map((item, originalIndex) => {
@@ -44,7 +49,12 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const displayTitle = mapping?.title ?? tagTitle ?? "（曲名なし）";
       const releaseOrder = buildReleaseOrderLabel(mapping) ?? "年月不明";
 
-      const coverUrl = coverUrlByPath[item.path] ?? null;
+      const dirPath = getDirname(item.path);
+
+      const coverUrl =
+        coverUrlByPath[item.path] ??
+        dirCoverUrlByDir[dirPath] ??
+        null;
 
       return {
         item,
@@ -55,5 +65,5 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         coverUrl,
       };
     });
-  }, [mp3List, titleByPath, coverUrlByPath, mappingByPrefixId]);
+  }, [mp3List, titleByPath, coverUrlByPath, dirCoverUrlByDir, mappingByPrefixId]);
 };

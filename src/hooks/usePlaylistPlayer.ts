@@ -51,7 +51,7 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
 
   const stopAndReset = useCallback((): void => {
     stop();
-    currentIndexRef.current = null;
+    // currentIndexRef.current = null;
   }, [stop]);
 
   // audio ended → 次へ（連続再生ON時）
