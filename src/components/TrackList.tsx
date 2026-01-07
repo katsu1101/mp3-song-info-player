@@ -2,8 +2,8 @@
 
 import {useSettings} from "@/components/Settings/SettingsProvider";
 import {TrackView}   from "@/hooks/useTrackViews";
-import Image         from "next/image";
-import React         from "react";
+import Image                      from "next/image";
+import React, {useEffect, useRef} from "react";
 
 type TrackListProps = {
   trackViews: readonly TrackView[];
@@ -16,11 +16,31 @@ type TrackListProps = {
 export function TrackList(props: TrackListProps) {
   const {trackViews, onPlayAtIndexAction, nowPlayingPath} = props;
 
+  const nowRowRef = useRef<HTMLTableRowElement | null>(null);
+
+  const getScrollBehavior = (): ScrollBehavior => {
+    // 省エネ設定の人は auto
+    if (typeof window === "undefined") return "auto";
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
+  };
+
   const {settings} = useSettings();
 
   const showFilePath = settings.ui.showFilePath;
 
   const THUMB = 20;
+
+  useEffect(() => {
+    if (!nowPlayingPath) return;
+    const row = nowRowRef.current;
+    if (!row) return;
+
+    row.scrollIntoView({
+      behavior: getScrollBehavior(),
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [nowPlayingPath]);
 
   return (
     <section style={{marginTop: 12}}>
@@ -83,12 +103,17 @@ export function TrackList(props: TrackListProps) {
               return (
                 <tr
                   key={t.item.path}
+                  ref={(el) => {
+                    if (isNowPlaying) nowRowRef.current = el;
+                  }}
                   aria-current={isNowPlaying ? "true" : undefined}
                   style={{
                     borderBottom: "1px solid rgba(255,255,255,0.08)",
                     height: 24,
                     background: isNowPlaying ? "rgba(255,255,255,0.06)" : "transparent",
                     transition: "background 120ms ease",
+                    // ✅ ヘッダーに隠れやすい場合はここを増やす
+                    scrollMarginTop: 80,
                   }}
                 >
                   {/* art */}
