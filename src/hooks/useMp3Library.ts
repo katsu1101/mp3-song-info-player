@@ -124,21 +124,23 @@ export const useMp3Library = () => {
     dirCovers.clearAll();
   };
 
-  const toTrackMeta = (meta: Mp3Meta, coverUrl: string | null): TrackMeta => {
+  const toTrackMeta = (
+    meta: Mp3Meta, coverUrl: string | null, fileName: string
+  ): TrackMeta => {
     return {
-      title: meta.title ?? "",
+      title: meta.title ?? fileName,
       artist: meta.artist ?? "",
       album: meta.album ?? "",
       trackNo: meta.trackNo ?? null,
-      // year: meta.year ?? null,
-      coverUrl, // ← TrackMeta 側が string | null を想定してるならこれでOK
+      year: meta.year ?? null,
+      coverUrl,
     };
   };
 
   const buildList = async (handle: FileSystemDirectoryHandle) => {
     setFolderName(handle.name);
 
-    const items = await readMp3FromDirectory(handle, {recursion: true});
+    const items = await readMp3FromDirectory(handle, "");
     setMp3List(items);
 
     // ✅ フォルダ代表画像（先に作っておく：表示フォールバック用）
@@ -168,7 +170,7 @@ export const useMp3Library = () => {
       const coverUrl: string | null = createCoverObjectUrl(meta.picture);
       covers.setUrl(entry.path, coverUrl ?? null);
 
-      const trackMeta: TrackMeta = toTrackMeta(meta, coverUrl);
+      const trackMeta: TrackMeta = toTrackMeta(meta, coverUrl, file.name);
 
       setMetaByPath((prev) => ({
         ...prev,

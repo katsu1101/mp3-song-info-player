@@ -1,7 +1,7 @@
 "use client";
 
-import {useSettings} from "@/components/Settings/SettingsProvider";
-import {TrackView}   from "@/hooks/useTrackViews";
+import {useSettings}              from "@/components/Settings/SettingsProvider";
+import {TrackView}                from "@/hooks/useTrackViews";
 import Image                      from "next/image";
 import React, {useEffect, useRef} from "react";
 
@@ -10,11 +10,11 @@ type TrackListProps = {
 
   onPlayAtIndexAction: (index: number) => void | Promise<void>;
 
-  nowPlayingPath: string | null; // ✅ 追加
+  nowPlayingID: number;
 };
 
 export function TrackList(props: TrackListProps) {
-  const {trackViews, onPlayAtIndexAction, nowPlayingPath} = props;
+  const {trackViews, onPlayAtIndexAction, nowPlayingID} = props;
 
   const nowRowRef = useRef<HTMLTableRowElement | null>(null);
 
@@ -31,7 +31,7 @@ export function TrackList(props: TrackListProps) {
   const THUMB = 20;
 
   useEffect(() => {
-    if (!nowPlayingPath) return;
+    if (!nowPlayingID) return;
     const row = nowRowRef.current;
     if (!row) return;
 
@@ -40,7 +40,7 @@ export function TrackList(props: TrackListProps) {
       block: "nearest",
       inline: "nearest",
     });
-  }, [nowPlayingPath]);
+  }, [nowPlayingID]);
 
   return (
     <section style={{marginTop: 12}}>
@@ -69,6 +69,7 @@ export function TrackList(props: TrackListProps) {
           >
             <colgroup>
               {[
+                <col key="no" style={{width: 28}}/>,
                 <col key="art" style={{width: 28}}/>,
                 <col key="action" style={{width: 32}}/>,
                 // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
@@ -85,6 +86,7 @@ export function TrackList(props: TrackListProps) {
 
             <thead>
             <tr style={{borderBottom: "1px solid rgba(255,255,255,0.10)"}}>
+              <th style={thStyle}>#</th>
               <th style={thStyle} aria-label="ジャケット"/>
               <th style={{...thStyle, textAlign: "right"}}>再生</th>
               <th style={thStyle}>曲名</th>
@@ -96,7 +98,7 @@ export function TrackList(props: TrackListProps) {
 
             <tbody>
             {trackViews.map((t) => {
-              const isNowPlaying = nowPlayingPath === t.item.path;
+              const isNowPlaying = nowPlayingID === t.item.id;
               const releaseText = t.orderLabel;
               const originalText = t.originalArtist ?? "";
 
@@ -116,6 +118,7 @@ export function TrackList(props: TrackListProps) {
                     scrollMarginTop: 80,
                   }}
                 >
+                  <td>{t.item.id}</td>
                   {/* art */}
                   <td
                     style={{

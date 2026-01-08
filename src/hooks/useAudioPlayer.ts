@@ -3,16 +3,11 @@
 import type {Mp3Entry}               from "@/types";
 import {useEffect, useRef, useState} from "react";
 
-type NowPlaying = {
-  path: string;
-  title: string | null;
-};
-
 export const useAudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
-  const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null);
+  const [nowPlayingID, setNowPlayingID] = useState(0);
 
   const objectUrlRef = useRef<string | null>(null);
 
@@ -30,7 +25,7 @@ export const useAudioPlayer = () => {
       audio.load();
     }
     setAudioSrc(null);
-    setNowPlaying(null);
+    setNowPlayingID(0);
     revokeCurrentUrl();
   };
 
@@ -47,7 +42,7 @@ export const useAudioPlayer = () => {
     objectUrlRef.current = url;
 
     setAudioSrc(url);
-    setNowPlaying({path: entry.path, title});
+    setNowPlayingID(entry.id);
 
     audio.src = url;
 
@@ -69,7 +64,7 @@ export const useAudioPlayer = () => {
   return {
     audioRef,
     audioSrc,
-    nowPlaying,
+    nowPlayingID,
     playEntry,
     stop,
   };

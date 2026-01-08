@@ -29,7 +29,7 @@ export default function Page() {
 
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = useFantiaMapping();
 
-  const {audioRef, nowPlaying, playEntry, stop} = useAudioPlayer();
+  const {audioRef, nowPlayingID, playEntry, stop} = useAudioPlayer();
 
   const trackViews = useTrackViews({
     mp3List,
@@ -46,10 +46,7 @@ export default function Page() {
   };
   const {settings} = useSettings();
   const {
-    playAtIndex,
-    playNext,
-    playPrev,
-    stopAndReset,
+    playActions,
   } = usePlaylistPlayer({
     audioRef,
     playEntry,
@@ -83,19 +80,17 @@ export default function Page() {
 
           <TrackList
             trackViews={trackViews}
-            onPlayAtIndexAction={playAtIndex}
-            nowPlayingPath={nowPlaying?.path ?? null}
+            onPlayAtIndexAction={playActions.playAtIndex}
+            nowPlayingID={nowPlayingID}
           />
         </>
       }
       player={
         <NowPlayingPanel
-          nowPlaying={nowPlaying}
+          nowPlayingID={nowPlayingID}
           trackViews={trackViews}
           audioRef={audioRef}
-          playPrevAction={playPrev}
-          playNextAction={playNext}
-          stopAndResetAction={stopAndReset}
+          playActions={playActions}
         />
       }
     />

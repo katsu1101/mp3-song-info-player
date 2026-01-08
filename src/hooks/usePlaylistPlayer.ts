@@ -14,6 +14,13 @@ type UsePlaylistPlayerArgs = {
   isShuffle: boolean;
 };
 
+export type PlayActions = {
+  playAtIndex: (index: number) => Promise<void>;
+  playNext: () => Promise<void>;
+  playPrev: () => Promise<void>;
+  pause: () => void;
+}
+
 const randomInt = (maxExclusive: number): number => {
   if (maxExclusive <= 0) return 0;
 
@@ -49,7 +56,6 @@ const buildShuffledQueue = (length: number, excludeIndex: number | null): number
 
 export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
   const {audioRef, playEntry, stop, list, getTitle, resetKey, isContinuous, isShuffle} = args;
-
 
   const currentIndexRef = useRef<number | null>(null);
 
@@ -134,7 +140,7 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     await playAtIndex(idx - 1);
   }, [playAtIndex]);
 
-  const stopAndReset = useCallback((): void => {
+  const pause = useCallback((): void => {
     stop();
     // currentIndexRef.current = null; // ←互換のまま残す（必要なら外で制御）
   }, [stop]);
@@ -216,15 +222,13 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
 
   return useMemo(
     () => ({
-      isContinuous,
-
-      isShuffle,
-
-      playAtIndex,
-      playNext,
-      playPrev,
-      stopAndReset,
+      playActions: {
+        playAtIndex,
+        playNext,
+        playPrev,
+        pause
+      } as PlayActions
     }),
-    [isContinuous, isShuffle, playAtIndex, playNext, playPrev, stopAndReset]
+    [isContinuous, isShuffle, playAtIndex, playNext, playPrev, pause]
   );
 };

@@ -4,6 +4,7 @@ export type TrackMeta = {
   artist: string | null;
   album: string | null;
   trackNo: number | null;
+  year: number | null;
 
   // ジャケット（objectURL。無ければ null）
   coverUrl: string | null;

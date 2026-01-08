@@ -1,24 +1,15 @@
 "use client";
 
+import {PlayActions}                         from "@/hooks/usePlaylistPlayer";
 import {TrackView}                           from "@/hooks/useTrackViews";
 import Image                                 from "next/image";
 import React, {useEffect, useMemo, useState} from "react";
 
-type NowPlayingInfo = {
-  title: string | null;
-  path: string;
-};
-
 type NowPlayingPanelProps = {
-  nowPlaying: NowPlayingInfo | null;
+  nowPlayingID: number;
   trackViews: readonly TrackView[];
-
   audioRef: React.RefObject<HTMLAudioElement | null>;
-
-  playPrevAction: () => Promise<void> | void;
-  playNextAction: () => Promise<void> | void;
-
-  stopAndResetAction: () => void;
+  playActions: PlayActions;
 };
 
 const getBasename = (path: string): string => {
@@ -34,29 +25,28 @@ const getDirname = (path: string): string => {
 
 export function NowPlayingPanel(props: NowPlayingPanelProps) {
   const {
-    nowPlaying,
+    nowPlayingID,
     trackViews,
     audioRef,
-    playPrevAction,
-    playNextAction,
+    playActions,
   } = props;
 
   const nowTrackView = useMemo(() => {
-    if (!nowPlaying) return null;
-    return trackViews.find((t) => t.item.path === nowPlaying.path) ?? null;
-  }, [nowPlaying, trackViews]);
+    if (!nowPlayingID) return null;
+    return trackViews.find((t) => t.item.id === nowPlayingID) ?? null;
+  }, [nowPlayingID, trackViews]);
 
-  const title = nowTrackView?.displayTitle ?? nowPlaying?.title ?? "未再生";
+  const title = nowTrackView?.displayTitle ?? "";
   const coverUrl = nowTrackView?.coverUrl ?? null;
 
   const releaseOrder = nowTrackView?.orderLabel ?? "—";
   const originalArtist = nowTrackView?.originalArtist ?? "—";
 
-  const filePath = nowPlaying?.path ?? "";
+  const filePath = nowTrackView?.item.path;
   const fileName = filePath ? getBasename(filePath) : "—";
   const dirName = filePath ? getDirname(filePath) : "";
 
-  const canControl = Boolean(nowPlaying);
+  const canControl = Boolean(nowTrackView?.item);
 
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -168,7 +158,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps) {
 
         <div style={{marginLeft: "auto", display: "flex", alignItems: "center", gap: 10}}>
           <button
-            onClick={() => void playPrevAction()}
+            onClick={() => void playActions.playPrev()}
             disabled={!canControl}
             style={miniIconButtonStyle(!canControl)}
             title="前へ"
@@ -186,7 +176,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps) {
           </button>
 
           <button
-            onClick={() => void playNextAction()}
+            onClick={() => void playActions.playNext()}
             disabled={!canControl}
             style={miniIconButtonStyle(!canControl)}
             title="次へ"

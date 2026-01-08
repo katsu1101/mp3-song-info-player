@@ -2,10 +2,8 @@ import {Mp3Entry} from "@/types";
 
 export const readMp3FromDirectory = async (
   directoryHandle: FileSystemDirectoryHandle,
-  options?: { recursion?: boolean; basePath?: string }
+  basePath: string
 ): Promise<Mp3Entry[]> => {
-  const recursion = options?.recursion ?? true;
-  const basePath = options?.basePath ?? "";
 
   const entries: Mp3Entry[] = [];
 
@@ -21,24 +19,23 @@ export const readMp3FromDirectory = async (
       const fileHandle = handle as FileSystemFileHandle;
       const file = await fileHandle.getFile();
       entries.push({
+        id: 0,
         path: currentPath,
         name: file.name,
         size: file.size,
         lastModified: file.lastModified,
-        fileHandle, // ★追加
+        fileHandle,
       });
       continue;
     }
 
-    if (handle.kind === "directory" && recursion) {
-      const child = await readMp3FromDirectory(handle as FileSystemDirectoryHandle, {
-        recursion,
-        basePath: currentPath,
-      });
+    if (handle.kind === "directory") {
+      const child = await readMp3FromDirectory(
+          handle as FileSystemDirectoryHandle, currentPath);
       entries.push(...child);
     }
   }
 
-  entries.sort((a, b) => a.path.localeCompare(b.path, "ja"));
-  return entries;
+  // ✅ 返却順に連番を確定
+  return entries.map((entry, index) => ({ ...entry, id: index + 1 }));
 };
