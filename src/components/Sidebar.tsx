@@ -1,33 +1,35 @@
-import React, {JSX} from "react";
+import React from "react";
 
-/**
- * ライブラリと並べ替えオプションを備えたサイドバーをレンダリングする機能コンポーネント。
- *
- * @return {JSX.Element} グリッドレイアウトでスタイル設定されたライブラリボタンとソートボタンを含む、レンダリングされた SidebarStub コンポーネント。
- */
-export function SidebarStub(): JSX.Element {
+export function SidebarStub(): React.JSX.Element {
   return (
-    <div style={{display: "grid", gap: 12}}>
-      <div style={{fontWeight: 800, opacity: 0.9}}>ライブラリ</div>
-      <button style={sideButtonStyle}>すべて</button>
-      <button style={sideButtonStyle}>対応表あり</button>
-      <button style={sideButtonStyle}>対応表なし</button>
+    <div className="grid gap-3">
+      <div className="text-sm font-extrabold opacity-90">ライブラリ</div>
+      <SideButton>すべて</SideButton>
+      <SideButton>対応表あり</SideButton>
+      <SideButton>対応表なし</SideButton>
 
-      <div style={{marginTop: 8, fontWeight: 800, opacity: 0.9}}>ソート</div>
-      <button style={sideButtonStyle}>Fantia順</button>
-      <button style={sideButtonStyle}>ファイル名順</button>
+      <div className="mt-2 text-sm font-extrabold opacity-90">ソート</div>
+      <SideButton>Fantia順</SideButton>
+      <SideButton>ファイル名順</SideButton>
     </div>
   );
 }
 
-/**
- * サイドボタンのスタイルを定義するCSSプロパティオブジェクト。
- */
-const sideButtonStyle: React.CSSProperties = {
-  textAlign: "left",
-  padding: "8px 10px",
-  borderRadius: 10,
-  border: "1px solid rgba(255,255,255,0.10)",
-  background: "rgba(255,255,255,0.04)",
-  color: "white",
-};
+function SideButton({children}: { children: React.ReactNode }): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      className="
+        text-left px-3 py-2 rounded-lg border
+        bg-[color:var(--panel)]
+        border-[color:var(--panel-border)]
+        text-[color:var(--foreground)]
+        hover:bg-[color:var(--panel-hover)]
+        active:translate-y-[0.5px]
+        transition
+      "
+    >
+      {children}
+    </button>
+  );
+}

@@ -131,13 +131,13 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         return;
       }
 
-      if (event.code === "ArrowRight") {
+      if (event.code === "ArrowDown") {
         event.preventDefault();
         void playNext();
         return;
       }
 
-      if (event.code === "ArrowLeft") {
+      if (event.code === "ArrowUp") {
         event.preventDefault();
         void playPrev();
         return;

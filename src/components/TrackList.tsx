@@ -1,6 +1,7 @@
 "use client";
 
-import {useSettings}                   from "@/components/Settings/SettingsProvider";
+import {NowPlayingPulse} from "@/components/NowPlayingPulse";
+import {useSettings}     from "@/components/Settings/SettingsProvider";
 import {PlayActions}                   from "@/types/actions";
 import {TrackView}                     from "@/types/views";
 import Image                           from "next/image";
@@ -13,6 +14,7 @@ type TrackListProps = {
   trackViews: readonly TrackView[];
   playActions: PlayActions;
   nowPlayingID: number;
+  isPlaying: boolean;
 };
 
 /**
@@ -27,7 +29,7 @@ type TrackListProps = {
  * @return {JSX.Element} トラックの一覧とその詳細情報を表示するレンダリング済み TrackList コンポーネント。
  */
 export function TrackList(props: TrackListProps): JSX.Element {
-  const {trackViews, playActions, nowPlayingID} = props;
+  const {trackViews, playActions, nowPlayingID, isPlaying} = props;
 
   const nowRowRef = useRef<HTMLTableRowElement | null>(null);
 
@@ -62,10 +64,11 @@ export function TrackList(props: TrackListProps): JSX.Element {
         <p style={{marginTop: 10, opacity: 0.7, fontSize: 13}}>曲がありません（フォルダを選択してください）</p>
       ) : (
         <div
+          data-scroll="song-list"
           style={{
             marginTop: 8,
             maxWidth: "100%",
-            overflowX: showFilePath ? "auto" : "hidden", // ✅ 普段ははみ出させない
+            overflowX: showFilePath ? "auto" : "hidden",
           }}
         >
           <table
@@ -93,7 +96,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
 
             <thead>
-            <tr style={{borderBottom: "1px solid rgba(255,255,255,0.10)"}}>
+            <tr style={{borderBottom: "1px solid var(--list-border)"}}>
               <th style={thStyle}>#</th>
               <th style={thStyle} aria-label="ジャケット"/>
               <th style={{...thStyle, textAlign: "right"}}>再生</th>
@@ -118,11 +121,13 @@ export function TrackList(props: TrackListProps): JSX.Element {
                   }}
                   aria-current={isNowPlaying ? "true" : undefined}
                   style={{
-                    borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    borderBottom: "1px solid var(--list-border-soft)",
                     height: 24,
-                    background: isNowPlaying ? "rgba(255,255,255,0.06)" : "transparent",
-                    transition: "background 120ms ease",
-                    // ✅ ヘッダーに隠れやすい場合はここを増やす
+                    background: isNowPlaying
+                      ? "linear-gradient(90deg, var(--sel-bg) 0%, transparent 70%)"
+                      : "transparent",
+                    boxShadow: isNowPlaying ? "inset 0 0 0 1px var(--sel-glow)" : "none",
+                    transition: "background 120ms ease, box-shadow 120ms ease",
                     scrollMarginTop: 80,
                   }}
                 >
@@ -132,7 +137,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
                     style={{
                       ...tdStyle,
                       padding: 0,
-                      borderLeft: isNowPlaying ? "3px solid rgba(255,255,255,0.65)" : "3px solid transparent",
+                      borderLeft: "3px solid transparent",
                     }}
                   >
                     <div
@@ -141,8 +146,8 @@ export function TrackList(props: TrackListProps): JSX.Element {
                         height: THUMB,
                         borderRadius: 8,
                         overflow: "hidden",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid var(--list-chip-border)",
+                        background: "var(--list-chip-bg)",
                         display: "grid",
                         placeItems: "center",
                       }}
@@ -157,7 +162,22 @@ export function TrackList(props: TrackListProps): JSX.Element {
                           style={{width: "100%", height: "100%", objectFit: "cover"}}
                         />
                       ) : (
-                        <span style={{fontSize: 10, opacity: 0.6}}>No</span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 900,
+                            letterSpacing: "0.02em",
+                            color: "var(--no-fg)",
+                            background: "var(--no-bg)",
+                            borderRadius: 6,
+                            padding: "1px 4px",
+                            lineHeight: 1.1,
+                          }}
+                          aria-label="ジャケットなし"
+                          title="ジャケットなし"
+                        >
+                          No
+                        </span>
                       )}
                     </div>
                   </td>
@@ -173,10 +193,10 @@ export function TrackList(props: TrackListProps): JSX.Element {
                           padding: 0,
                           borderRadius: 999,
                           border: isNowPlaying
-                            ? "1px solid rgba(255,255,255,0.40)"
-                            : "1px solid rgba(255,255,255,0.18)",
-                          background: isNowPlaying ? "rgba(255,255,255,0.10)" : "transparent",
-                          color: "white",
+                            ? "1px solid var(--list-action-border-active)"
+                            : "1px solid var(--list-action-border)",
+                          background: isNowPlaying ? "var(--list-action-bg-active)" : "transparent",
+                          color: "var(--foreground)",
                           fontWeight: 800,
                           lineHeight: "20px",
                           display: "inline-flex",
@@ -185,14 +205,21 @@ export function TrackList(props: TrackListProps): JSX.Element {
                         }}
                         title="この曲を再生"
                       >
-                        ▶
+                        {isNowPlaying ? (isPlaying ? <NowPlayingPulse /> : "⏸") : "▶"}
                       </button>
                     </div>
                   </td>
 
                   {/* title */}
                   <td style={tdStyle}>
-                    <div style={oneLine15} title={t.displayTitle}>
+                    <div
+                      style={{
+                        ...oneLine15,
+                        fontWeight: isNowPlaying ? 950 : oneLine15.fontWeight,
+                        textShadow: isNowPlaying ? "0 1px 0 rgba(0,0,0,0.08)" : "none",
+                      }}
+                      title={t.displayTitle}
+                    >
                       {t.displayTitle}
                     </div>
                   </td>

@@ -6,6 +6,7 @@ import {useSettings}                      from "@/components/Settings/SettingsPr
 import {SidebarStub}                      from "@/components/Sidebar";
 import {TopBar}                           from "@/components/TopBar";
 import {TrackList}                        from "@/components/TrackList";
+import {useAudioPlaybackState}            from "@/hooks/useAudioPlaybackState";
 import {useAudioPlayer}                   from "@/hooks/useAudioPlayer";
 import {useFantiaMapping}                 from "@/hooks/useFantiaMapping";
 import {useMp3Library, useOrderedMp3List} from "@/hooks/useMp3Library";
@@ -42,6 +43,7 @@ export default function Page(): JSX.Element {
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = useFantiaMapping();
 
   const {audioRef, nowPlayingID, playEntry} = useAudioPlayer();
+  const {isPlaying} = useAudioPlaybackState(audioRef);
   const metaByPath = settingAction.metaByPath
   const trackViews = useTrackViews({
     mp3List: orderedMp3List,
@@ -81,6 +83,7 @@ export default function Page(): JSX.Element {
             trackViews={trackViews}
             playActions={playActions}
             nowPlayingID={nowPlayingID}
+            isPlaying={isPlaying}
           />
         </>
       }
@@ -90,6 +93,7 @@ export default function Page(): JSX.Element {
           trackViews={trackViews}
           audioRef={audioRef}
           playActions={playActions}
+          isPlaying={isPlaying}
         />
       }
     />

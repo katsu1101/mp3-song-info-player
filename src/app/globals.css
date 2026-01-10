@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-:root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
-
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -12,10 +7,98 @@
     --font-mono: var(--font-geist-mono);
 }
 
+:root {
+    /* ライト */
+    --background: #ffffff;
+    --foreground: #171717;
+
+    --sb-size: 10px;
+    --sb-track: rgba(0, 0, 0, 0.06);
+    --sb-thumb: rgba(0, 0, 0, 0.22);
+    --sb-thumb-hover: rgba(0, 0, 0, 0.34);
+
+    color-scheme: light;
+
+    --panel: rgba(0, 0, 0, 0.03);
+    --panel-hover: rgba(0, 0, 0, 0.06);
+    --panel-border: rgba(0, 0, 0, 0.10);
+
+    /* トグル */
+    --toggle-track-off: rgba(0, 0, 0, 0.10);
+    --toggle-track-on: rgba(0, 0, 0, 0.18);
+    --toggle-border: rgba(0, 0, 0, 0.18);
+    --toggle-knob: rgba(255, 255, 255, 0.95);
+    --toggle-knob-shadow: rgba(0, 0, 0, 0.25);
+
+    /* TrackList（ライト） */
+    --list-border: rgba(0, 0, 0, 0.10);
+    --list-border-soft: rgba(0, 0, 0, 0.06);
+    --list-row-hover: rgba(0, 0, 0, 0.04);
+    --list-row-active: rgba(0, 0, 0, 0.06);
+
+    --list-accent: rgba(0, 0, 0, 0.45);
+
+    --list-chip-bg: rgba(0, 0, 0, 0.04);
+    --list-chip-border: rgba(0, 0, 0, 0.12);
+
+    --list-action-border: rgba(0, 0, 0, 0.18);
+    --list-action-border-active: rgba(0, 0, 0, 0.28);
+    --list-action-bg-active: rgba(0, 0, 0, 0.06);
+
+    /* 選択アクセント（ライト） */
+    --sel-fill: rgba(0, 0, 0, 0.06);
+    --sel-ring: rgba(0, 0, 0, 0.18);
+    --sel-glow: rgba(0, 0, 0, 0.10);
+
+    --no-bg: rgba(0, 0, 0, 0.08);
+    --no-fg: rgba(0, 0, 0, 0.75);
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
+        /*ダーク*/
         --background: #0a0a0a;
         --foreground: #ededed;
+
+        --sb-track: rgba(255, 255, 255, 0.06);
+        --sb-thumb: rgba(255, 255, 255, 0.22);
+        --sb-thumb-hover: rgba(255, 255, 255, 0.34);
+
+        color-scheme: dark;
+
+        --panel: rgba(255, 255, 255, 0.04);
+        --panel-hover: rgba(255, 255, 255, 0.07);
+        --panel-border: rgba(255, 255, 255, 0.10);
+
+        /* トグル */
+        --toggle-track-off: rgba(255, 255, 255, 0.08);
+        --toggle-track-on: rgba(255, 255, 255, 0.18);
+        --toggle-border: rgba(255, 255, 255, 0.18);
+        --toggle-knob: rgba(255, 255, 255, 0.85);
+        --toggle-knob-shadow: rgba(0, 0, 0, 0.35);
+
+        /* TrackList（ライト） */
+        --list-border: rgba(255, 255, 255, 0.10);
+        --list-border-soft: rgba(255, 255, 255, 0.08);
+        --list-row-hover: rgba(255, 255, 255, 0.04);
+        --list-row-active: rgba(255, 255, 255, 0.06);
+
+        --list-accent: rgba(255, 255, 255, 0.65);
+
+        --list-chip-bg: rgba(255, 255, 255, 0.06);
+        --list-chip-border: rgba(255, 255, 255, 0.12);
+
+        --list-action-border: rgba(255, 255, 255, 0.18);
+        --list-action-border-active: rgba(255, 255, 255, 0.40);
+        --list-action-bg-active: rgba(255, 255, 255, 0.10);
+
+        /* 選択アクセント（ライト） */
+        --sel-fill: rgba(255, 255, 255, 0.12);
+        --sel-ring: rgba(255, 255, 255, 0.26);
+        --sel-glow: rgba(255, 255, 255, 0.14);
+
+        --no-bg: rgba(255, 255, 255, 0.10);
+        --no-fg: rgba(255, 255, 255, 0.78);
     }
 }
 
@@ -23,4 +106,53 @@ body {
     background: var(--background);
     color: var(--foreground);
     font-family: Arial, Helvetica, sans-serif;
+}
+
+.scrollbar {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) var(--sb-track);
+
+    /* スクロールバーが出たり消えたりでレイアウトが揺れるのを防ぐ */
+    scrollbar-gutter: stable;
+}
+
+/* Chrome / Edge / Safari */
+.scrollbar::-webkit-scrollbar {
+    width: var(--sb-size);
+    height: var(--sb-size);
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: var(--sb-track);
+    border-radius: 999px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--sb-thumb);
+    border-radius: 999px;
+
+    /* “細い芯”っぽく見せる小技 */
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--sb-thumb-hover);
+}
+
+.scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ✅ 選択行の“面”を作る */
+/* 選択行：面 + 輪郭（角丸なし、色バーなし） */
+[data-scroll="song-list"] tbody tr[aria-current="true"] td {
+    background: linear-gradient(90deg, var(--sel-fill) 30%, transparent 78%);
+    box-shadow: inset 0 0 0 2px var(--sel-ring);
+}
+
+/* さらに少しだけ“浮く”感じ（外側は控えめ） */
+[data-scroll="song-list"] tbody tr[aria-current="true"] {
+    filter: saturate(1.2);
 }

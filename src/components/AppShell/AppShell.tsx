@@ -54,15 +54,24 @@ export function AppShell({header, sidebar, main, player}: AppShellProps): JSX.El
           minWidth: 0,
         }}
       >
-        <aside style={{minWidth: 0, minHeight: 0, overflow: "auto"}}>
+        <aside
+          className="overflow-auto scrollbar"
+          style={{minWidth: 0, minHeight: 0, overflow: "auto"}}
+        >
           {sidebar}
         </aside>
 
-        <main style={{minWidth: 0, minHeight: 0, overflow: "auto"}}>
+        <main
+          className="overflow-auto scrollbar"
+          style={{minWidth: 0, minHeight: 0, overflow: "auto"}}
+        >
           {main}
         </main>
 
-        <aside style={{minWidth: 0, minHeight: 0, overflow: "auto"}}>
+        <aside
+          className="overflow-auto scrollbar"
+          style={{minWidth: 0, minHeight: 0, overflow: "auto"}}
+        >
           {/* 右ペインを追従させたいなら sticky */}
           <div style={{position: "sticky", top: 10}}>
             {player}

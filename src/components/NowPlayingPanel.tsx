@@ -1,10 +1,9 @@
 "use client";
 
-
-import {PlayActions}                              from "@/types/actions";
-import {TrackView}                                from "@/types/views";
-import Image                                      from "next/image";
-import React, {JSX, useEffect, useMemo, useState} from "react";
+import {PlayActions}         from "@/types/actions";
+import {TrackView}           from "@/types/views";
+import Image                 from "next/image";
+import React, {JSX, useMemo} from "react";
 
 /**
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
@@ -14,6 +13,7 @@ type NowPlayingPanelProps = {
   trackViews: readonly TrackView[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
   playActions: PlayActions;
+  isPlaying: boolean;
 };
 
 /**
@@ -62,6 +62,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     trackViews,
     audioRef,
     playActions,
+    isPlaying,
   } = props;
 
   const nowTrackView = useMemo(() => {
@@ -76,26 +77,6 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   const dirName = filePath ? getDirname(filePath) : "";
 
   const canControl = Boolean(nowTrackView?.item);
-
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const sync = () => setIsPlaying(!audio.paused && !audio.ended);
-
-    sync();
-    audio.addEventListener("play", sync);
-    audio.addEventListener("pause", sync);
-    audio.addEventListener("ended", sync);
-
-    return () => {
-      audio.removeEventListener("play", sync);
-      audio.removeEventListener("pause", sync);
-      audio.removeEventListener("ended", sync);
-    };
-  }, [audioRef]);
 
   const togglePlayPauseLikeSpace = async () => {
     if (!canControl) return;

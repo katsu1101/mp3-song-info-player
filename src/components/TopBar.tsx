@@ -48,8 +48,8 @@ export function TopBar(props: TopBarProps): JSX.Element {
         marginTop: 8,
         padding: "10px 12px",
         borderRadius: 14,
-        border: "1px solid rgba(255,255,255,0.12)",
-        background: "rgba(0,0,0,0.25)",
+        border: "1px solid var(--panel-border)",
+        background: "var(--panel-bg)",
       }}
     >
       <div
@@ -81,7 +81,7 @@ export function TopBar(props: TopBarProps): JSX.Element {
           <span
             style={{
               fontSize: 12,
-              opacity: 0.75,
+              color: "var(--muted)",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -102,9 +102,9 @@ export function TopBar(props: TopBarProps): JSX.Element {
             style={{
               padding: "6px 10px",
               borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.22)",
-              background: "rgba(255,255,255,0.06)",
-              color: "white",
+              border: "1px solid var(--button-border)",
+              background: "var(--button-bg)",
+              color: "var(--foreground)",
               fontWeight: 800,
               whiteSpace: "nowrap",
             }}
@@ -118,9 +118,9 @@ export function TopBar(props: TopBarProps): JSX.Element {
               style={{
                 padding: "6px 10px",
                 borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.18)",
+                border: "1px solid var(--button-border)",
                 background: "transparent",
-                color: "white",
+                color: "var(--foreground)",
                 opacity: 0.9,
                 whiteSpace: "nowrap",
               }}
@@ -162,7 +162,7 @@ export function TopBar(props: TopBarProps): JSX.Element {
               />
               <span style={toggleKnobStyle(isShuffle)}/>
             </span>
-            <span style={{fontSize: 12, opacity: 0.7}}>{isContinuous ? "ON" : "OFF"}</span>
+            <span style={{fontSize: 12, opacity: 0.7}}>{isShuffle ? "ON" : "OFF"}</span>
           </label>
 
           {/* file名表示スイッチ */}
@@ -175,8 +175,8 @@ export function TopBar(props: TopBarProps): JSX.Element {
                 width: 44,
                 height: 24,
                 borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.18)",
-                background: showFilePath ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.10)",
+                border: "1px solid var(--toggle-border)",
+                background: showFilePath ? "var(--toggle-track-on)" : "var(--toggle-track-off)",
                 transition: "background 120ms ease",
               }}
             >
@@ -195,8 +195,8 @@ export function TopBar(props: TopBarProps): JSX.Element {
                   width: 18,
                   height: 18,
                   borderRadius: 999,
-                  background: "rgba(255,255,255,0.85)",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+                  background: "var(--toggle-knob)",
+                  boxShadow: `0 2px 8px var(--toggle-knob-shadow)`,
                   transition: "left 120ms ease",
                 }}
               />
@@ -235,8 +235,8 @@ const toggleTrackStyle = (checked: boolean): React.CSSProperties => ({
   width: 44,
   height: 24,
   borderRadius: 999,
-  border: "1px solid rgba(255,255,255,0.18)",
-  background: checked ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)",
+  border: "1px solid var(--toggle-border)",
+  background: checked ? "var(--toggle-track-on)" : "var(--toggle-track-off)",
 });
 
 /**
@@ -249,7 +249,7 @@ const toggleKnobStyle = (checked: boolean): React.CSSProperties => ({
   width: 18,
   height: 18,
   borderRadius: 999,
-  background: "rgba(255,255,255,0.85)",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+  background: "var(--toggle-knob)",
+  boxShadow: `0 2px 8px var(--toggle-knob-shadow)`,
   transition: "left 120ms ease",
 });
