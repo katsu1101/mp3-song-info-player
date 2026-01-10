@@ -298,8 +298,6 @@ export const useMp3Library = (shuffle: boolean) => {
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       const handle: FileSystemDirectoryHandle = await window.showDirectoryPicker({mode: "read"});
 
       await saveDirectoryHandle(handle);
