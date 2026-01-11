@@ -52,6 +52,22 @@
 
     --no-bg: rgba(0, 0, 0, 0.08);
     --no-fg: rgba(0, 0, 0, 0.75);
+
+    /* 浮いた面（drawer/sheet/mini bar） */
+    --elev-bg: var(--background);
+    --elev-border: var(--panel-border);
+
+    /* 影（ライト） */
+    --shadow-elev: 0 12px 26px rgba(0, 0, 0, 0.18);
+    --shadow-drawer: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+    /* 暗幕（ライト） */
+    --scrim: rgba(0, 0, 0, 0.35);
+
+    /* シートのつまみ・閉じるボタン */
+    --sheet-handle: rgba(0, 0, 0, 0.20);
+    --sheet-close-bg: var(--elev-bg);
+    --sheet-close-border: var(--elev-border);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -99,6 +115,21 @@
 
         --no-bg: rgba(255, 255, 255, 0.10);
         --no-fg: rgba(255, 255, 255, 0.78);
+
+        /* 浮いた面は “完全な黒” より少しだけ明るい方が段差が出る */
+        --elev-bg: color-mix(in oklab, var(--background) 88%, white);
+        --elev-border: var(--panel-border);
+
+        /* 影（ダークは濃く） */
+        --shadow-elev: 0 16px 40px rgba(0, 0, 0, 0.55);
+        --shadow-drawer: 0 16px 48px rgba(0, 0, 0, 0.60);
+
+        /* 暗幕（ダークは少し濃く） */
+        --scrim: rgba(0, 0, 0, 0.55);
+
+        --sheet-handle: rgba(255, 255, 255, 0.22);
+        --sheet-close-bg: var(--elev-bg);
+        --sheet-close-border: var(--elev-border);
     }
 }
 

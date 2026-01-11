@@ -70,7 +70,7 @@ export default function Page(): JSX.Element {
           settingAction={settingAction}
         />
       }
-      sidebar={<SidebarStub/>}
+      sidebar={<SidebarStub settingAction={settingAction}/>}
       main={
         <>
           {settingAction.errorMessage
@@ -87,15 +87,16 @@ export default function Page(): JSX.Element {
           />
         </>
       }
-      player={
+      renderPlayer={(variant) => (
         <NowPlayingPanel
+          variant={variant}
           nowPlayingID={nowPlayingID}
           trackViews={trackViews}
           audioRef={audioRef}
           playActions={playActions}
           isPlaying={isPlaying}
         />
-      }
+      )}
     />
   );
 }

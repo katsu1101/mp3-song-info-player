@@ -1,0 +1,210 @@
+.root {
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    background: var(--background);
+    border-bottom: 1px solid var(--panel-border);
+}
+
+.headerInner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.headerContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr) 360px;
+    gap: 12px;
+    padding: 0 12px;
+    min-height: 0;
+    min-width: 0;
+}
+
+.scrollPane {
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+}
+
+.playerInner {
+    position: sticky;
+    top: 10px;
+}
+
+.sidebarToggle {
+    display: none;
+}
+
+/* タブレット：sidebarはドロワー、main + playerは維持（player幅は可変でOK） */
+@media (max-width: 1024px) {
+    .body {
+        grid-template-columns: minmax(0, 1fr) clamp(260px, 34vw, 480px);
+    }
+
+    .sidebarToggle {
+        display: inline-flex;
+    }
+
+    .sidebarPane {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(320px, 86vw);
+        z-index: 80;
+        transform: translateX(-105%);
+        transition: transform 160ms ease-out;
+        padding: 10px 12px;
+        background: var(--elev-bg);
+        color: var(--foreground);
+        box-shadow: var(--shadow-drawer);
+        border-right: 1px solid var(--elev-border);
+    }
+
+    .sidebarPane[data-open="true"] {
+        transform: translateX(0);
+    }
+
+    .backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        background: var(--scrim);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 160ms ease-out;
+    }
+
+    .backdrop[data-open="true"] {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.playerSheet {
+    display: none;
+}
+
+.miniPlayerBar {
+    display: none;
+}
+
+/* ===== スマホ：main 1本 + ミニプレイヤー固定 + フルはボトムシート ===== */
+@media (max-width: 740px) {
+    :root {
+        --mini-player-height: 76px;
+        --mini-player-gap: 18px;
+        --mini-player-bottom: calc(var(--mini-player-gap) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .body {
+        grid-template-columns: minmax(0, 1fr);
+        /*padding-bottom: calc(var(--mini-player-height) + var(--mini-player-bottom));*/
+    }
+
+    /* 右ペインはスマホでは使わない */
+    .playerPane {
+        display: none;
+    }
+
+    /* ミニプレイヤー固定 */
+    .miniPlayerBar {
+        padding: 0;
+        overflow: hidden; /* ジャケを角丸で切るなら効く */
+        align-items: stretch; /* 高さいっぱいに伸ばす */
+        position: sticky;
+        left: 10px;
+        right: 10px;
+        bottom: var(--mini-player-bottom);
+        height: var(--mini-player-height);
+        z-index: 76;
+        border-radius: 18px;
+        border: 1px solid var(--elev-border);
+        box-shadow: var(--shadow-elev);
+        display: flex;
+        cursor: pointer;
+        background: var(--elev-bg);
+        color: var(--foreground);
+    }
+
+    /* ボトムシート */
+    .playerSheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: min(86dvh, 780px);
+        z-index: 90;
+        border-radius: 18px 18px 0 0;
+        transform: translateY(105%);
+        transition: transform 180ms ease-out;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        background: var(--elev-bg);
+        color: var(--foreground);
+        border-top: 1px solid var(--elev-border);
+    }
+
+    .playerSheet[data-open="true"] {
+        transform: translateY(0);
+    }
+
+    .sheetBackdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 85;
+        background: var(--scrim);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 180ms ease-out;
+    }
+
+    .sheetBackdrop[data-open="true"] {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .sheetHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+    }
+
+    .sheetHandle {
+        width: 44px;
+        height: 4px;
+        border-radius: 9999px;
+        background: var(--sheet-handle);
+        margin: 0 auto;
+    }
+
+    .sheetClose {
+        border-radius: 9999px;
+        padding: 8px 12px;
+        cursor: pointer;
+        border: 1px solid var(--sheet-close-border);
+        background: var(--sheet-close-bg);
+        color: var(--foreground);
+    }
+
+    .sheetBody {
+        overflow: auto;
+        min-height: 0;
+        padding: 10px 12px;
+    }
+}

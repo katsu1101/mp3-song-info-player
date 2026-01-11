@@ -1,5 +1,6 @@
 "use client";
 
+import {PlayerVariant}       from "@/components/AppShell/AppShell";
 import {PlayActions}         from "@/types/actions";
 import {TrackView}           from "@/types/views";
 import Image                 from "next/image";
@@ -9,6 +10,7 @@ import React, {JSX, useMemo} from "react";
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
  */
 type NowPlayingPanelProps = {
+  variant: PlayerVariant;
   nowPlayingID: number;
   trackViews: readonly TrackView[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -97,6 +99,127 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     audio.pause();
   };
 
+  const variant = props.variant ?? "full";
+  if (variant === "mini") {
+    // まずは暫定: ここを「ミニUI」に差し替えていく
+    // return <MiniNowPlayingBar ... />;
+
+    const onPrev: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void playActions.playPrev();
+    };
+
+    const onToggle: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void togglePlayPauseLikeSpace();
+    };
+
+    const onNext: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void playActions.playNext();
+    };
+
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "stretch",
+          minWidth: 0,
+        }}
+      >
+        {/* 左：ジャケット（高さいっぱい・正方形） */}
+        <div
+          style={{
+            height: "100%",
+            aspectRatio: "1 / 1",
+            borderRight: "1px solid var(--panel-border)",
+            background: "var(--panel)",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          {nowTrackView?.coverUrl ? (
+            <Image
+              src={nowTrackView.coverUrl}
+              alt=""
+              width={256}
+              height={256}
+              unoptimized
+              style={{width: "100%", height: "100%", objectFit: "cover"}}
+            />
+          ) : (
+            <span style={{fontSize: 11, opacity: 0.6}}>No Art</span>
+          )}
+        </div>
+
+        {/* 右：上=タイトル / 下=ボタン */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "10px 12px",
+            gap: 8,
+          }}
+        >
+          {/* 上：タイトル */}
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 900,
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "var(--foreground)",
+            }}
+            title={title}
+          >
+            {title}
+          </div>
+
+          {/* 下：ボタン */}
+          <div style={{display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end"}}>
+            <button
+              type="button"
+              onClick={onPrev}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="前へ"
+            >
+              ⏮
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggle}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title={isPlaying ? "一時停止" : "再生"}
+            >
+              {isPlaying ? "⏸" : "▶"}
+            </button>
+
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="次へ"
+            >
+              ⏭
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ====== full ======
   const COVER_MAX = 280;
 
   return (
@@ -105,13 +228,13 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         marginTop: 12,
         padding: 12,
         borderRadius: 16,
-        border: "1px solid rgba(255,255,255,0.12)",
-        background: "rgba(0,0,0,0.22)",
+        border: "1px solid var(--panel-border)",
+        background: "var(--panel)",
         overflowX: "hidden",
         maxWidth: "100%",
+        color: "var(--foreground)",
       }}
     >
-      {/* ジャケ（上） */}
       <div style={{display: "grid", placeItems: "center"}}>
         <div
           style={{
@@ -120,15 +243,15 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             aspectRatio: "1 / 1",
             borderRadius: 18,
             overflow: "hidden",
-            border: "1px solid rgba(255,255,255,0.14)",
-            background: "rgba(255,255,255,0.06)",
+            border: "1px solid var(--panel-border)",
+            background: "var(--panel)",
             display: "grid",
             placeItems: "center",
           }}
         >
           {nowTrackView?.coverUrl ? (
             <Image
-              src={nowTrackView?.coverUrl}
+              src={nowTrackView.coverUrl}
               alt=""
               width={COVER_MAX}
               height={COVER_MAX}
@@ -141,16 +264,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         </div>
       </div>
 
-      {/* タイトル行：左=曲名、右=◀ 停止/再生 ▶ */}
-      <div
-        style={{
-          marginTop: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          minWidth: 0,
-        }}
-      >
+      <div style={{marginTop: 10, display: "flex", alignItems: "center", gap: 10, minWidth: 0}}>
         <div
           style={{
             minWidth: 0,
@@ -168,27 +282,30 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
         <div style={{marginLeft: "auto", display: "flex", alignItems: "center", gap: 10}}>
           <button
+            type="button"
             onClick={() => void playActions.playPrev()}
             disabled={!canControl}
-            style={miniIconButtonStyle(!canControl)}
+            style={fullIconButtonStyle(!canControl)}
             title="前へ"
           >
             ⏮
           </button>
 
           <button
+            type="button"
             onClick={() => void togglePlayPauseLikeSpace()}
             disabled={!canControl}
-            style={miniIconButtonStyle(!canControl)}
+            style={fullIconButtonStyle(!canControl)}
             title={isPlaying ? "一時停止" : "再生"}
           >
             {isPlaying ? "⏸" : "▶"}
           </button>
 
           <button
+            type="button"
             onClick={() => void playActions.playNext()}
             disabled={!canControl}
-            style={miniIconButtonStyle(!canControl)}
+            style={fullIconButtonStyle(!canControl)}
             title="次へ"
           >
             ⏭
@@ -196,12 +313,10 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         </div>
       </div>
 
-      {/* audio：タイトル行のすぐ下 */}
       <div style={{marginTop: 10}}>
         <audio ref={audioRef} controls preload="none" style={{width: "100%"}}/>
       </div>
 
-      {/* 情報（縦） */}
       <div style={{marginTop: 12, display: "grid", gap: 6}}>
         <InfoRow label="年月/順" value={nowTrackView?.orderLabel ?? "—"}/>
         <InfoRow label="原曲" value={nowTrackView?.originalArtist ?? "—"}/>
@@ -209,7 +324,6 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         {dirName ? <InfoRow label="フォルダ" value={dirName}/> : null}
       </div>
 
-      {/* パス（折りたたみ） */}
       {filePath ? (
         <details style={{marginTop: 10}}>
           <summary style={{cursor: "pointer", fontSize: 12, opacity: 0.7}}>パス</summary>
@@ -252,14 +366,31 @@ function InfoRow(props: { label: string; value: string }): JSX.Element {
   );
 }
 
-function miniIconButtonStyle(disabled: boolean): React.CSSProperties {
+function fullIconButtonStyle(disabled: boolean): React.CSSProperties {
   return {
     width: 44,
     height: 34,
     borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "transparent",
+    border: "1px solid var(--panel-border)",
+    background: "var(--panel-hover)",
     color: "white",
+    fontWeight: 900,
+    opacity: disabled ? 0.45 : 1,
+    cursor: disabled ? "not-allowed" : "pointer",
+    display: "grid",
+    placeItems: "center",
+    lineHeight: 1,
+  };
+}
+
+function miniBarButtonStyle(disabled: boolean): React.CSSProperties {
+  return {
+    width: 40,
+    height: 32,
+    borderRadius: 999,
+    border: "1px solid var(--panel-border)",
+    background: "var(--panel)",
+    color: "var(--foreground)",
     fontWeight: 900,
     opacity: disabled ? 0.45 : 1,
     cursor: disabled ? "not-allowed" : "pointer",

@@ -1,10 +1,9 @@
 "use client";
 
-import {NowPlayingPulse} from "@/components/NowPlayingPulse";
-import {useSettings}     from "@/components/Settings/SettingsProvider";
+import {useSettings}                   from "@/components/Settings/SettingsProvider";
+import {TrackRow}                      from "@/components/TrackRow";
 import {PlayActions}                   from "@/types/actions";
 import {TrackView}                     from "@/types/views";
-import Image                           from "next/image";
 import React, {JSX, useEffect, useRef} from "react";
 
 /**
@@ -43,8 +42,6 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
   const showFilePath = settings.ui.showFilePath;
 
-  const THUMB = 20;
-
   useEffect(() => {
     if (!nowPlayingID) return;
     const row = nowRowRef.current;
@@ -58,7 +55,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
   }, [nowPlayingID]);
 
   return (
-    <section style={{marginTop: 12}}>
+    <section>
 
       {trackViews.length === 0 ? (
         <p style={{marginTop: 10, opacity: 0.7, fontSize: 13}}>曲がありません（フォルダを選択してください）</p>
@@ -66,7 +63,6 @@ export function TrackList(props: TrackListProps): JSX.Element {
         <div
           data-scroll="song-list"
           style={{
-            marginTop: 8,
             maxWidth: "100%",
             overflowX: showFilePath ? "auto" : "hidden",
           }}
@@ -80,9 +76,9 @@ export function TrackList(props: TrackListProps): JSX.Element {
           >
             <colgroup>
               {[
+                <col key="action" style={{width: 32}}/>,
                 <col key="no" style={{width: 28}}/>,
                 <col key="art" style={{width: 28}}/>,
-                <col key="action" style={{width: 32}}/>,
                 // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
                 <col key="title"/>,
 
@@ -97,9 +93,9 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
             <thead>
             <tr style={{borderBottom: "1px solid var(--list-border)"}}>
+              <th style={{...thStyle, textAlign: "right"}}></th>
               <th style={thStyle}>#</th>
               <th style={thStyle} aria-label="ジャケット"/>
-              <th style={{...thStyle, textAlign: "right"}}>再生</th>
               <th style={thStyle}>曲名</th>
               <th style={thStyle}>アルバム</th>
               <th style={thStyle}>原曲</th>
@@ -108,148 +104,15 @@ export function TrackList(props: TrackListProps): JSX.Element {
             </thead>
 
             <tbody>
-            {trackViews.map((t, index) => {
-              const isNowPlaying = nowPlayingID === t.item.id;
-              const releaseText = t.orderLabel;
-              const originalText = t.originalArtist ?? "";
-
-              return (
-                <tr
-                  key={t.item.path}
-                  ref={(el) => {
-                    if (isNowPlaying) nowRowRef.current = el;
-                  }}
-                  aria-current={isNowPlaying ? "true" : undefined}
-                  style={{
-                    borderBottom: "1px solid var(--list-border-soft)",
-                    height: 24,
-                    background: isNowPlaying
-                      ? "linear-gradient(90deg, var(--sel-bg) 0%, transparent 70%)"
-                      : "transparent",
-                    boxShadow: isNowPlaying ? "inset 0 0 0 1px var(--sel-glow)" : "none",
-                    transition: "background 120ms ease, box-shadow 120ms ease",
-                    scrollMarginTop: 80,
-                  }}
-                >
-                  <td>{index + 1}</td>
-                  {/* art */}
-                  <td
-                    style={{
-                      ...tdStyle,
-                      padding: 0,
-                      borderLeft: "3px solid transparent",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: THUMB,
-                        height: THUMB,
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        border: "1px solid var(--list-chip-border)",
-                        background: "var(--list-chip-bg)",
-                        display: "grid",
-                        placeItems: "center",
-                      }}
-                    >
-                      {t.coverUrl ? (
-                        <Image
-                          src={t.coverUrl}
-                          alt=""
-                          width={THUMB}
-                          height={THUMB}
-                          unoptimized
-                          style={{width: "100%", height: "100%", objectFit: "cover"}}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 900,
-                            letterSpacing: "0.02em",
-                            color: "var(--no-fg)",
-                            background: "var(--no-bg)",
-                            borderRadius: 6,
-                            padding: "1px 4px",
-                            lineHeight: 1.1,
-                          }}
-                          aria-label="ジャケットなし"
-                          title="ジャケットなし"
-                        >
-                          No
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* action */}
-                  <td style={{...tdStyle, padding: 0}}>
-                    <div style={{display: "grid", placeItems: "center"}}>
-                      <button
-                        onClick={() => void playActions.playAtIndex(index)}
-                        style={{
-                          height: 20,
-                          width: 28,
-                          padding: 0,
-                          borderRadius: 999,
-                          border: isNowPlaying
-                            ? "1px solid var(--list-action-border-active)"
-                            : "1px solid var(--list-action-border)",
-                          background: isNowPlaying ? "var(--list-action-bg-active)" : "transparent",
-                          color: "var(--foreground)",
-                          fontWeight: 800,
-                          lineHeight: "20px",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                        title="この曲を再生"
-                      >
-                        {isNowPlaying ? (isPlaying ? <NowPlayingPulse /> : "⏸") : "▶"}
-                      </button>
-                    </div>
-                  </td>
-
-                  {/* title */}
-                  <td style={tdStyle}>
-                    <div
-                      style={{
-                        ...oneLine15,
-                        fontWeight: isNowPlaying ? 950 : oneLine15.fontWeight,
-                        textShadow: isNowPlaying ? "0 1px 0 rgba(0,0,0,0.08)" : "none",
-                      }}
-                      title={t.displayTitle}
-                    >
-                      {t.displayTitle}
-                    </div>
-                  </td>
-
-                  {/* releaseOrder */}
-                  <td style={tdStyle}>
-                    <div style={oneLine12} title={releaseText}>
-                      {releaseText}
-                    </div>
-                  </td>
-
-                  {/* originalArtist */}
-                  <td style={tdStyle}>
-                    <div style={oneLine12} title={originalText}>
-                      {originalText || "—"}
-                    </div>
-                  </td>
-
-                  {/* path (optional) */}
-                  {showFilePath ? (
-                    <td style={tdStyle}>
-                      <div style={oneLine11dim} title={t.item.path}>
-                        {t.item.path}
-                      </div>
-                    </td>
-                  ) : null}
-
-                </tr>
-              );
-            })}
+            {trackViews.map((t, index) =>
+              <TrackRow
+                key={index}
+                view={t}
+                index={index}
+                isActive={nowPlayingID === t.item.id}
+                isPlaying={isPlaying}
+                onPlay={playActions.playAtIndex}
+              />)}
             </tbody>
 
           </table>
@@ -270,52 +133,4 @@ const thStyle: React.CSSProperties = {
   opacity: 0.85,
   textAlign: "left",
   whiteSpace: "nowrap",
-};
-
-/**
- * テーブルセル（td）要素に適用されるスタイルプロパティを表します。
- * このオブジェクトは、要素のレイアウトと外観を定義するために使用されます。
- */
-const tdStyle: React.CSSProperties = {
-  padding: "0 6px",
-  verticalAlign: "middle",
-  lineHeight: "24px",      // ✅ 行高に吸着させる
-};
-
-/**
- * テキスト関連のプロパティを設定するためのCSSスタイルオブジェクト。
- *
- * `oneLine15`オブジェクトは、単一行のテキストに適用される特定のスタイルを定義します。
- */
-const oneLine15: React.CSSProperties = {
-  fontSize: 14,
-  fontWeight: 900,
-  lineHeight: "24px",      // ✅ ここも吸着
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-};
-
-/**
- * 特定の視覚的外観でテキストをスタイル設定するためのCSSプロパティオブジェクト。
- */
-const oneLine12: React.CSSProperties = {
-  fontSize: 12,
-  opacity: 0.75,
-  lineHeight: 1.1,           // ✅ 行間を締める
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-};
-
-/**
- * テキスト要素が特定のフォントサイズ、透明度、およびオーバーフロー動作で単一行に表示されるようにするCSSスタイル。
- * このスタイルには、オーバーフローしたテキストを省略記号で切り詰める設定が含まれます。
- */
-const oneLine11dim: React.CSSProperties = {
-  fontSize: 11,
-  opacity: 0.55,
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
 };
