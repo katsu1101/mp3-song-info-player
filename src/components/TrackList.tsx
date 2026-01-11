@@ -57,7 +57,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
     });
   }, [nowPlayingID]);
 
-  return trackViews.length === 0 ? (
+  return !settingAction.folderName && trackViews.length === 0 ? (
     <EmptyStateFolderActions settingAction={settingAction}/>
   ) : (
     <section>

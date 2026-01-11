@@ -67,7 +67,7 @@ export function TrackRow(props: {
         </div>
       </td>
 
-      <td style={{padding: "8px 8px"}}>{index + 1}</td>
+      <td style={{ padding: "auto", textAlign: "right" }}>{index + 1}</td>
 
       {/* art */}
       <td
@@ -113,8 +113,8 @@ export function TrackRow(props: {
               aria-label="ジャケットなし"
               title="ジャケットなし"
             >
-                          No
-                        </span>
+              {view.originalArtist ?? "No"}
+            </span>
           )}
         </div>
       </td>
