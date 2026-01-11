@@ -101,7 +101,8 @@ export function TrackRow(props: {
           ) : (
             <span
               style={{
-                fontSize: 11,
+                border: "1px solid var(--no-fg)",
+                fontSize: 14,
                 fontWeight: 900,
                 letterSpacing: "0.02em",
                 color: "var(--no-fg)",
@@ -113,7 +114,7 @@ export function TrackRow(props: {
               aria-label="ジャケットなし"
               title="ジャケットなし"
             >
-              {view.originalArtist ?? "No"}
+              {view.orderLabel ?? view.originalArtist ?? "No"}
             </span>
           )}
         </div>
