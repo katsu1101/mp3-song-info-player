@@ -40,7 +40,6 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
-
   const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
   const toggleSidebar = useCallback(() => setIsSidebarOpen((prev) => !prev), []);
 
@@ -85,7 +84,7 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
             aria-expanded={isSidebarOpen}
             onClick={toggleSidebar}
           >
-            ☰ 𝓜𝓮𝓷𝓾
+            ☰ メニュー
           </button>
 
           <div className={styles.headerContent}>
@@ -112,10 +111,26 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
 
       <div className={styles.body}>
         <aside
-          id={sidebarId}
-          className={`${styles.scrollPane} ${styles.sidebarPane} scrollbar`}
-          data-open={sidebarOpenAttr}
+          id="sidebar-drawer"
+          className={styles.sidebarPane}
+          data-open={isSidebarOpen ? "true" : "false"}
         >
+          <div className={styles.drawerHeader}>
+            <div>
+              <div className={styles.drawerTitle}>メニュー</div>
+              {/*<div className={styles.drawerSub}>選択中: {folderName ?? "未選択"}</div>*/}
+            </div>
+
+            <button
+              type="button"
+              className={styles.drawerClose}
+              onClick={() => setIsSidebarOpen(false)}
+              aria-label="メニューを閉じる"
+            >
+              ✕
+            </button>
+          </div>
+
           {sidebar}
         </aside>
 

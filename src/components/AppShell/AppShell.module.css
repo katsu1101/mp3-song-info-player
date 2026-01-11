@@ -18,6 +18,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-left: 12px;
 }
 
 .headerContent {
@@ -47,6 +48,16 @@
 
 .sidebarToggle {
     display: none;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--foreground);
+    cursor: pointer;
+    user-select: none;
 }
 
 .playerSheet {
@@ -68,9 +79,9 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .sidebarToggle {
-        display: inline-flex;
-    }
+    /*.sidebarToggle {*/
+    /*    display: inline-flex;*/
+    /*}*/
 
     .sidebarPane {
         position: fixed;
@@ -87,6 +98,40 @@
         box-shadow: var(--shadow-drawer);
         border-right: 1px solid var(--elev-border);
     }
+
+    .drawerHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 4px 12px;
+        border-bottom: 1px solid var(--panel-border);
+        margin-bottom: 12px;
+    }
+
+    .drawerTitle {
+        font-weight: 900;
+        letter-spacing: 0.02em;
+    }
+
+    .drawerClose {
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid var(--panel-border);
+        background: var(--panel);
+        color: var(--foreground);
+        cursor: pointer;
+    }
+
+    .drawerClose:hover { background: var(--panel-hover); }
+
+    .drawerSub {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-top: 2px;
+    }
+
+    .sidebarToggle { display: inline-flex; }
 
     .sidebarPane[data-open="true"] {
         transform: translateX(0);
