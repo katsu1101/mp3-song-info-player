@@ -57,7 +57,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
     });
   }, [nowPlayingID]);
 
-  return !state.folderName ? (
+  return !state.folderName || state.needsReconnect ? (
     <EmptyStateFolderActions
       state={state}
       commands={commands}
