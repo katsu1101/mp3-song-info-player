@@ -2,6 +2,7 @@ import {NowPlayingPulse} from "@/components/NowPlayingPulse";
 import {TrackView}       from "@/types/views";
 import Image             from "next/image";
 import React             from "react";
+import styles            from "./TrackList.module.css";
 
 const THUMB = 20;
 
@@ -137,14 +138,14 @@ export function TrackRow(props: {
 
 
       {/* releaseOrder */}
-      <td style={tdStyle}>
+      <td className={styles.colYm} style={tdStyle}>
         <div style={oneLine12} title={view.orderLabel}>
           {view.orderLabel}
         </div>
       </td>
 
       {/* originalArtist */}
-      <td style={tdStyle}>
+      <td className={styles.colOrig} style={tdStyle}>
         <div style={oneLine12} title={view.originalArtist || "—"}>
           {view.originalArtist || "—"}
         </div>

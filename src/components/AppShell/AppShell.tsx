@@ -84,7 +84,7 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
             aria-expanded={isSidebarOpen}
             onClick={toggleSidebar}
           >
-            ☰ メニュー
+            ☰
           </button>
 
           <div className={styles.headerContent}>

@@ -7,6 +7,7 @@ import {AppCommands}                   from "@/hooks/useAppCommands";
 import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
 import React, {JSX, useEffect, useRef} from "react";
+import styles                          from "./TrackList.module.css";
 
 /**
  * トラックリストコンポーネントのプロパティを表します。
@@ -89,8 +90,8 @@ export function TrackList(props: TrackListProps): JSX.Element {
                 <col key="title"/>,
 
                 // ✅ 右側は “狭い時は縮む / 広い時は広がりすぎない” clamp が強い
-                <col key="ym" style={{width: "clamp(80px, 9vw, 120px)"}}/>,
-                <col key="orig" style={{width: "clamp(60px, 9vw, 100px)"}}/>,
+                <col className={styles.colYm} key="ym"/>,
+                <col className={styles.colOrig} key="orig"/>,
 
                 ...(showFilePath ? [<col key="path" style={{width: 260}}/>] : []),
               ]}
@@ -102,8 +103,8 @@ export function TrackList(props: TrackListProps): JSX.Element {
               <th style={thStyle}>#</th>
               <th style={thStyle} aria-label="ジャケット"/>
               <th style={thStyle}>曲名</th>
-              <th style={thStyle}>アルバム</th>
-              <th style={thStyle}>原曲</th>
+              <th className={styles.colYm} style={thStyle}>アルバム</th>
+              <th className={styles.colOrig} style={thStyle}>原曲</th>
               {showFilePath ? <th style={thStyle}>ファイル</th> : null}
             </tr>
             </thead>

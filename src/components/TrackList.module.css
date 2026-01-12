@@ -1,0 +1,28 @@
+/* デスクトップは clamp */
+.colYm {
+    width: clamp(80px, 9vw, 120px);
+}
+
+.colOrig {
+    width: clamp(60px, 9vw, 100px);
+}
+
+@media (max-width: 430px) {
+    .colOrig, td.colOrig {
+        display: none;
+    }
+
+    .colOrig {
+        width: 0 !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .colYm, td.colYm {
+        display: none;
+    }
+
+    .colYm {
+        width: 0 !important;
+    }
+}
