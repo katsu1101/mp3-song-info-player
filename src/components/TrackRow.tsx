@@ -37,7 +37,7 @@ export function TrackRow(props: {
         touchAction: "manipulation",
         background: isActive ? "rgba(0,0,0,0.06)" : "transparent",
       }}
-      className="hover:bg-black/5 active:bg-black/10"
+      className="hover:bg-black/5"
     >
 
       {/* action */}
@@ -67,7 +67,7 @@ export function TrackRow(props: {
         </div>
       </td>
 
-      <td style={{ padding: "auto", textAlign: "right" }}>{index + 1}</td>
+      <td style={{padding: "auto", textAlign: "right"}}>{index + 1}</td>
 
       {/* art */}
       <td

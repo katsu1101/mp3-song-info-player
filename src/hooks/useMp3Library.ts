@@ -8,14 +8,13 @@ import {getDirname}                                                     from "@/
 import {shuffleArray}                                                   from "@/lib/shuffle";
 import type {Covers}                                                    from "@/types/mp3";
 import type {Mp3Entry}                                                  from "@/types/mp3Entry";
-import type {SettingAction}                                             from "@/types/setting";
+import {SettingActions, SettingState}                                   from "@/types/setting";
 import type {TrackMetaByPath}                                           from "@/types/trackMeta";
 import {useCallback, useEffect, useMemo, useRef, useState}              from "react";
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;
-  onBeforeReload?: () => void;
-  getPriorityPaths?: () => string[]; // TODO: 後追い処理で利用
+  priorityPaths?: string[]; // getPriorityPaths の代替（必要なら）
 };
 
 const resolveDirectoryHandle = async (
@@ -57,7 +56,8 @@ const findFirstImageFileHandle = async (
  * TODO: dirCoverUrlByDir を後追いで埋める
  */
 export const useMp3Library = (options: UseMp3LibraryOptions) => {
-  const {shuffle, onBeforeReload, getPriorityPaths} = options;
+  const {shuffle, priorityPaths} = options;
+  // TODO: priorityPaths を後追い処理に使うならここで参照
 
   const [mp3List, setMp3List] = useState<Mp3Entry[]>([]);
   const [folderName, setFolderName] = useState("");
@@ -256,8 +256,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
     // ✅ metaも後追い（1曲ずつ）
     void startMetaWorker(items);
-
-    void startMetaWorker(items);
   }, [shuffle, startDirCoverWorker, startMetaWorker]);
 
   const createCoverObjectUrlFromPicture = (picture?: { data: Uint8Array; format: string }): string | null => {
@@ -305,7 +303,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
       return;
     }
 
-    onBeforeReload?.();
     resetView();
     setNeedsReconnect(false);
 
@@ -317,7 +314,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : String(e));
     }
-  }, [onBeforeReload, resetView, buildList]);
+  }, [resetView, buildList]);
 
   const reconnect = useCallback(async () => {
     setErrorMessage("");
@@ -357,15 +354,17 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   return {
     mp3List,
     covers,
-    settingAction: {
+    settingState: {
       folderName,
       errorMessage,
       metaByPath,
       savedHandle,
       needsReconnect,
+    } as SettingState,
+    settingActions: {
       pickFolderAndLoad,
       reconnect,
       forget,
-    } as SettingAction,
+    } as SettingActions,
   };
 };

@@ -1,14 +1,16 @@
 "use client";
 
-import type {SettingAction} from "@/types/setting";
-import React                from "react";
+import {AppCommands}  from "@/hooks/useAppCommands";
+import {SettingState} from "@/types/setting";
+import React          from "react";
 
 type Props = {
-  settingAction: SettingAction;
+  state: Pick<SettingState, "savedHandle" | "needsReconnect">;
+  commands: AppCommands;
 };
 
-export function EmptyStateFolderActions({settingAction}: Props): React.JSX.Element {
-  const canReconnect = Boolean(settingAction.savedHandle && settingAction.needsReconnect);
+export function EmptyStateFolderActions({state, commands}: Props): React.JSX.Element {
+  const canReconnect = Boolean(state.savedHandle && state.needsReconnect);
 
   return (
     <div
@@ -30,7 +32,7 @@ export function EmptyStateFolderActions({settingAction}: Props): React.JSX.Eleme
             textAlign: "center",
             marginBottom: 16,
           }}
-          onClick={() => void settingAction.reconnect()}
+          onClick={() => void commands.reconnect()}
         >
           <div style={{fontSize: 18, fontWeight: 900, marginBottom: 10}}>
             再接続
@@ -43,7 +45,7 @@ export function EmptyStateFolderActions({settingAction}: Props): React.JSX.Eleme
       ) : null}
       <button
         type="button"
-        onClick={() => void settingAction.pickFolderAndLoad()}
+        onClick={() => void commands.pickFolder()}
         style={{
           width: "min(640px, 100%)",
           borderRadius: 18,

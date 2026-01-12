@@ -1,14 +1,13 @@
 "use client";
 
-import {SettingAction} from "@/types/setting";
-import React, {JSX}    from "react";
+import React, {JSX} from "react";
 
 /**
  * TopBarコンポーネントに必要なプロパティを表します。
  */
 type TopBarProps = {
   title: string;
-  settingAction: SettingAction;
+  folderName: string;
 };
 
 /**
@@ -27,7 +26,7 @@ type TopBarProps = {
  * @return {JSX.Element} The rendered header containing the title, folder actions, and toggleable settings.
  */
 export function TopBar(props: TopBarProps): JSX.Element {
-  const {title, settingAction} = props;
+  const {title, folderName} = props;
 
   return (
     <header
@@ -75,10 +74,10 @@ export function TopBar(props: TopBarProps): JSX.Element {
               textOverflow: "ellipsis",
               maxWidth: 360,
             }}
-            title={settingAction.folderName}
+            title={folderName}
           >
-            {settingAction.folderName
-              ? `選択中: ${settingAction.folderName}`
+            {folderName
+              ? `選択中: ${folderName}`
               : "未選択"}
           </span>
         </div>

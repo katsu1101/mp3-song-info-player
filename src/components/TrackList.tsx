@@ -3,8 +3,8 @@
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
 import {TrackRow}                      from "@/components/TrackRow";
-import {PlayActions}                   from "@/types/actions";
-import {SettingAction}                 from "@/types/setting";
+import {AppCommands}                   from "@/hooks/useAppCommands";
+import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
 import React, {JSX, useEffect, useRef} from "react";
 
@@ -13,10 +13,10 @@ import React, {JSX, useEffect, useRef} from "react";
  */
 type TrackListProps = {
   trackViews: readonly TrackView[];
-  playActions: PlayActions;
   nowPlayingID: number;
   isPlaying: boolean;
-  settingAction: SettingAction
+  state: SettingState;
+  commands: AppCommands
 };
 
 /**
@@ -31,7 +31,7 @@ type TrackListProps = {
  * @return {JSX.Element} トラックの一覧とその詳細情報を表示するレンダリング済み TrackList コンポーネント。
  */
 export function TrackList(props: TrackListProps): JSX.Element {
-  const {trackViews, playActions, nowPlayingID, isPlaying, settingAction} = props;
+  const {trackViews, nowPlayingID, isPlaying, state, commands} = props;
 
   const nowRowRef = useRef<HTMLTableRowElement | null>(null);
 
@@ -57,70 +57,73 @@ export function TrackList(props: TrackListProps): JSX.Element {
     });
   }, [nowPlayingID]);
 
-  return !settingAction.folderName ? (
-    <EmptyStateFolderActions settingAction={settingAction}/>
+  return !state.folderName ? (
+    <EmptyStateFolderActions
+      state={state}
+      commands={commands}
+    />
   ) : trackViews.length === 0 ?
     <>読み込み中</>
-    :(
-    <section>
-      <div
-        data-scroll="song-list"
-        style={{
-          maxWidth: "100%",
-          overflowX: showFilePath ? "auto" : "hidden",
-        }}
-      >
-        <table
+    : (
+      <section>
+        <div
+          data-scroll="song-list"
           style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            tableLayout: "fixed",
+            maxWidth: "100%",
+            overflowX: showFilePath ? "auto" : "hidden",
           }}
         >
-          <colgroup>
-            {[
-              <col key="action" style={{width: 32}}/>,
-              <col key="no" style={{width: 28}}/>,
-              <col key="art" style={{width: 28}}/>,
-              // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
-              <col key="title"/>,
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              tableLayout: "fixed",
+            }}
+          >
+            <colgroup>
+              {[
+                <col key="action" style={{width: 32}}/>,
+                <col key="no" style={{width: 28}}/>,
+                <col key="art" style={{width: 28}}/>,
+                // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
+                <col key="title"/>,
 
-              // ✅ 右側は “狭い時は縮む / 広い時は広がりすぎない” clamp が強い
-              <col key="ym" style={{width: "clamp(80px, 9vw, 120px)"}}/>,
-              <col key="orig" style={{width: "clamp(60px, 9vw, 100px)"}}/>,
+                // ✅ 右側は “狭い時は縮む / 広い時は広がりすぎない” clamp が強い
+                <col key="ym" style={{width: "clamp(80px, 9vw, 120px)"}}/>,
+                <col key="orig" style={{width: "clamp(60px, 9vw, 100px)"}}/>,
 
-              ...(showFilePath ? [<col key="path" style={{width: 260}}/>] : []),
-            ]}
-          </colgroup>
+                ...(showFilePath ? [<col key="path" style={{width: 260}}/>] : []),
+              ]}
+            </colgroup>
 
-          <thead>
-          <tr style={{borderBottom: "1px solid var(--list-border)"}}>
-            <th style={{...thStyle, textAlign: "right"}}></th>
-            <th style={thStyle}>#</th>
-            <th style={thStyle} aria-label="ジャケット"/>
-            <th style={thStyle}>曲名</th>
-            <th style={thStyle}>アルバム</th>
-            <th style={thStyle}>原曲</th>
-            {showFilePath ? <th style={thStyle}>ファイル</th> : null}
-          </tr>
-          </thead>
+            <thead>
+            <tr style={{borderBottom: "1px solid var(--list-border)"}}>
+              <th style={{...thStyle, textAlign: "right"}}></th>
+              <th style={thStyle}>#</th>
+              <th style={thStyle} aria-label="ジャケット"/>
+              <th style={thStyle}>曲名</th>
+              <th style={thStyle}>アルバム</th>
+              <th style={thStyle}>原曲</th>
+              {showFilePath ? <th style={thStyle}>ファイル</th> : null}
+            </tr>
+            </thead>
 
-          <tbody>
-          {trackViews.map((t, index) =>
-            <TrackRow
-              key={index}
-              view={t}
-              index={index}
-              isActive={nowPlayingID === t.item.id}
-              isPlaying={isPlaying}
-              onPlay={playActions.playAtIndex}
-            />)}
-          </tbody>
+            <tbody>
+            {trackViews.map((t, index) =>
+              <TrackRow
+                key={index}
+                view={t}
+                index={index}
+                isActive={nowPlayingID === t.item.id}
+                isPlaying={isPlaying}
+                onPlay={commands.playAtIndex}
+              />)}
+            </tbody>
 
-        </table>
-      </div>
-    </section>
-  );
+          </table>
+        </div>
+      </section>
+    );
 }
 
 /**

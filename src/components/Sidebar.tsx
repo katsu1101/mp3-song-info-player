@@ -1,12 +1,15 @@
-import {useSettings}   from "@/components/Settings/SettingsProvider";
-import {SettingAction} from "@/types/setting";
-import React           from "react";
+import {useSettings}  from "@/components/Settings/SettingsProvider";
+import {AppCommands}  from "@/hooks/useAppCommands";
+import {SettingState} from "@/types/setting";
+
+import React from "react";
 
 type SidebarMenuProps = {
-  settingAction: SettingAction;
+  state: SettingState
+  commands: AppCommands;
 };
 
-export function SidebarStub({settingAction}: SidebarMenuProps): React.JSX.Element {
+export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Element {
   const {settings, toggleShowFilePath, toggleContinuous, toggleShuffle} = useSettings();
 
   const showFilePath = settings.ui.showFilePath;
@@ -16,15 +19,15 @@ export function SidebarStub({settingAction}: SidebarMenuProps): React.JSX.Elemen
   const handleForget = (): void => {
     const ok = window.confirm("保存しているフォルダの記憶を消します。よろしいですか？");
     if (!ok) return;
-    void settingAction.forget();
+    void commands.forget();
   };
 
   return (
     <div className="grid gap-4">
-      <SideButton onClick={settingAction.pickFolderAndLoad}>フォルダを選ぶ</SideButton>
+      <SideButton onClick={commands.pickFolder}>フォルダを選ぶ</SideButton>
 
-      {settingAction.savedHandle && settingAction.needsReconnect ? (
-        <SideButton onClick={settingAction.reconnect} variant="ghost">
+      {state.savedHandle && state.needsReconnect ? (
+        <SideButton onClick={commands.reconnect} variant="ghost">
           再接続
         </SideButton>
       ) : null}
@@ -48,7 +51,7 @@ export function SidebarStub({settingAction}: SidebarMenuProps): React.JSX.Elemen
         onChange={toggleShowFilePath}
       />
 
-      {settingAction.savedHandle ? (
+      {state.savedHandle ? (
         <>
           <SectionTitle>危険操作</SectionTitle>
           <SideButton onClick={handleForget} variant="danger">

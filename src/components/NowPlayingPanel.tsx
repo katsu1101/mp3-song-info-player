@@ -1,7 +1,7 @@
 "use client";
 
 import {PlayerVariant}       from "@/components/AppShell/AppShell";
-import {PlayActions}         from "@/types/actions";
+import {AppCommands}         from "@/hooks/useAppCommands";
 import {TrackView}           from "@/types/views";
 import Image                 from "next/image";
 import React, {JSX, useMemo} from "react";
@@ -14,7 +14,7 @@ type NowPlayingPanelProps = {
   nowPlayingID: number;
   trackViews: readonly TrackView[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
-  playActions: PlayActions;
+  commands: AppCommands;
   isPlaying: boolean;
 };
 
@@ -63,7 +63,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     nowPlayingID,
     trackViews,
     audioRef,
-    playActions,
+    commands,
     isPlaying,
   } = props;
 
@@ -106,7 +106,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
     const onPrev: React.MouseEventHandler<HTMLButtonElement> = (e) => {
       e.stopPropagation();
-      void playActions.playPrev();
+      void commands.playPrev();
     };
 
     const onToggle: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -116,7 +116,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
     const onNext: React.MouseEventHandler<HTMLButtonElement> = (e) => {
       e.stopPropagation();
-      void playActions.playNext();
+      void commands.playNext();
     };
 
     return (
@@ -283,7 +283,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         <div style={{marginLeft: "auto", display: "flex", alignItems: "center", gap: 10}}>
           <button
             type="button"
-            onClick={() => void playActions.playPrev()}
+            onClick={() => void commands.playPrev()}
             disabled={!canControl}
             style={fullIconButtonStyle(!canControl)}
             title="前へ"
@@ -303,7 +303,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
           <button
             type="button"
-            onClick={() => void playActions.playNext()}
+            onClick={() => void commands.playNext()}
             disabled={!canControl}
             style={fullIconButtonStyle(!canControl)}
             title="次へ"

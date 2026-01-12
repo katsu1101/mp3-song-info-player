@@ -173,9 +173,6 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
           </button>
         </div>
 
-        <div className={styles.sheetBody}>
-          {renderPlayer("full")}
-        </div>
       </section>
     </div>
   );

@@ -1,5 +1,14 @@
 import {TrackMetaByPath} from "@/types/trackMeta";
 
+
+export type SettingState = {
+  folderName: string;
+  errorMessage: string;
+  metaByPath: TrackMetaByPath;
+  savedHandle: FileSystemDirectoryHandle | null;
+  needsReconnect: boolean;
+};
+
 /**
  * 特定の設定またはフォルダに関連付けられた操作とメタデータを表します。
  * このタイプは、フォルダ構成、メタデータ、および関連する操作を管理するために使用されます。
@@ -16,17 +25,11 @@ import {TrackMetaByPath} from "@/types/trackMeta";
  * - `reconnect`: 切断が発生した場合、保存されたフォルダハンドルへの再接続を試みます。
  * - `forget`: 保存されたフォルダと関連するメタデータをクリアし、事実上そのフォルダを「忘却」します。
  */
-export type SettingAction = {
-  folderName: string,
-  errorMessage: string,
-  // ✅ TrackMeta 本体
-  metaByPath: TrackMetaByPath,
-  savedHandle: FileSystemDirectoryHandle | null,
-  needsReconnect: boolean,
+export type SettingActions = {
   pickFolderAndLoad: () => Promise<void>;
   reconnect: () => Promise<void>;
   forget: () => Promise<void>;
-}
+};
 
 /**
  * アプリケーションの設定を表し、UIおよび再生の好みが含まれます。

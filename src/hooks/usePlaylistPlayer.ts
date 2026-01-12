@@ -15,9 +15,12 @@ type UsePlaylistPlayerArgs = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   playEntry: (entry: Mp3Entry, title: string | null) => Promise<void>;
 
-  trackViews: TrackView[]; // 連続再生の並び順確定済み
-  resetKey?: string; // フォルダ変更などでリセットしたい時に渡す
-  settings: Settings
+  trackViews: TrackView[];
+  resetKey?: string;
+  settings: Settings;
+
+  // ✅ 追加: フォルダ変更/シャッフル切替などで「曲を外す」完全停止
+  stopAndClear?: () => void;
 };
 
 /**
@@ -40,7 +43,7 @@ type UsePlaylistPlayerArgs = {
  *                   - `playPrev(): Promise<void>`: プレイリストの前のトラックを再生します。
  */
 export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
-  const {audioRef, playEntry, trackViews, resetKey, settings} = args;
+  const {audioRef, playEntry, trackViews, resetKey, settings, stopAndClear} = args;
 
   const currentIndexRef = useRef<number | null>(null);
 
@@ -50,7 +53,7 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
   useEffect(() => {
     isContinuousRef.current = settings.playback.continuous;
     isShuffleRef.current = settings.playback.shuffle;
-  }, [settings]);
+  }, [settings.playback.continuous, settings.playback.shuffle]);
 
   const playAtIndex = useCallback(
     async (index: number): Promise<void> => {
@@ -67,19 +70,27 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
 
   const playNext = useCallback(async (): Promise<void> => {
     const index = currentIndexRef.current;
-    if (index === null) return;
 
-    // ✅ 通常
+    // ✅ 未選択なら先頭から
+    if (index === null) {
+      if (trackViews.length > 0) await playAtIndex(0);
+      return;
+    }
+
     await playAtIndex(index + 1);
-  }, [playAtIndex]);
+  }, [playAtIndex, trackViews.length]);
 
   const playPrev = useCallback(async (): Promise<void> => {
     const index = currentIndexRef.current;
-    if (index === null) return;
 
-    // ✅ 通常
+    // ✅ 未選択なら末尾（好みで0でもOK）
+    if (index === null) {
+      if (trackViews.length > 0) await playAtIndex(trackViews.length - 1);
+      return;
+    }
+
     await playAtIndex(index - 1);
-  }, [playAtIndex]);
+  }, [playAtIndex, trackViews.length]);
 
   // audio ended → 次へ（連続再生ON時）
   useEffect(() => {
@@ -95,11 +106,12 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     return () => audio.removeEventListener("ended", onEnded);
   }, [audioRef, playNext]);
 
-  // resetKey（フォルダ変更など）でプレイリスト位置をリセット
+  // ✅ resetKey（フォルダ変更など）でプレイリスト位置 + audio を完全停止
   useEffect(() => {
     if (resetKey === undefined) return;
     currentIndexRef.current = null;
-  }, [resetKey]);
+    stopAndClear?.(); // ← これが重要（srcを外す/nowPlayingリセットをここで保証）
+  }, [resetKey, stopAndClear]);
 
   // キーボードショートカット
   useEffect(() => {
@@ -114,20 +126,26 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
       if (event.code === "Space") {
         event.preventDefault();
 
-        const hasSource = audio.currentSrc.length > 0;
-
         if (!audio.paused) {
           audio.pause();
           return;
         }
 
+        // ✅ ソース無しなら「先頭を再生」(= 新フォルダ切替直後の自然動作)
+        if (trackViews.length > 0) void playAtIndex(0);
+
+        // ✅ currentSrc だけだと微妙な場合があるので src も見る
+        const hasSource = Boolean(audio.currentSrc || audio.src);
+
         if (hasSource) {
           if (audio.ended) audio.currentTime = 0;
-          void audio.play();
+
+          // ✅ NotSupportedError 対策（srcが無い/解読不能など）
+          void audio.play().catch(() => {
+          });
           return;
         }
 
-        if (trackViews.length > 0) void playAtIndex(0);
         return;
       }
 
@@ -154,7 +172,7 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         playAtIndex,
         playNext,
         playPrev,
-      } as PlayActions
+      } as PlayActions,
     }),
     [playAtIndex, playNext, playPrev]
   );

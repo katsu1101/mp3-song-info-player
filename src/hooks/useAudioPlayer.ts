@@ -1,7 +1,7 @@
 "use client";
 
-import type {Mp3Entry}    from "@/types/mp3Entry";
-import {useRef, useState} from "react";
+import type {Mp3Entry}                 from "@/types/mp3Entry";
+import {useCallback, useRef, useState} from "react";
 
 /**
  * オーディオプレーヤーの機能を提供するフック。
@@ -43,6 +43,7 @@ export const useAudioPlayer = () => {
     setNowPlayingID(entry.id);
 
     audio.src = url;
+    audio.load(); // メタデータ読み込みを促進
 
     try {
       await audio.play();
@@ -51,10 +52,26 @@ export const useAudioPlayer = () => {
     }
   };
 
+  const stopAndClear = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.currentTime = 0;
+
+    // ここが重要: 曲を外す
+    audio.removeAttribute("src"); // audio.src = "" でもOK
+    audio.load();                 // 状態を確定させる
+
+    // ✅ ここが超重要：UI側の「再生中」も消す
+    setNowPlayingID(-1); // (あなたの実装に合わせて null や undefined でもOK)
+  }, []);
+
   return {
     audioRef,
     audioSrc,
     nowPlayingID,
     playEntry,
+    stopAndClear,
   };
 };
