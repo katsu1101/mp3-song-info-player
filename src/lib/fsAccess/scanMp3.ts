@@ -35,13 +35,13 @@ export const readMp3FromDirectory = async (
         && !name.toLowerCase().endsWith(".m4a")) continue;
 
       const fileHandle = handle as FileSystemFileHandle;
-      const file = await fileHandle.getFile();
+      const fileName = fileHandle.name;
+      // const file = await fileHandle.getFile();
       entries.push({
-        id: 0,
+        id: 0, // 仮のID、後で連番を振る
         path: currentPath,
-        name: file.name,
-        size: file.size,
-        lastModified: file.lastModified,
+        name: fileName,
+        lastModified: null, // 仮りの値
         fileHandle,
       });
       continue;

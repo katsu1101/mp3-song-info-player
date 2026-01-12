@@ -7,6 +7,7 @@ import {Covers}                  from "@/types/mp3";
 import type {Mp3Entry}           from "@/types/mp3Entry";
 import {TrackMetaByPath}         from "@/types/trackMeta";
 import {TrackView}               from "@/types/views";
+import React                     from "react";
 
 /**
  * `useTrackViews` 機能に必要な引数を表します。
@@ -81,39 +82,41 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
     return {item, key, originalIndex};
   });
 
-  return decorated.map(({item}, index) => {
-    const meta = metaByPath[item.path];
+  return React.useMemo(() => {
+    return decorated.map(({item}, index) => {
+      const meta = metaByPath[item.path];
 
-    const prefixId = extractPrefixIdFromPath(item.path);
-    const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
+      const prefixId = extractPrefixIdFromPath(item.path);
+      const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
 
-    const filename = getBasename(item.path);
-    const displayTitle = mapping?.title ?? meta?.title ?? filename;
+      const filename = getBasename(item.path);
+      const displayTitle = mapping?.title ?? meta?.title ?? filename;
 
-    const albumName = meta?.album ?? null;
-    const trackNo = meta?.trackNo ?? null;
+      const albumName = meta?.album ?? null;
+      const trackNo = meta?.trackNo ?? null;
 
-    const albumOrderLabel =
-      albumName ? (trackNo ? `${albumName} / ${toTwoDigits(trackNo)}` : albumName) : null;
+      const albumOrderLabel =
+        albumName ? (trackNo ? `${albumName} / ${toTwoDigits(trackNo)}` : albumName) : null;
 
-    const releaseOrderLabel = buildReleaseOrderLabel(mapping) ?? "年月不明";
-    const orderLabel = albumOrderLabel ?? releaseOrderLabel;
+      const releaseOrderLabel = buildReleaseOrderLabel(mapping) ?? "年月不明";
+      const orderLabel = albumOrderLabel ?? releaseOrderLabel;
 
-    const tagArtist = normalizeText(meta?.artist);
-    const mappingOriginal = normalizeText(mapping?.originalArtist);
-    const originalArtist = tagArtist ?? mappingOriginal;
+      const tagArtist = normalizeText(meta?.artist);
+      const mappingOriginal = normalizeText(mapping?.originalArtist);
+      const originalArtist = tagArtist ?? mappingOriginal;
 
-    const dirPath = getDirname(item.path);
-    const coverUrl =
-      covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
+      const dirPath = getDirname(item.path);
+      const coverUrl =
+        covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
 
-    return {
-      item,
-      index,
-      displayTitle,
-      orderLabel,
-      originalArtist,
-      coverUrl,
-    };
-  });
+      return {
+        item,
+        index,
+        displayTitle,
+        orderLabel,
+        originalArtist,
+        coverUrl,
+      };
+    });
+  }, [decorated, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
 };
