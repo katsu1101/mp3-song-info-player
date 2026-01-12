@@ -1,7 +1,7 @@
 import React, {JSX, useCallback, useEffect, useId, useMemo, useState} from "react";
 import styles                                                         from "./AppShell.module.css";
 
-export type PlayerVariant = "mini" | "full";
+export type PlayerVariant = "mini" | "full" | "full2";
 
 /**
  * App Shell レイアウトのレンダリングに必要なプロパティを表します。
@@ -173,6 +173,9 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
           </button>
         </div>
 
+        <div className={styles.sheetBody}>
+          {renderPlayer("full2")}
+        </div>
       </section>
     </div>
   );

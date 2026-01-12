@@ -313,9 +313,9 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         </div>
       </div>
 
-      <div style={{marginTop: 10}}>
+      {variant === "full" ? <div style={{marginTop: 10}}>
         <audio ref={audioRef} controls preload="none" style={{width: "100%"}}/>
-      </div>
+      </div> : null}
 
       <div style={{marginTop: 12, display: "grid", gap: 6}}>
         <InfoRow label="年月/順" value={nowTrackView?.orderLabel ?? "—"}/>

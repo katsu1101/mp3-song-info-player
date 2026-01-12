@@ -6,6 +6,30 @@ import {Settings}                                       from "@/types/setting";
 import {TrackView}                                      from "@/types/views";
 import React, {useCallback, useEffect, useMemo, useRef} from "react";
 
+const clamp = (value: number, min: number, max: number): number => {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+};
+
+const canSeek = (audio: HTMLAudioElement): boolean => {
+  // duration が無い/不正な場合は「とりあえず 0 以上にする」だけにする
+  // （読み込み直後やストリーム系で起きうる）
+  return Number.isFinite(audio.currentTime);
+};
+
+const seekBySeconds = (audio: HTMLAudioElement, deltaSeconds: number): void => {
+  if (!canSeek(audio)) return;
+
+  const next = audio.currentTime + deltaSeconds;
+
+  // duration が取れない場合は上限を設けず 0 だけ守る
+  const hasDuration = Number.isFinite(audio.duration) && audio.duration > 0;
+  const max = hasDuration ? audio.duration : Number.POSITIVE_INFINITY;
+
+  audio.currentTime = clamp(next, 0, max);
+};
+
 /**
  * プレイリストプレイヤーフックの引数。
  *
@@ -139,8 +163,6 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
 
         if (hasSource) {
           if (audio.ended) audio.currentTime = 0;
-
-          // ✅ NotSupportedError 対策（srcが無い/解読不能など）
           void audio.play().catch(() => {
           });
           return;
@@ -158,6 +180,18 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
       if (event.code === "ArrowUp") {
         event.preventDefault();
         void playPrev();
+        return;
+      }
+
+      if (event.code === "ArrowLeft") {
+        event.preventDefault();
+        seekBySeconds(audio, -10);
+        return;
+      }
+
+      if (event.code === "ArrowRight") {
+        event.preventDefault();
+        seekBySeconds(audio, +10);
         return;
       }
     };
