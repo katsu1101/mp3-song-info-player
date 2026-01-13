@@ -126,6 +126,10 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     revokeAll(); // ✅ ここに集約
   }, [revokeAll]);
 
+  // TODO(整理A-1): coverUrlByPathRef を削るなら、このuseEffectごと消す
+  // useEffect(() => { coverUrlByPathRef.current = coverUrlByPath; }, [coverUrlByPath]);
+
+  // ✅ startDirCoverWorker 内の二重 set を1回にする
   const startDirCoverWorker = useCallback(async (
     rootHandle: FileSystemDirectoryHandle,
     items: readonly Mp3Entry[]
@@ -159,9 +163,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
           const file = await imgHandle.getFile();
           const url = URL.createObjectURL(file);
           track(url);
-          setDirCoverUrlByDir((prev) => ({...prev, [dirPath]: url}));
-
-          if (dirCoverRunIdRef.current !== myRunId) return;
 
           setDirCoverUrlByDir((prev) => {
             if (prev[dirPath] === url) return prev;
@@ -179,6 +180,15 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     await Promise.all(Array.from({length: concurrency}, () => runOne()));
   }, [track]);
 
+// ✅ unmount掃除に revokeAll を追加（漏れ防止）
+  useEffect(() => {
+    return () => {
+      dirCoverRunIdRef.current += 1;
+      metaRunIdRef.current += 1;
+      revokeAll();
+    };
+  }, [revokeAll]);
+  
   const startMetaWorker = useCallback(async (items: readonly Mp3Entry[]) => {
     const createCoverObjectUrlFromPicture = (
       picture?: { data: Uint8Array; format: string }
@@ -338,9 +348,10 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   useEffect(() => {
     return () => {
       dirCoverRunIdRef.current += 1;
-      metaRunIdRef.current += 1; // ✅ 忘れず止める
+      metaRunIdRef.current += 1;
+      revokeAll();
     };
-  }, []);
+  }, [revokeAll]);
 
   const covers: Covers = useMemo(() => ({
     coverUrlByPath,
