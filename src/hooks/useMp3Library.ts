@@ -1,9 +1,11 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
-import {getLowerExt, IMAGE_EXTS}                                        from "@/const/constants";
 import {useObjectUrlPool}                                               from "@/hooks/useObjectUrlPool";
 import {clearDirectoryHandle, loadDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
+import {findFirstImageFileHandle}                                       from "@/lib/fsAccess/findFirstImageFileHandle";
+import {canReadNow, ensureDirectoryPicker, requestRead}                 from "@/lib/fsAccess/permission";
+import {resolveDirectoryHandle}                                         from "@/lib/fsAccess/resolveDirectoryHandle";
 import {readMp3FromDirectory}                                           from "@/lib/fsAccess/scanMp3";
 import {readMp3Meta}                                                    from "@/lib/mp3/readMp3Meta";
 import {getDirname}                                                     from "@/lib/path/getDirname";
@@ -17,37 +19,6 @@ import {useCallback, useEffect, useMemo, useRef, useState}              from "re
 type UseMp3LibraryOptions = {
   shuffle: boolean;
   priorityPaths?: string[]; // getPriorityPaths の代替（必要なら）
-};
-
-const resolveDirectoryHandle = async (
-  rootHandle: FileSystemDirectoryHandle,
-  dirPath: string
-): Promise<FileSystemDirectoryHandle> => {
-  if (!dirPath) return rootHandle;
-
-  const parts = dirPath.split("/").filter(Boolean);
-  let current: FileSystemDirectoryHandle = rootHandle;
-
-  for (const part of parts) {
-    current = await current.getDirectoryHandle(part, {create: false});
-  }
-  return current;
-};
-
-const findFirstImageFileHandle = async (
-  directoryHandle: FileSystemDirectoryHandle
-): Promise<FileSystemFileHandle | null> => {
-  // TSのlib定義差を吸収（entries() の型が薄い環境がある）
-  const iterable = (directoryHandle as unknown as {
-    entries: () => AsyncIterable<[string, FileSystemHandle]>
-  }).entries();
-
-  for await (const [name, entry] of iterable) {
-    if (entry.kind !== "file") continue;
-    if (!IMAGE_EXTS.has(getLowerExt(name))) continue;
-    return entry as FileSystemFileHandle;
-  }
-  return null;
 };
 
 /**
@@ -85,34 +56,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
   // ✅ 後追いキャンセル用（フォルダ切替で止める）
   const dirCoverRunIdRef = useRef(0);
-
-  const ensureDirectoryPicker = (): string | null => {
-    if (typeof window === "undefined") return null;
-
-    if (!window.isSecureContext) return "HTTPSで開いてください（セキュアな接続が必要です）。";
-    if (typeof window.showDirectoryPicker !== "function") {
-      return "このブラウザはフォルダ選択に対応していません。Chrome/Edgeでお試しください。";
-    }
-    return null;
-  };
-
-  const canReadNow = async (handle: FileSystemDirectoryHandle): Promise<boolean> => {
-    const anyHandle = handle as unknown as {
-      queryPermission?: (d: { mode: "read" }) => Promise<PermissionState>;
-    };
-    if (!anyHandle.queryPermission) return true;
-    const state = await anyHandle.queryPermission({mode: "read"});
-    return state === "granted";
-  };
-
-  const requestRead = async (handle: FileSystemDirectoryHandle): Promise<boolean> => {
-    const anyHandle = handle as unknown as {
-      requestPermission?: (d: { mode: "read" }) => Promise<PermissionState>;
-    };
-    if (!anyHandle.requestPermission) return false;
-    const state = await anyHandle.requestPermission({mode: "read"});
-    return state === "granted";
-  };
 
   const resetView = useCallback(() => {
     dirCoverRunIdRef.current += 1;
@@ -180,15 +123,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     await Promise.all(Array.from({length: concurrency}, () => runOne()));
   }, [track]);
 
-// ✅ unmount掃除に revokeAll を追加（漏れ防止）
-  useEffect(() => {
-    return () => {
-      dirCoverRunIdRef.current += 1;
-      metaRunIdRef.current += 1;
-      revokeAll();
-    };
-  }, [revokeAll]);
-  
   const startMetaWorker = useCallback(async (items: readonly Mp3Entry[]) => {
     const createCoverObjectUrlFromPicture = (
       picture?: { data: Uint8Array; format: string }
