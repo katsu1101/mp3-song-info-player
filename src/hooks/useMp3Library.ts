@@ -1,16 +1,15 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
-import {useMp3LibraryBoot}                                 from "@/hooks/useMp3LibraryBoot";
-import {useObjectUrlPool}                                  from "@/hooks/useObjectUrlPool";
-import {clearDirectoryHandle, saveDirectoryHandle}         from "@/lib/fsAccess/dirHandleStore";
-import {ensureDirectoryPicker, requestRead}                from "@/lib/fsAccess/permission";
-import {buildMp3Library}                                   from "@/lib/mp3/library/buildMp3Library";
-import type {Covers}                                       from "@/types/mp3";
-import type {Mp3Entry}                                     from "@/types/mp3Entry";
-import {SettingActions, SettingState}                      from "@/types/setting";
-import type {TrackMetaByPath}                              from "@/types/trackMeta";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useMp3LibraryBoot}                                      from "@/hooks/useMp3LibraryBoot";
+import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
+import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
+import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
+import type {Covers}                                            from "@/types/mp3";
+import type {Mp3Entry}                                          from "@/types/mp3Entry";
+import {SettingActions, SettingState}                           from "@/types/setting";
+import type {TrackMetaByPath}                                   from "@/types/trackMeta";
+import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;
@@ -82,50 +81,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     setErrorMessage,
   });
 
-
-  const pickFolderAndLoad = useCallback(async () => {
-    const error = ensureDirectoryPicker();
-    if (error) {
-      setErrorMessage(error);
-      return;
-    }
-
-    resetView();
-    setNeedsReconnect(false);
-
-    try {
-      const handle: FileSystemDirectoryHandle = await window.showDirectoryPicker({mode: "read"});
-      await saveDirectoryHandle(handle);
-      setSavedHandle(handle);
-      await buildList(handle);
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : String(e));
-    }
-  }, [resetView, buildList]);
-
-  const reconnect = useCallback(async () => {
-    setErrorMessage("");
-    if (!savedHandle) return;
-
-    const ok = await requestRead(savedHandle);
-    if (!ok) {
-      setNeedsReconnect(true);
-      setErrorMessage("フォルダへの読み取り権限が付与されませんでした。");
-      return;
-    }
-
-    resetView();
-    await buildList(savedHandle);
-    setNeedsReconnect(false);
-  }, [buildList, savedHandle, resetView]);
-
-  const forget = useCallback(async () => {
-    await clearDirectoryHandle();
-    setSavedHandle(null);
-    setNeedsReconnect(false);
-    resetView();
-  }, [resetView]);
-
   // unmount掃除
   useEffect(() => {
     return () => {
@@ -139,6 +94,34 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     coverUrlByPath,
     dirCoverUrlByDir,
   }), [coverUrlByPath, dirCoverUrlByDir]);
+
+  const pickFolderAndLoad = useCallback(async () => {
+    await pickFolderAndLoadAction({
+      resetView,
+      buildList,
+      setNeedsReconnect,
+      setSavedHandle,
+      setErrorMessage,
+    });
+  }, [resetView, buildList]);
+
+  const reconnect = useCallback(async () => {
+    await reconnectAction({
+      savedHandle,
+      resetView,
+      buildList,
+      setNeedsReconnect,
+      setErrorMessage,
+    });
+  }, [savedHandle, resetView, buildList]);
+
+  const forget = useCallback(async () => {
+    await forgetAction({
+      resetView,
+      setSavedHandle,
+      setNeedsReconnect,
+    });
+  }, [resetView]);
 
   return {
     mp3List,
