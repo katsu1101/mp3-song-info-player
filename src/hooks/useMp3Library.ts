@@ -1,6 +1,8 @@
+// src/hooks/useMp3Library.ts
 "use client";
 
 import {getLowerExt, IMAGE_EXTS}                                        from "@/const/constants";
+import {useObjectUrlPool}                                               from "@/hooks/useObjectUrlPool";
 import {clearDirectoryHandle, loadDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
 import {readMp3FromDirectory}                                           from "@/lib/fsAccess/scanMp3";
 import {readMp3Meta}                                                    from "@/lib/mp3/readMp3Meta";
@@ -59,6 +61,8 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   const {shuffle, priorityPaths} = options;
   // TODO: priorityPaths を後追い処理に使うならここで参照
 
+  const {track, revokeAll} = useObjectUrlPool();
+
   const [mp3List, setMp3List] = useState<Mp3Entry[]>([]);
   const [folderName, setFolderName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -78,12 +82,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     coverUrlByPathRef.current = coverUrlByPath;
   }, [coverUrlByPath]);
 
-  // ✅ objectURL の revoke 管理
-  const objectUrlsRef = useRef<Set<string>>(new Set());
-  const revokeAllObjectUrls = useCallback(() => {
-    for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
-    objectUrlsRef.current.clear();
-  }, []);
 
   // ✅ 後追いキャンセル用（フォルダ切替で止める）
   const dirCoverRunIdRef = useRef(0);
@@ -125,8 +123,8 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     setDirCoverUrlByDir({});
     setCoverUrlByPath({}); // ✅ 追加
     setMetaByPath({}); // ✅ 追加
-    revokeAllObjectUrls();
-  }, [revokeAllObjectUrls]);
+    revokeAll(); // ✅ ここに集約
+  }, [revokeAll]);
 
   const startDirCoverWorker = useCallback(async (
     rootHandle: FileSystemDirectoryHandle,
@@ -160,7 +158,8 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
           const file = await imgHandle.getFile();
           const url = URL.createObjectURL(file);
-          objectUrlsRef.current.add(url);
+          track(url);
+          setDirCoverUrlByDir((prev) => ({...prev, [dirPath]: url}));
 
           if (dirCoverRunIdRef.current !== myRunId) return;
 
@@ -178,9 +177,20 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     };
 
     await Promise.all(Array.from({length: concurrency}, () => runOne()));
-  }, []);
+  }, [track]);
 
   const startMetaWorker = useCallback(async (items: readonly Mp3Entry[]) => {
+    const createCoverObjectUrlFromPicture = (
+      picture?: { data: Uint8Array; format: string }
+    ): string | null => {
+      if (!picture) return null;
+
+      const copied = new Uint8Array(picture.data);
+      const blob = new Blob([copied], {type: picture.format});
+      const url = URL.createObjectURL(blob);
+      track(url);
+      return url;
+    };
     const myRunId = ++metaRunIdRef.current;
 
     for (const entry of items) {
@@ -220,7 +230,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
       await new Promise<void>((r) => setTimeout(r, 0));
     }
-  }, []);
+  }, [track]);
 
 
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
@@ -258,20 +268,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     void startMetaWorker(items);
   }, [shuffle, startDirCoverWorker, startMetaWorker]);
 
-  const createCoverObjectUrlFromPicture = (picture?: { data: Uint8Array; format: string }): string | null => {
-    if (!picture) return null;
-
-    const bytes = picture.data;
-
-    // ✅ SharedArrayBuffer 等の可能性を潰すため、必ず ArrayBuffer にコピーする
-    const copied = new Uint8Array(bytes); // ← ここで ArrayBuffer に乗り換える（コピー）
-    const blob = new Blob([copied], {type: picture.format}); // Uint8Array は BlobPart 扱いになる
-
-    const url = URL.createObjectURL(blob);
-
-    objectUrlsRef.current.add(url);
-    return url;
-  };
   // 起動時に復元
   useEffect(() => {
     const boot = async () => {
@@ -342,9 +338,9 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   useEffect(() => {
     return () => {
       dirCoverRunIdRef.current += 1;
-      revokeAllObjectUrls();
+      metaRunIdRef.current += 1; // ✅ 忘れず止める
     };
-  }, [revokeAllObjectUrls]);
+  }, []);
 
   const covers: Covers = useMemo(() => ({
     coverUrlByPath,
