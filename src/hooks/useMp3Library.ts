@@ -1,15 +1,16 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
-import {useObjectUrlPool}                                               from "@/hooks/useObjectUrlPool";
-import {clearDirectoryHandle, loadDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
-import {canReadNow, ensureDirectoryPicker, requestRead}                 from "@/lib/fsAccess/permission";
-import {buildMp3Library}                                                from "@/lib/mp3/library/buildMp3Library";
-import type {Covers}                                                    from "@/types/mp3";
-import type {Mp3Entry}                                                  from "@/types/mp3Entry";
-import {SettingActions, SettingState}                                   from "@/types/setting";
-import type {TrackMetaByPath}                                           from "@/types/trackMeta";
-import {useCallback, useEffect, useMemo, useRef, useState}              from "react";
+import {useMp3LibraryBoot}                                 from "@/hooks/useMp3LibraryBoot";
+import {useObjectUrlPool}                                  from "@/hooks/useObjectUrlPool";
+import {clearDirectoryHandle, saveDirectoryHandle}         from "@/lib/fsAccess/dirHandleStore";
+import {ensureDirectoryPicker, requestRead}                from "@/lib/fsAccess/permission";
+import {buildMp3Library}                                   from "@/lib/mp3/library/buildMp3Library";
+import type {Covers}                                       from "@/types/mp3";
+import type {Mp3Entry}                                     from "@/types/mp3Entry";
+import {SettingActions, SettingState}                      from "@/types/setting";
+import type {TrackMetaByPath}                              from "@/types/trackMeta";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;
@@ -73,28 +74,14 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   }, [shuffle, track]);
 
   // 起動時に復元
-  useEffect(() => {
-    const boot = async () => {
-      try {
-        const handle = await loadDirectoryHandle();
-        if (!handle) return;
+  useMp3LibraryBoot({
+    buildList,
+    setSavedHandle,
+    setFolderName,
+    setNeedsReconnect,
+    setErrorMessage,
+  });
 
-        setSavedHandle(handle);
-        setFolderName(handle.name);
-
-        const ok = await canReadNow(handle);
-        if (ok) {
-          await buildList(handle);
-          setNeedsReconnect(false);
-        } else {
-          setNeedsReconnect(true);
-        }
-      } catch (e) {
-        setErrorMessage(e instanceof Error ? e.message : String(e));
-      }
-    };
-    void boot();
-  }, [buildList]);
 
   const pickFolderAndLoad = useCallback(async () => {
     const error = ensureDirectoryPicker();
