@@ -4,32 +4,23 @@
 import {useObjectUrlPool}                                               from "@/hooks/useObjectUrlPool";
 import {clearDirectoryHandle, loadDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
 import {canReadNow, ensureDirectoryPicker, requestRead}                 from "@/lib/fsAccess/permission";
-import {readMp3FromDirectory}                                           from "@/lib/fsAccess/scanMp3";
-import {startDirCoverWorker}                                            from "@/lib/mp3/workers/startDirCoverWorker";
-import {startMetaWorker}                                                from "@/lib/mp3/workers/startMetaWorker";
-import {shuffleArray}                                                   from "@/lib/shuffle";
+import {buildMp3Library}                                                from "@/lib/mp3/library/buildMp3Library";
 import type {Covers}                                                    from "@/types/mp3";
 import type {Mp3Entry}                                                  from "@/types/mp3Entry";
 import {SettingActions, SettingState}                                   from "@/types/setting";
 import type {TrackMetaByPath}                                           from "@/types/trackMeta";
 import {useCallback, useEffect, useMemo, useRef, useState}              from "react";
 
-
 type UseMp3LibraryOptions = {
   shuffle: boolean;
-  priorityPaths?: string[]; // getPriorityPaths の代替（必要なら）
 };
 
 /**
  * 暫定: mp3List だけ最優先で返す。
  * - meta/covers/dirCover は全て空（UIを壊さないためのダミー）
- *
- * TODO: metaByPath を後追いで埋める（1曲ずつ）
- * TODO: dirCoverUrlByDir を後追いで埋める
  */
 export const useMp3Library = (options: UseMp3LibraryOptions) => {
-  const {shuffle, priorityPaths} = options;
-  // TODO: priorityPaths を後追い処理に使うならここで参照
+  const {shuffle} = options;
 
   const {track, revokeAll} = useObjectUrlPool();
 
@@ -54,58 +45,29 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
   const resetView = useCallback(() => {
     dirCoverRunIdRef.current += 1;
-    metaRunIdRef.current += 1; // ✅ 追加：meta後追い停止
+    metaRunIdRef.current += 1;
     setErrorMessage("");
     setMp3List([]);
     setFolderName("");
     setDirCoverUrlByDir({});
-    setCoverUrlByPath({}); // ✅ 追加
-    setMetaByPath({}); // ✅ 追加
-    revokeAll(); // ✅ ここに集約
+    setCoverUrlByPath({});
+    setMetaByPath({});
+    revokeAll();
   }, [revokeAll]);
 
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
-    setFolderName(handle.name);
-
-    let items = await readMp3FromDirectory(handle, "");
-
-    if (shuffle) {
-      items = shuffleArray(items);
-      for (let i = 0; i < items.length; i++) items[i]!.id = i + 1;
-    }
-
-    setMp3List(items);
-
-    // ✅ まずダミーで一括初期化（即表示）
-    setMetaByPath(() => {
-      const next: TrackMetaByPath = {};
-      for (const e of items) {
-        next[e.path] = {
-          title: e.fileHandle.name,
-          artist: "",
-          album: "",
-          trackNo: null,
-          year: null,
-        };
-      }
-      return next;
-    });
-
-    // ✅ フォルダ代表画像だけ後追い開始
-    void startDirCoverWorker({
-      rootHandle: handle,
-      items,
-      runIdRef: dirCoverRunIdRef,
+    await buildMp3Library({
+      handle,
+      shuffle,
       track,
-      setDirCoverUrlByDir,
-    });
 
-    // ✅ metaも後追い（1曲ずつ）
-    void startMetaWorker({
-      items,
-      runIdRef: metaRunIdRef,
-      track,
+      dirCoverRunIdRef,
+      metaRunIdRef,
+
+      setFolderName,
+      setMp3List,
       setMetaByPath,
+      setDirCoverUrlByDir,
       setCoverUrlByPath,
     });
   }, [shuffle, track]);
@@ -165,7 +127,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
       return;
     }
 
-    resetView(); // ✅ 追加（ただし folderName も一旦消える）
+    resetView();
     await buildList(savedHandle);
     setNeedsReconnect(false);
   }, [buildList, savedHandle, resetView]);

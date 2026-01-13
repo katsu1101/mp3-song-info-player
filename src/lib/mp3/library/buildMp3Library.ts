@@ -1,0 +1,91 @@
+// src/lib/mp3/library/buildMp3Library.ts
+
+import {readMp3FromDirectory}          from "@/lib/fsAccess/scanMp3";
+import {startDirCoverWorker}           from "@/lib/mp3/workers/startDirCoverWorker";
+import {startMetaWorker}               from "@/lib/mp3/workers/startMetaWorker";
+import {shuffleArray}                  from "@/lib/shuffle";
+import type {Mp3Entry}                 from "@/types/mp3Entry";
+import type {TrackMetaByPath}          from "@/types/trackMeta";
+import type {Dispatch, SetStateAction} from "react";
+
+type RunIdRef = { current: number };
+
+type BuildMp3LibraryArgs = {
+  handle: FileSystemDirectoryHandle;
+  shuffle: boolean;
+
+  // objectURL 管理
+  track: (url: string) => void;
+
+  // 後追いキャンセル
+  dirCoverRunIdRef: RunIdRef;
+  metaRunIdRef: RunIdRef;
+
+  // state setters
+  setFolderName: Dispatch<SetStateAction<string>>;
+  setMp3List: Dispatch<SetStateAction<Mp3Entry[]>>;
+  setMetaByPath: Dispatch<SetStateAction<TrackMetaByPath>>;
+  setDirCoverUrlByDir: Dispatch<SetStateAction<Record<string, string | null>>>;
+  setCoverUrlByPath: Dispatch<SetStateAction<Record<string, string | null>>>;
+};
+
+const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => {
+  const next: TrackMetaByPath = {};
+  for (const e of items) {
+    next[e.path] = {
+      title: e.fileHandle.name,
+      artist: "",
+      album: "",
+      trackNo: null,
+      year: null,
+    };
+  }
+  return next;
+};
+
+export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> => {
+  const {
+    handle,
+    shuffle,
+    track,
+    dirCoverRunIdRef,
+    metaRunIdRef,
+    setFolderName,
+    setMp3List,
+    setMetaByPath,
+    setDirCoverUrlByDir,
+    setCoverUrlByPath,
+  } = args;
+
+  setFolderName(handle.name);
+
+  let items = await readMp3FromDirectory(handle, "");
+
+  if (shuffle) {
+    items = shuffleArray(items);
+    for (let i = 0; i < items.length; i++) items[i]!.id = i + 1;
+  }
+
+  setMp3List(items);
+
+  // ✅ まずダミーで一括初期化（即表示）
+  setMetaByPath(() => buildInitialMetaByPath(items));
+
+  // ✅ フォルダ代表画像だけ後追い開始
+  void startDirCoverWorker({
+    rootHandle: handle,
+    items,
+    runIdRef: dirCoverRunIdRef,
+    track,
+    setDirCoverUrlByDir,
+  });
+
+  // ✅ metaも後追い（1曲ずつ）
+  void startMetaWorker({
+    items,
+    runIdRef: metaRunIdRef,
+    track,
+    setMetaByPath,
+    setCoverUrlByPath,
+  });
+};
