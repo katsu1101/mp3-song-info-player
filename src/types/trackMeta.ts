@@ -8,9 +8,6 @@ export type TrackMeta = {
   album: string | null;
   trackNo: number | null;
   year: number | null;
-
-  // ジャケット（objectURL。無ければ null）
-  coverUrl: string | null;
 };
 
 /**

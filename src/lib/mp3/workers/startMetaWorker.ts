@@ -55,8 +55,6 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
         });
       }
 
-      // ✅ metaByPathは互換維持（ただし既存coverがある場合はnullのままになりうる）
-      // TODO(第四弾): metaByPathからcoverUrlを削除して、covers側だけを参照する設計に寄せる
       setMetaByPath((prev) => ({
         ...prev,
         [entry.path]: {
@@ -65,7 +63,6 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
           album: meta.album ?? "",
           trackNo: meta.trackNo ?? null,
           year: meta.year ?? null,
-          coverUrl: createdCoverUrl ?? prev[entry.path]?.coverUrl ?? null,
         },
       }));
     } catch {

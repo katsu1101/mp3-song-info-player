@@ -2,7 +2,7 @@ import {getBasename}             from "@/components/NowPlayingPanel";
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import {getDirname}              from "@/lib/path/getDirname";
 import {buildReleaseOrderLabel}  from "@/lib/playlist/label";
-import {FantiaMappingEntry}      from "@/types/fantia";
+import type {FantiaMappingEntry} from "@/types/fantia";
 import {Covers}                  from "@/types/mp3";
 import type {Mp3Entry}           from "@/types/mp3Entry";
 import {TrackMetaByPath}         from "@/types/trackMeta";
@@ -76,14 +76,8 @@ const normalizeText = (value: unknown): string | null => {
 export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
   const {mp3List, metaByPath, covers, mappingByPrefixId} = args;
 
-  // ここはただの計算。副作用（localStorage書き込み/乱数で順序変更など）は入れないのが安全。
-  const decorated = mp3List.map((item, originalIndex) => {
-    const key = item.id
-    return {item, key, originalIndex};
-  });
-
   return React.useMemo(() => {
-    return decorated.map(({item}, index) => {
+    return mp3List.map((item, index) => {
       const meta = metaByPath[item.path];
 
       const prefixId = extractPrefixIdFromPath(item.path);
@@ -106,8 +100,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const originalArtist = tagArtist ?? mappingOriginal;
 
       const dirPath = getDirname(item.path);
-      const coverUrl =
-        covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
+      const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
 
       return {
         item,
@@ -118,5 +111,5 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         coverUrl,
       };
     });
-  }, [decorated, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
+  }, [mp3List, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
 };

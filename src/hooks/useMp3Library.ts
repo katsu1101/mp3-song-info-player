@@ -64,9 +64,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     revokeAll(); // ✅ ここに集約
   }, [revokeAll]);
 
-  // TODO(整理A-1): coverUrlByPathRef を削るなら、このuseEffectごと消す
-  // useEffect(() => { coverUrlByPathRef.current = coverUrlByPath; }, [coverUrlByPath]);
-
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
     setFolderName(handle.name);
 
@@ -89,7 +86,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
           album: "",
           trackNo: null,
           year: null,
-          coverUrl: null,
         };
       }
       return next;
@@ -169,9 +165,10 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
       return;
     }
 
+    resetView(); // ✅ 追加（ただし folderName も一旦消える）
     await buildList(savedHandle);
     setNeedsReconnect(false);
-  }, [buildList, savedHandle]);
+  }, [buildList, savedHandle, resetView]);
 
   const forget = useCallback(async () => {
     await clearDirectoryHandle();

@@ -29,7 +29,6 @@ export default function Page(): JSX.Element {
 
   const {mp3List, covers, settingState, settingActions} = useMp3Library({
     shuffle: settings.playback.shuffle,
-    // priorityPaths, // ← hook側I/Fを `priorityPaths?: string[]` にしているならこれ
   });
 
   // ===== 表示用（trackViews）=====
@@ -40,7 +39,6 @@ export default function Page(): JSX.Element {
     covers,
     mappingByPrefixId,
   });
-
 
   // ===== Playlist（連続再生アクション）=====
   const playlist = usePlaylistPlayer({

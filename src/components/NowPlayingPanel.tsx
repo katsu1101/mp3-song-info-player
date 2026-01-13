@@ -71,6 +71,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     if (!nowPlayingID) return null;
     return trackViews.find((t) => t.item.id === nowPlayingID) ?? null;
   }, [nowPlayingID, trackViews]);
+  // TODO
 
   const title = nowTrackView?.displayTitle ?? "";
 
