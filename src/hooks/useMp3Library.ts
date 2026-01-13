@@ -47,10 +47,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   // ✅ dirCover だけ動かす
   const [dirCoverUrlByDir, setDirCoverUrlByDir] = useState<Record<string, string | null>>({});
   const [coverUrlByPath, setCoverUrlByPath] = useState<Record<string, string | null>>({});
-  const coverUrlByPathRef = useRef<Record<string, string | null>>({});
-  useEffect(() => {
-    coverUrlByPathRef.current = coverUrlByPath;
-  }, [coverUrlByPath]);
 
 
   // ✅ 後追いキャンセル用（フォルダ切替で止める）
@@ -115,7 +111,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
       track,
       setMetaByPath,
       setCoverUrlByPath,
-      coverUrlByPathRef, // 既存挙動維持のため（第三弾で削除可能）
     });
   }, [shuffle, track]);
 
