@@ -3,18 +3,17 @@
 
 import {useObjectUrlPool}                                               from "@/hooks/useObjectUrlPool";
 import {clearDirectoryHandle, loadDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
-import {findFirstImageFileHandle}                                       from "@/lib/fsAccess/findFirstImageFileHandle";
 import {canReadNow, ensureDirectoryPicker, requestRead}                 from "@/lib/fsAccess/permission";
-import {resolveDirectoryHandle}                                         from "@/lib/fsAccess/resolveDirectoryHandle";
 import {readMp3FromDirectory}                                           from "@/lib/fsAccess/scanMp3";
-import {readMp3Meta}                                                    from "@/lib/mp3/readMp3Meta";
-import {getDirname}                                                     from "@/lib/path/getDirname";
+import {startDirCoverWorker}                                            from "@/lib/mp3/workers/startDirCoverWorker";
+import {startMetaWorker}                                                from "@/lib/mp3/workers/startMetaWorker";
 import {shuffleArray}                                                   from "@/lib/shuffle";
 import type {Covers}                                                    from "@/types/mp3";
 import type {Mp3Entry}                                                  from "@/types/mp3Entry";
 import {SettingActions, SettingState}                                   from "@/types/setting";
 import type {TrackMetaByPath}                                           from "@/types/trackMeta";
 import {useCallback, useEffect, useMemo, useRef, useState}              from "react";
+
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;
@@ -72,111 +71,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   // TODO(整理A-1): coverUrlByPathRef を削るなら、このuseEffectごと消す
   // useEffect(() => { coverUrlByPathRef.current = coverUrlByPath; }, [coverUrlByPath]);
 
-  // ✅ startDirCoverWorker 内の二重 set を1回にする
-  const startDirCoverWorker = useCallback(async (
-    rootHandle: FileSystemDirectoryHandle,
-    items: readonly Mp3Entry[]
-  ) => {
-    const myRunId = ++dirCoverRunIdRef.current;
-
-    // 対象フォルダを抽出（"" はルート扱い）
-    const dirPaths = Array.from(new Set(items.map((x) => getDirname(x.path))));
-
-    // 先に null で埋める（UI都合で undefined を避けたい場合）
-    setDirCoverUrlByDir(() => {
-      const next: Record<string, string | null> = {};
-      for (const dirPath of dirPaths) next[dirPath] = null;
-      return next;
-    });
-
-    // 軽くするため同時2本くらい
-    const concurrency = 2;
-    let cursor = 0;
-
-    const runOne = async () => {
-      while (cursor < dirPaths.length) {
-        if (dirCoverRunIdRef.current !== myRunId) return;
-
-        const dirPath = dirPaths[cursor++]!;
-        try {
-          const dirHandle = await resolveDirectoryHandle(rootHandle, dirPath);
-          const imgHandle = await findFirstImageFileHandle(dirHandle);
-          if (!imgHandle) continue;
-
-          const file = await imgHandle.getFile();
-          const url = URL.createObjectURL(file);
-          track(url);
-
-          setDirCoverUrlByDir((prev) => {
-            if (prev[dirPath] === url) return prev;
-            return {...prev, [dirPath]: url};
-          });
-        } catch {
-          // フォルダが消えた/権限/読み取り失敗は無視（フォールバック無しになるだけ）
-        }
-
-        // UIが固まりにくいように息継ぎ
-        await new Promise<void>((r) => setTimeout(r, 0));
-      }
-    };
-
-    await Promise.all(Array.from({length: concurrency}, () => runOne()));
-  }, [track]);
-
-  const startMetaWorker = useCallback(async (items: readonly Mp3Entry[]) => {
-    const createCoverObjectUrlFromPicture = (
-      picture?: { data: Uint8Array; format: string }
-    ): string | null => {
-      if (!picture) return null;
-
-      const copied = new Uint8Array(picture.data);
-      const blob = new Blob([copied], {type: picture.format});
-      const url = URL.createObjectURL(blob);
-      track(url);
-      return url;
-    };
-    const myRunId = ++metaRunIdRef.current;
-
-    for (const entry of items) {
-      if (metaRunIdRef.current !== myRunId) return;
-
-      try {
-        const file = await entry.fileHandle.getFile();
-
-        // ✅ 文字化け修復込み（native優先 + SJIS修復）
-        const meta = await readMp3Meta(file);
-
-        // ✅ すでに cover があるなら二重生成しない（objectURLを無駄に作らない）
-        const alreadyCover = coverUrlByPathRef.current[entry.path];
-        const coverUrl = alreadyCover ?? createCoverObjectUrlFromPicture(meta.picture);
-
-        // ✅ coverUrlByPath を更新（coverUrl が null なら入れない）
-        if (coverUrl && !alreadyCover) {
-          setCoverUrlByPath((prev) => ({...prev, [entry.path]: coverUrl}));
-        }
-
-        if (metaRunIdRef.current !== myRunId) return;
-
-        setMetaByPath((prev) => ({
-          ...prev,
-          [entry.path]: {
-            title: meta.title ?? entry.fileHandle.name,
-            artist: meta.artist ?? "",
-            album: meta.album ?? "",
-            trackNo: meta.trackNo ?? null,
-            year: meta.year ?? null,
-            coverUrl: coverUrl ?? null, // ✅ ここはどっちでもOK（tracks側がどこを参照するか次第）
-          },
-        }));
-      } catch {
-        // 失敗時はダミーのまま（OK）
-      }
-
-      await new Promise<void>((r) => setTimeout(r, 0));
-    }
-  }, [track]);
-
-
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
     setFolderName(handle.name);
 
@@ -206,11 +100,24 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     });
 
     // ✅ フォルダ代表画像だけ後追い開始
-    void startDirCoverWorker(handle, items);
+    void startDirCoverWorker({
+      rootHandle: handle,
+      items,
+      runIdRef: dirCoverRunIdRef,
+      track,
+      setDirCoverUrlByDir,
+    });
 
     // ✅ metaも後追い（1曲ずつ）
-    void startMetaWorker(items);
-  }, [shuffle, startDirCoverWorker, startMetaWorker]);
+    void startMetaWorker({
+      items,
+      runIdRef: metaRunIdRef,
+      track,
+      setMetaByPath,
+      setCoverUrlByPath,
+      coverUrlByPathRef, // 既存挙動維持のため（第三弾で削除可能）
+    });
+  }, [shuffle, track]);
 
   // 起動時に復元
   useEffect(() => {
