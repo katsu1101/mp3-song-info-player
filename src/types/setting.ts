@@ -31,11 +31,15 @@ export type SettingActions = {
   forget: () => Promise<void>;
 };
 
+export type TrackListViewMode = "list" | "grid";
+export type TrackGridSize = "sm" | "md" | "lg";
 /**
  * アプリケーションの設定を表し、UIおよび再生の好みが含まれます。
  */
 export type Settings = {
   ui: {
+    trackListViewMode: TrackListViewMode;
+    trackGridSize: TrackGridSize;
     showFilePath: boolean;
   };
   playback: {
@@ -59,6 +63,8 @@ export type Settings = {
  */
 export const defaultSettings: Settings = {
   ui: {
+    trackListViewMode: "list",
+    trackGridSize: "md",
     showFilePath: false,
   },
   playback: {

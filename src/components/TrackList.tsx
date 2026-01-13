@@ -1,141 +1,140 @@
 "use client";
 
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
+import {NowPlayingPulse}               from "@/components/NowPlayingPulse";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
-import {TrackRow}                      from "@/components/TrackRow";
 import {AppCommands}                   from "@/hooks/useAppCommands";
 import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
+import Image                           from "next/image";
 import React, {JSX, useEffect, useRef} from "react";
-import styles                          from "./TrackList.module.css";
+import styles                          from "./TrackList.module.scss";
 
-/**
- * トラックリストコンポーネントのプロパティを表します。
- */
 type TrackListProps = {
   trackViews: readonly TrackView[];
   nowPlayingID: number;
   isPlaying: boolean;
   state: SettingState;
-  commands: AppCommands
+  commands: AppCommands;
 };
 
-/**
- * トラックリストコンポーネントをレンダリングし、トラックの一覧を表示します。各トラックには、タイトル、アルバム、オリジナルアーティスト、ファイルパスなどの詳細情報が含まれます。
- * トラックを再生するためのインタラクティブな要素を備え、現在再生中のトラックをハイライト表示します。
- *
- * @param {TrackListProps} props - TrackList コンポーネントに渡されるプロパティ。
- * @param {Array} props.trackViews - 表示する各トラックの詳細を含むトラックビューオブジェクトの配列。
- * @param {Object} props.playActions - 特定のインデックスでトラックを再生するなど、再生アクション用の関数を格納したオブジェクト。
- * @param {string | null} props.nowPlayingID - 現在再生中のトラックのID。リスト内でハイライト表示するために使用されます。
- *
- * @return {JSX.Element} トラックの一覧とその詳細情報を表示するレンダリング済み TrackList コンポーネント。
- */
 export function TrackList(props: TrackListProps): JSX.Element {
   const {trackViews, nowPlayingID, isPlaying, state, commands} = props;
 
-  const nowRowRef = useRef<HTMLTableRowElement | null>(null);
+  const nowItemRef = useRef<HTMLButtonElement | null>(null);
 
   const getScrollBehavior = (): ScrollBehavior => {
-    // 省エネ設定の人は auto
     if (typeof window === "undefined") return "auto";
     return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
   };
 
   const {settings} = useSettings();
 
+  // 手動切替（設定）
+  const viewMode = settings.ui.trackListViewMode ?? "list"; // "details" | "tiles"
+  // const viewMode = "list"
   const showFilePath = settings.ui.showFilePath;
 
   useEffect(() => {
     if (!nowPlayingID) return;
-    const row = nowRowRef.current;
-    if (!row) return;
+    const el = nowItemRef.current;
+    if (!el) return;
 
-    row.scrollIntoView({
+    el.scrollIntoView({
       behavior: getScrollBehavior(),
       block: "nearest",
       inline: "nearest",
     });
   }, [nowPlayingID]);
 
-  return !state.folderName || state.needsReconnect ? (
-    <EmptyStateFolderActions
-      state={state}
-      commands={commands}
-    />
-  ) : trackViews.length === 0 ?
-    <>読み込み中</>
-    : (
-      <section>
-        <div
-          data-scroll="song-list"
-          style={{
-            maxWidth: "100%",
-            overflowX: showFilePath ? "auto" : "hidden",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              tableLayout: "fixed",
-            }}
-          >
-            <colgroup>
-              {[
-                <col key="action" style={{width: 32}}/>,
-                <col key="no" style={{width: 28}}/>,
-                <col key="art" style={{width: 28}}/>,
-                // ✅ ここが肝：曲名は width 指定しない（余りを全部吸う）
-                <col key="title"/>,
+  if (!state.folderName || state.needsReconnect) {
+    return <EmptyStateFolderActions state={state} commands={commands}/>;
+  }
+  if (trackViews.length === 0) return <>読み込み中</>;
 
-                // ✅ 右側は “狭い時は縮む / 広い時は広がりすぎない” clamp が強い
-                <col className={styles.colYm} key="ym"/>,
-                <col className={styles.colOrig} key="orig"/>,
+  return (
+    <section
+      className={styles.trackList}
+      data-view={viewMode}
+      data-grid-size={settings.ui.trackGridSize ?? "md"}
+      data-show-path={showFilePath ? "1" : "0"}
+      data-scroll="song-list"
+    >
+      {/* “ヘッダー行”も同じDOMで持てる（details時だけ見せる） */}
+      <div className={styles.headerRow} aria-hidden>
+        <div className={styles.colAction}/>
+        <div className={styles.colNo}>#</div>
+        <div className={styles.colArt}>🎨</div>
+        <div className={styles.colTitle}>曲名</div>
+        <div className={styles.colYm}>アルバム</div>
+        <div className={styles.colOrig}>原曲</div>
+        <div className={styles.colPath}>ファイル</div>
+      </div>
 
-                ...(showFilePath ? [<col key="path" style={{width: 260}}/>] : []),
-              ]}
-            </colgroup>
+      <ul className={styles.list} role="list">
+        {trackViews.map((t, index) => {
+          const isActive = nowPlayingID === t.item.id;
 
-            <thead>
-            <tr style={{borderBottom: "1px solid var(--list-border)"}}>
-              <th style={{...thStyle, textAlign: "right"}}></th>
-              <th style={thStyle}>#</th>
-              <th style={thStyle} aria-label="ジャケット"/>
-              <th style={thStyle}>曲名</th>
-              <th className={styles.colYm} style={thStyle}>アルバム</th>
-              <th className={styles.colOrig} style={thStyle}>原曲</th>
-              {showFilePath ? <th style={thStyle}>ファイル</th> : null}
-            </tr>
-            </thead>
+          return (
+            <li
+              key={t.item.id ?? index}
+              className={styles.item}
+              data-now-playing={isActive ? "1" : "0"}
+            >
+              <button
+                ref={isActive ? (node) => {
+                  nowItemRef.current = node;
+                } : undefined}
+                type="button"
+                className={styles.rowButton}
+                // aria-current={isActive ? "true" : undefined}
+                onClick={() => commands.playAtIndex(index)}
+              >
+                <span className={styles.colAction} aria-hidden>
+                  {isActive ? (isPlaying ? <NowPlayingPulse/> : "⏸") : "▶"}
+                </span>
 
-            <tbody>
-            {trackViews.map((t, index) =>
-              <TrackRow
-                key={index}
-                view={t}
-                index={index}
-                isActive={nowPlayingID === t.item.id}
-                isPlaying={isPlaying}
-                onPlay={commands.playAtIndex}
-              />)}
-            </tbody>
+                <span className={styles.colNo}>{index + 1}</span>
 
-          </table>
-        </div>
-      </section>
-    );
+                <span className={styles.colArt} aria-hidden>
+                  <span className={styles.artBox} aria-hidden>
+                    <span className={styles.artInner}>
+                      {t.coverUrl ? (
+                        <Image
+                          src={t.coverUrl}
+                          alt=""
+                          fill
+                          unoptimized
+                          style={{
+                            objectFit: "cover",
+                            objectPosition: "50% 0%", // ✅ 上を優先して切り取る
+                          }}
+                        />
+                      ) : (
+                        <span className={styles.noArt} aria-label="ジャケットなし" title="ジャケットなし">
+                          {t.orderLabel === "" ? t.originalArtist ?? t.displayTitle ?? "No" : t.orderLabel}
+                        </span>
+                      )}
+                    </span>
+                  </span>
+
+                </span>
+
+                <span className={styles.colTitle} title={t.displayTitle ?? ""}>
+                  {t.displayTitle ?? "（無題）"}
+                </span>
+
+                <span className={styles.colYm}>{t.orderLabel}</span>
+                <span className={styles.colOrig}>{t.originalArtist}</span>
+
+                <span className={styles.colPath} title={t.item.path ?? ""}>
+                  {t.item.path ?? "なし"}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 }
-
-/**
- * テーブルヘッダー（th）要素に適用されるスタイルを表します。
- * パディング、フォントサイズ、フォントウェイト、不透明度、テキスト配置、および空白処理に関するCSSプロパティを含みます。
- */
-const thStyle: React.CSSProperties = {
-  padding: "2px 6px",
-  fontSize: 11,
-  fontWeight: 800,
-  opacity: 0.85,
-  textAlign: "left",
-  whiteSpace: "nowrap",
-};

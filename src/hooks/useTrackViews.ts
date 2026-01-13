@@ -98,7 +98,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const albumOrderLabel =
         albumName ? (trackNo ? `${albumName} / ${toTwoDigits(trackNo)}` : albumName) : null;
 
-      const releaseOrderLabel = buildReleaseOrderLabel(mapping) ?? "年月不明";
+      const releaseOrderLabel = buildReleaseOrderLabel(mapping) ?? "";
       const orderLabel = albumOrderLabel ?? releaseOrderLabel;
 
       const tagArtist = normalizeText(meta?.artist);

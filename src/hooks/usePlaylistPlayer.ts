@@ -116,6 +116,10 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     await playAtIndex(index - 1);
   }, [playAtIndex, trackViews.length]);
 
+  const stop = useCallback(async (): Promise<void> => {
+    if (stopAndClear) stopAndClear()
+  }, [stopAndClear]);
+
   // audio ended → 次へ（連続再生ON時）
   useEffect(() => {
     const audio = audioRef.current;
@@ -156,17 +160,13 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         }
 
         // ✅ ソース無しなら「先頭を再生」(= 新フォルダ切替直後の自然動作)
-        if (trackViews.length > 0) void playAtIndex(0);
-
-        // ✅ currentSrc だけだと微妙な場合があるので src も見る
-        const hasSource = Boolean(audio.currentSrc || audio.src);
-
-        if (hasSource) {
-          if (audio.ended) audio.currentTime = 0;
-          void audio.play().catch(() => {
-          });
-          return;
+        if (!audio.src) {
+          void playAtIndex(0);
+          audio.load()
         }
+        // if (audio.ended) audio.currentTime = 0;
+        void audio.play().catch(() => {
+        });
 
         return;
       }
@@ -206,8 +206,9 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         playAtIndex,
         playNext,
         playPrev,
-      } as PlayActions,
+        stop
+      } as PlayActions
     }),
-    [playAtIndex, playNext, playPrev]
+    [playAtIndex, playNext, playPrev, stop]
   );
 };

@@ -1,0 +1,428 @@
+/* TrackList.module.scss */
+
+/* =========================
+   Base
+========================= */
+
+.trackList {
+  max-width: 100%;
+
+  /* 共通の土台 */
+  .list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ボタン共通 */
+  .rowButton {
+    width: 100%;
+    border: 1px solid var(--list-border);
+    background: var(--panel);
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .rowButton:focus-visible {
+    outline: none;
+  }
+}
+
+/* =========================
+   Artwork (shared)
+========================= */
+
+.artBox {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.artInner {
+  display: block; /* fillの親がinlineだと壊れるので固定 */
+  position: relative; /* fillの必須 */
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--list-chip-border);
+  background: var(--list-chip-bg);
+
+  /* Next/Image の img を確実に枠へフィット（縦長は上優先でトリミング） */
+  :global(img) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 50% 0 !important;
+    display: block;
+  }
+}
+
+/* =========================
+   list
+========================= */
+.trackList[data-view="list"] {
+  /* 列幅は変数で一元管理 */
+  --col-path: 260px; /* showPath=0で0にする */
+  --col-ym: clamp(80px, 9vw, 120px);
+  --col-orig: clamp(60px, 9vw, 100px);
+
+  /* grid骨格：ここは1箇所だけにする */
+  .headerRow,
+  .rowButton {
+    display: grid;
+    grid-template-columns:
+      32px
+      28px
+      28px
+      minmax(0, 1fr)
+      minmax(0, var(--col-ym))
+      minmax(0, var(--col-orig))
+      minmax(0, var(--col-path));
+    gap: 0;
+    align-items: center;
+    min-width: 0; /* ✅ grid内で縮められるように */
+  }
+
+  /* row */
+  .rowButton {
+    padding: 2px 6px;
+    min-height: 32px;
+    border-radius: 10px;
+    line-height: 1.1;
+  }
+
+  /* header */
+  .headerRow {
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 800;
+    opacity: 0.85;
+    border-bottom: 1px solid var(--list-border);
+  }
+
+  /* 文字列列：1行固定＋…（header含む） */
+  .colTitle,
+  .colYm,
+  .colOrig,
+  .colPath,
+  .headerRow > div {
+    min-width: 0;          /* ✅ これがないと縮まず突き抜ける */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* 各セルの縦余白を詰める */
+  .colAction,
+  .colNo,
+  .colArt,
+  .colTitle,
+  .colYm,
+  .colOrig,
+  .colPath {
+    padding-block: 0;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  /* 列ごとの文字寄せ */
+  .colNo {
+    text-align: right;
+    justify-self: end;
+  }
+  .colTitle,
+  .colYm,
+  .colOrig,
+  .colPath {
+    text-align: left;
+    //justify-self: start;
+  }
+
+  /* アイコン系 */
+  .colAction,
+  .colArt {
+    justify-self: center;
+  }
+
+  /* listのart列は縦中央 */
+  .colArt {
+    display: flex;
+    align-items: center;
+  }
+
+  /* listのサムネ */
+  .artBox {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* showPath=0 は “変数を0にする” + 要素を隠す */
+  &[data-show-path="0"] {
+    --col-path: 0px;
+    .colPath { display: none; }
+  }
+
+  /* 再生中 */
+  .item[data-now-playing="1"] .rowButton {
+    background: color-mix(in srgb, var(--panel) 92%, var(--sel-ring) 8%);
+    border-color: color-mix(in srgb, var(--list-border) 60%, var(--sel-ring) 40%);
+  }
+}
+
+
+
+/* =========================
+   Grid (tiles) + Size: sm/md/lg
+========================= */
+
+.trackList[data-view="grid"] {
+  /* ✅ 既定は md（= 旧sm相当） */
+  --grid-min: 140px;
+  --grid-gap: 6px;
+  --grid-pad: 4px;
+
+  --card-pad: 6px;
+  --card-radius: 12px;
+
+  --footer-h: 34px;
+  --action: 30px;
+
+  --no-fs: 11px;
+  --no-py: 1px;
+  --no-px: 4px;
+
+  --title-fs: 12px;
+  --title-w: 900;
+
+  /* ✅ sm: もっと小さく（密度重視） */
+  &[data-grid-size="sm"] {
+    --grid-min: 120px;
+    --grid-gap: 5px;
+    --grid-pad: 3px;
+
+    --card-pad: 5px;
+    --card-radius: 11px;
+
+    --footer-h: 32px;
+    --action: 28px;
+
+    --no-fs: 10px;
+    --no-py: 1px;
+    --no-px: 3px;
+
+    --title-fs: 11px;
+  }
+
+  /* ✅ md: 既定（上の値が md 扱い） */
+  &[data-grid-size="md"] {
+    /* no-op */
+  }
+
+  /* ✅ lg: 体感で大きい（差が出る） */
+  &[data-grid-size="lg"] {
+    --grid-min: 220px;
+    --grid-gap: 10px;
+    --grid-pad: 8px;
+
+    --card-pad: 10px;
+    --card-radius: 16px;
+
+    --footer-h: 44px;
+    --action: 38px;
+
+    --no-fs: 13px;
+    --no-py: 2px;
+    --no-px: 6px;
+
+    --title-fs: 14px;
+  }
+
+  .headerRow {
+    display: none;
+  }
+
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min), 1fr));
+    gap: var(--grid-gap);
+    padding: var(--grid-pad);
+  }
+
+  /* カード: 画像 + フッター（action / no / title） */
+  .rowButton {
+    display: grid;
+    grid-template-rows: auto var(--footer-h);
+    grid-template-columns: var(--action) auto 1fr;
+    grid-template-areas:
+      "art    art   art"
+      "action no    title";
+
+    gap: 0;
+    padding: var(--card-pad);
+    border-radius: var(--card-radius);
+    align-items: center;
+  }
+
+  /* grid で隠す列 */
+  .colYm,
+  .colOrig,
+  .colPath {
+    display: none;
+  }
+
+  /* 画像 */
+  .colArt {
+    grid-area: art;
+  }
+
+  /* 正方形サムネ */
+  .artBox {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+  }
+
+  /* 再生ボタン（下帯左） */
+  .colAction {
+    grid-area: action;
+    display: grid;
+    place-items: center;
+
+    width: var(--action);
+    height: var(--action);
+    border-radius: 999px;
+
+    border: 1px solid var(--list-border);
+    background: var(--panel);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+
+    line-height: 1;
+  }
+
+  /* No（タイトルの左） */
+  .colNo {
+    grid-area: no;
+    justify-self: start;
+    text-align: right;
+
+    padding: var(--no-py) var(--no-px);
+    border-radius: 999px;
+    border: 1px solid var(--list-border);
+    background: var(--panel);
+
+    font-size: var(--no-fs);
+    font-weight: 800;
+    line-height: 1.2;
+    opacity: 0.9;
+  }
+
+  /* タイトル */
+  .colTitle {
+    grid-area: title;
+
+    min-width: 0;
+    font-weight: var(--title-w);
+    font-size: var(--title-fs);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    text-align: left;
+  }
+
+  /* 再生中の視認性 */
+  .item[data-now-playing="1"] {
+    .colAction {
+      border-color: color-mix(in srgb, var(--list-border) 45%, var(--sel-ring) 55%);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--sel-ring) 35%, transparent);
+    }
+
+    .colTitle {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+
+/* =========================
+   Responsive adjustments
+========================= */
+
+/* 小さい幅で列を隠す（details限定） */
+@media (max-width: 430px) {
+  .trackList[data-view="list"] {
+    --col-orig: 0px;
+
+    .colOrig {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .trackList[data-view="list"] {
+    --col-ym: 0px;
+
+    .colYm {
+      display: none;
+    }
+  }
+}
+
+/* 任意：狭い幅では list を tiles化（表示密度重視） */
+@media (max-width: 720px) {
+  .trackList[data-view="list"] {
+    .headerRow {
+      display: none;
+    }
+
+    .list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 10px;
+      padding: 8px;
+    }
+
+    .rowButton {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 14px;
+      min-height: 36px;
+    }
+
+    .colArt {
+      display: block;
+    }
+
+    .artBox {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+    }
+
+    .colAction,
+    .colNo,
+    .colYm,
+    .colOrig,
+    .colPath {
+      display: none;
+    }
+
+    .colTitle {
+      font-weight: 900;
+    }
+  }
+}

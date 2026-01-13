@@ -34,7 +34,6 @@
     --list-border: rgba(0, 0, 0, 0.10);
     --list-border-soft: rgba(0, 0, 0, 0.06);
     --list-row-hover: rgba(0, 0, 0, 0.04);
-    --list-row-active: rgba(0, 0, 0, 0.06);
 
     --list-accent: rgba(0, 0, 0, 0.45);
 
@@ -42,8 +41,6 @@
     --list-chip-border: rgba(0, 0, 0, 0.12);
 
     --list-action-border: rgba(0, 0, 0, 0.18);
-    --list-action-border-active: rgba(0, 0, 0, 0.28);
-    --list-action-bg-active: rgba(0, 0, 0, 0.06);
 
     /* 選択アクセント（ライト） */
     --sel-fill: rgba(0, 0, 0, 0.06);
@@ -104,7 +101,6 @@
         --list-border: rgba(255, 255, 255, 0.10);
         --list-border-soft: rgba(255, 255, 255, 0.08);
         --list-row-hover: rgba(255, 255, 255, 0.04);
-        --list-row-active: rgba(255, 255, 255, 0.06);
 
         --list-accent: rgba(255, 255, 255, 0.65);
 
@@ -112,8 +108,6 @@
         --list-chip-border: rgba(255, 255, 255, 0.12);
 
         --list-action-border: rgba(255, 255, 255, 0.18);
-        --list-action-border-active: rgba(255, 255, 255, 0.40);
-        --list-action-bg-active: rgba(255, 255, 255, 0.10);
 
         /* 選択アクセント（ライト） */
         --sel-fill: rgba(255, 255, 255, 0.12);
@@ -190,14 +184,25 @@ body {
     background: transparent;
 }
 
-/* ✅ 選択行の“面”を作る */
-/* 選択行：面 + 輪郭（角丸なし、色バーなし） */
-[data-scroll="song-list"] tbody tr[aria-current="true"] td {
-    background: linear-gradient(90deg, var(--sel-fill) 30%, transparent 78%);
-    box-shadow: inset 0 0 0 2px var(--sel-ring);
+/* 1) マウスクリックで出る “変な枠” を消す（標準outlineを消す） */
+button:focus {
+    outline: none;
 }
 
-/* さらに少しだけ“浮く”感じ（外側は控えめ） */
-[data-scroll="song-list"] tbody tr[aria-current="true"] {
-    filter: saturate(1.2);
+/* 2) キーボード操作のときだけリングを出す（アクセシビリティ維持） */
+button:focus-visible {
+    outline: 2px solid var(--sel-ring);
+    outline-offset: 2px;
+}
+
+/* 3) ボタン内テキストの“選択/キャレット”を防ぐ */
+button {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+/* 4) ボタン内の子要素で cursor が変わらないように */
+button * {
+    cursor: inherit;
 }

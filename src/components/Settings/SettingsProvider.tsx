@@ -20,7 +20,8 @@ import React, {createContext, JSX, useContext, useEffect, useMemo, useReducer, u
 type Action =
   | { type: "replace"; settings: Settings }
   | { type: "set"; path: string; value: unknown }
-  | { type: "toggle"; path: string };
+  | { type: "toggle"; path: string }
+  | { type: "cycle"; path: string; values: readonly unknown[] };
 
 /**
  * 未知の型の文字列キーと値を持つレコードを表します。
@@ -212,6 +213,16 @@ const reducer = (state: Settings, action: Action): Settings => {
       if (typeof cur !== "boolean") return state;
       return setByPath(state, action.path, !cur);
     }
+    case "cycle": {
+      const cur = getByPath(state, action.path);
+      const values = action.values;
+      if (!Array.isArray(values) || values.length === 0) return state;
+
+      const curIndex = values.findIndex((v) => Object.is(v, cur));
+      const nextIndex = curIndex < 0 ? 0 : (curIndex + 1) % values.length;
+
+      return setByPath(state, action.path, values[nextIndex]);
+    }
     default:
       return state;
   }
@@ -235,7 +246,11 @@ const loadSettings = (): Settings => {
     const parsed = JSON.parse(raw) as Partial<Settings>;
 
     return {
-      ui: {showFilePath: parsed.ui?.showFilePath ?? defaultSettings.ui.showFilePath},
+      ui: {
+        trackListViewMode: parsed.ui?.trackListViewMode ?? defaultSettings.ui.trackListViewMode,
+        trackGridSize: parsed.ui?.trackGridSize ?? defaultSettings.ui.trackGridSize,
+        showFilePath: parsed.ui?.showFilePath ?? defaultSettings.ui.showFilePath,
+      },
       playback: {
         continuous: parsed.playback?.continuous ?? defaultSettings.playback.continuous,
         shuffle: parsed.playback?.shuffle ?? defaultSettings.playback.shuffle,
@@ -269,10 +284,8 @@ type SettingsContextValue = {
   settings: Settings;
   setSetting: (path: string, value: unknown) => void;
   toggleSetting: (path: string) => void;
-
-  toggleContinuous: () => void;
-  toggleShuffle: () => void;
-  toggleShowFilePath: () => void;
+  cycleSetting: (path: string, values: readonly unknown[]) => void;
+  // TODO: Pathを型安全にする（後で）
 };
 
 /**
@@ -307,18 +320,18 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export const SettingsProvider = ({children}: { children: React.ReactNode }): JSX.Element => {
   const [settings, dispatch] = useReducer(reducer, defaultSettings);
 
-  // ✅ 「ロード完了」フラグ（これが無いと defaultSettings が先に保存される）
-  const hasHydratedRef = useRef(false);
+  // ✅ 初回保存スキップ
+  const skipFirstSaveRef = useRef(true);
 
-  // 初回ロード
   useEffect(() => {
     dispatch({type: "replace", settings: loadSettings()});
-    hasHydratedRef.current = true;
   }, []);
 
-  // 変更保存（ロード完了後のみ）
   useEffect(() => {
-    if (!hasHydratedRef.current) return;
+    if (skipFirstSaveRef.current) {
+      skipFirstSaveRef.current = false;
+      return;
+    }
     saveSettings(settings);
   }, [settings]);
 
@@ -326,10 +339,7 @@ export const SettingsProvider = ({children}: { children: React.ReactNode }): JSX
     settings,
     setSetting: (path, value) => dispatch({type: "set", path, value}),
     toggleSetting: (path) => dispatch({type: "toggle", path}),
-
-    toggleContinuous: () => dispatch({type: "toggle", path: "playback.continuous"}),
-    toggleShuffle: () => dispatch({type: "toggle", path: "playback.shuffle"}),
-    toggleShowFilePath: () => dispatch({type: "toggle", path: "ui.showFilePath"}),
+    cycleSetting: (path, values) => dispatch({type: "cycle", path, values}),
   }), [settings]);
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

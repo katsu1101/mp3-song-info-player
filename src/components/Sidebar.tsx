@@ -1,8 +1,21 @@
-import {useSettings}  from "@/components/Settings/SettingsProvider";
-import {AppCommands}  from "@/hooks/useAppCommands";
-import {SettingState} from "@/types/setting";
+import {useSettings}                           from "@/components/Settings/SettingsProvider";
+import {SegmentedControl, ToggleControl}       from "@/components/ui";
+import {AppCommands}                           from "@/hooks/useAppCommands";
+import type {TrackGridSize, TrackListViewMode} from "@/types/setting";
+import {SettingState}                          from "@/types/setting";
+import {LayoutGrid, List}                      from "lucide-react";
+import React, {useCallback}                    from "react";
 
-import React from "react";
+export const trackListViewModeOptions = [
+  {value: "grid", label: "グリッド", icon: <LayoutGrid size={18} aria-hidden/>},
+  {value: "list", label: "リスト", icon: <List size={18} aria-hidden/>},
+] as const satisfies readonly { value: TrackListViewMode; label: string, icon: React.ReactNode }[];
+
+export const trackGridSizeOptions = [
+  {value: "sm", label: "小", icon: <>小</>},   // 小さめグリッドの雰囲気
+  {value: "md", label: "中", icon: <>中</>}, // 中
+  {value: "lg", label: "大", icon: <>大</>}, // 大（サイズ差で表現）
+] as const satisfies readonly { value: TrackGridSize; label: string, icon: React.ReactNode }[];
 
 type SidebarMenuProps = {
   state: SettingState
@@ -10,11 +23,25 @@ type SidebarMenuProps = {
 };
 
 export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Element {
-  const {settings, toggleShowFilePath, toggleContinuous, toggleShuffle} = useSettings();
+  const {settings, toggleSetting, setSetting} = useSettings();
 
-  const showFilePath = settings.ui.showFilePath;
-  const isContinuous = settings.playback.continuous;
-  const isShuffle = settings.playback.shuffle;
+  const toggleContinuous = () => toggleSetting("playback.continuous");
+  const toggleShuffle = () => {
+    commands.stopPlayback(); // シャッフル状態変更時に再生中トラックをリセット
+    toggleSetting("playback.shuffle");
+  }
+
+  const setTrackListViewMode = useCallback(
+    (next: TrackListViewMode) => setSetting("ui.trackListViewMode", next),
+    [setSetting]
+  );
+  const setTrackGridSize = useCallback(
+    (next: TrackGridSize) => {
+      setSetting("ui.trackGridSize", next);
+      setSetting("ui.trackListViewMode", "grid");
+    },
+    [setSetting]
+  );
 
   const handleForget = (): void => {
     const ok = window.confirm("保存しているフォルダの記憶を消します。よろしいですか？");
@@ -33,23 +60,50 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
       ) : null}
 
       <SectionTitle>再生</SectionTitle>
-      <ToggleRow
-        label="連続再生"
-        checked={isContinuous}
-        onChange={toggleContinuous}
-      />
-      <ToggleRow
-        label="シャッフル"
-        checked={isShuffle}
-        onChange={toggleShuffle}
-      />
+      <div className="flex items-center justify-between gap-3 px-1">
+        <span className="text-sm opacity-90">連続再生</span>
+        <ToggleControl
+          ariaLabel="連続再生"
+          checked={settings.playback.continuous}
+          onChangeAction={toggleContinuous}
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 px-1">
+        <span className="text-sm opacity-90">シャッフル</span>
+        <ToggleControl
+          ariaLabel="シャッフル"
+          checked={settings.playback.shuffle}
+          onChangeAction={toggleShuffle}
+        />
+      </div>
+
 
       <SectionTitle>表示</SectionTitle>
-      <ToggleRow
-        label="file名"
-        checked={showFilePath}
-        onChange={toggleShowFilePath}
+      <SegmentedControl
+        iconOnly
+        label="モード"
+        value={settings.ui.trackListViewMode}
+        options={trackListViewModeOptions}
+        onChangeAction={(next) => setTrackListViewMode(next)}
       />
+      <SegmentedControl
+        iconOnly
+        label="サイズ"
+        value={settings.ui.trackGridSize}
+        options={trackGridSizeOptions}
+        onChangeAction={(next) => setTrackGridSize(next)}
+      />
+
+
+      {/*<div className="flex items-center justify-between gap-3 px-1">*/}
+      {/*  <span className="text-sm opacity-90">file名</span>*/}
+      {/*  <ToggleControl*/}
+      {/*    ariaLabel="file名"*/}
+      {/*    checked={settings.ui.showFilePath}*/}
+      {/*    onChange={toggleShowFilePath}*/}
+      {/*  />*/}
+      {/*</div>*/}
 
       {state.savedHandle ? (
         <>
@@ -59,66 +113,20 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
           </SideButton>
         </>
       ) : null}
-      <SectionTitle>ライブラリ</SectionTitle>
-      <SideButton>すべて</SideButton>
-      <SideButton>対応表あり</SideButton>
-      <SideButton>対応表なし</SideButton>
+      {/*<SectionTitle>ライブラリ</SectionTitle>*/}
+      {/*<SideButton>すべて</SideButton>*/}
+      {/*<SideButton>対応表あり</SideButton>*/}
+      {/*<SideButton>対応表なし</SideButton>*/}
 
-      <SectionTitle>ソート</SectionTitle>
-      <SideButton>Fantia順</SideButton>
-      <SideButton>ファイル名順</SideButton>
+      {/*<SectionTitle>ソート</SectionTitle>*/}
+      {/*<SideButton>Fantia順</SideButton>*/}
+      {/*<SideButton>ファイル名順</SideButton>*/}
     </div>
   );
 }
 
 function SectionTitle({children}: { children: React.ReactNode }): React.JSX.Element {
   return <div className="text-sm font-extrabold opacity-90">{children}</div>;
-}
-
-function ToggleRow(props: {
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}): React.JSX.Element {
-  return (
-    <label className="flex items-center justify-between gap-3 px-1 select-none cursor-pointer">
-      <span className="text-sm opacity-90 whitespace-nowrap">{props.label}</span>
-
-      <span
-        style={{
-          position: "relative",
-          width: 44,
-          height: 24,
-          borderRadius: 999,
-          border: "1px solid var(--toggle-border)",
-          background: props.checked ? "var(--toggle-track-on)" : "var(--toggle-track-off)",
-          transition: "background 120ms ease",
-          flex: "0 0 auto",
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={props.checked}
-          onChange={props.onChange}
-          style={{position: "absolute", inset: 0, opacity: 0, cursor: "pointer"}}
-          aria-label={`${props.label} の切り替え`}
-        />
-        <span
-          style={{
-            position: "absolute",
-            top: 3,
-            left: props.checked ? 22 : 3,
-            width: 18,
-            height: 18,
-            borderRadius: 999,
-            background: "var(--toggle-knob)",
-            boxShadow: `0 2px 8px var(--toggle-knob-shadow)`,
-            transition: "left 120ms ease",
-          }}
-        />
-      </span>
-    </label>
-  );
 }
 
 function SideButton(
