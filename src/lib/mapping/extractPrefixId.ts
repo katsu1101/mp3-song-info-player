@@ -1,3 +1,5 @@
+// src/lib/mapping/extractPrefixId.ts
+
 /**
  * 指定されたファイルパスから8文字の16進数プレフィックスIDを抽出します。
  *

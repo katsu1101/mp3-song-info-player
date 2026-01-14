@@ -1,9 +1,8 @@
-import {getBasename}             from "@/components/NowPlayingPanel";
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import {getDirname}              from "@/lib/path/getDirname";
 import {buildReleaseOrderLabel}  from "@/lib/playlist/label";
+import {Covers}                  from "@/types";
 import type {FantiaMappingEntry} from "@/types/fantia";
-import {Covers}                  from "@/types/mp3";
 import type {Mp3Entry}           from "@/types/mp3Entry";
 import {TrackMetaByPath}         from "@/types/trackMeta";
 import {TrackView}               from "@/types/views";
@@ -81,10 +80,26 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const meta = metaByPath[item.path];
 
       const prefixId = extractPrefixIdFromPath(item.path);
+      const fantiaEntry = prefixId ? (mappingByPrefixId.get(prefixId) ?? null) : null;
+
+      const displayTitle =
+        pickText(meta?.title, fantiaEntry?.title, item.fileHandle.name) ?? item.fileHandle.name;
+
+      const displayArtist =
+        pickText(meta?.artist) ?? ""; // ← Fantia originalArtist は混ぜない方針
+
+      const displayAlbumTitle =
+        pickText(meta?.album); // Fantia releaseYm を album に混ぜない
+
+      // 任意: 表示用の補助情報（欲しくなったらUIに出す用）
+      const displaySub =
+        pickText(
+          fantiaEntry?.releaseYm ? `Fantia ${fantiaEntry.releaseYm}` : null,
+          fantiaEntry?.originalArtist ? `原曲: ${fantiaEntry.originalArtist}` : null,
+        );
+
       const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
 
-      const filename = getBasename(item.path);
-      const displayTitle = mapping?.title ?? meta?.title ?? filename;
 
       const albumName = meta?.album ?? null;
       const trackNo = meta?.trackNo ?? null;
@@ -105,6 +120,12 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       return {
         item,
         index,
+        display: {
+          title: displayTitle,
+          artist: displayArtist,
+          albumTitle: displayAlbumTitle,
+          sub: displaySub, // TODO: UIに出したくなったら
+        },
         displayTitle,
         orderLabel,
         originalArtist,
@@ -112,4 +133,12 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       };
     });
   }, [mp3List, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
+};
+
+const pickText = (...candidates: Array<string | null | undefined>): string | null => {
+  for (const c of candidates) {
+    const v = typeof c === "string" ? c.trim() : "";
+    if (v.length > 0) return v;
+  }
+  return null;
 };

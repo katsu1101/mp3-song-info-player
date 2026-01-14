@@ -1,12 +1,13 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
-import {readMp3FromDirectory}          from "@/lib/fsAccess/scanMp3";
-import {startDirCoverWorker}           from "@/lib/mp3/workers/startDirCoverWorker";
-import {startMetaWorker}               from "@/lib/mp3/workers/startMetaWorker";
-import {shuffleArray}                  from "@/lib/shuffle";
-import type {Mp3Entry}                 from "@/types/mp3Entry";
-import type {TrackMetaByPath}          from "@/types/trackMeta";
-import type {Dispatch, SetStateAction} from "react";
+import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
+import {startDirCoverWorker}      from "@/lib/mp3/workers/startDirCoverWorker";
+import {startMetaWorker}          from "@/lib/mp3/workers/startMetaWorker";
+import {shuffleArray}             from "@/lib/shuffle";
+import type {Mp3Entry}            from "@/types/mp3Entry";
+import type {TrackMetaByPath}     from "@/types/trackMeta";
+import {Dispatch, SetStateAction} from "react";
+
 
 type RunIdRef = { current: number };
 
@@ -33,6 +34,8 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
   const next: TrackMetaByPath = {};
   for (const e of items) {
     next[e.path] = {
+      albumArtist: null,
+      picture: null,
       title: e.fileHandle.name,
       artist: "",
       album: "",

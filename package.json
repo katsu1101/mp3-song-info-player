@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "cross-env NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/mp3-song-info-editor next build",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "pnpm tsc --noEmit"
   },
   "dependencies": {
     "cross-env": "^7.0.3",

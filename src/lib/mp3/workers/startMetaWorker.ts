@@ -1,5 +1,6 @@
 // src/lib/mp3/workers/startMetaWorker.ts
 
+import {normalizeMp3Tag}      from "@/lib/mp3/normalizeMp3Tag";
 import {readMp3Meta}          from "@/lib/mp3/readMp3Meta";
 import type {Mp3Entry}        from "@/types/mp3Entry";
 import type {TrackMetaByPath} from "@/types/trackMeta";
@@ -16,6 +17,7 @@ type Args = {
 
   setMetaByPath: React.Dispatch<React.SetStateAction<TrackMetaByPath>>;
   setCoverUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
+
 };
 
 const yieldToBrowser = async (): Promise<void> => {
@@ -41,9 +43,10 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
 
     try {
       const file = await entry.fileHandle.getFile();
-      const meta = await readMp3Meta(file);
+      const rawMeta = await readMp3Meta(file);
+      const tag = normalizeMp3Tag(rawMeta);
 
-      const createdCoverUrl = createCoverUrl(track, meta.picture);
+      const createdCoverUrl = createCoverUrl(track, rawMeta.picture);
 
       if (runIdRef.current !== myRunId) return;
 
@@ -55,15 +58,10 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
         });
       }
 
-      setMetaByPath((prev) => ({
-        ...prev,
-        [entry.path]: {
-          title: meta.title ?? entry.fileHandle.name,
-          artist: meta.artist ?? "",
-          album: meta.album ?? "",
-          trackNo: meta.trackNo ?? null,
-          year: meta.year ?? null,
-        },
+      // ここは既存のまま setMetaByPath を使ってOK（型だけMp3Tagになっている）
+      setMetaByPath((previous) => ({
+        ...previous,
+        [entry.path]: tag,
       }));
     } catch {
       // ignore

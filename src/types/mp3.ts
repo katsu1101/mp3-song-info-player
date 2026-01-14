@@ -1,13 +1,19 @@
-/**
- * パスやディレクトリにマッピングされたカバーURLを管理するための構造体を表します。
- */
-export type Covers = {
-  coverUrlByPath: Record<string, string | null>;
-  dirCoverUrlByDir: Record<string, string | null>;
-}
+// src/types/mp3.ts
+export type EmbeddedPicture = { data: Uint8Array; format: string };
+
+export type Mp3Tag = {
+  title: string | null;
+  artist: string | null;
+  album: string | null;
+  albumArtist: string | null;
+  trackNo: number | null;
+  year: number | null;
+  picture: EmbeddedPicture | null;
+};
 
 /**
- * MP3ファイルのメタデータ情報を表します。
+ * 旧互換。将来的に Mp3Tag へ統一するため廃止予定。
+ * @deprecated Use Mp3Tag instead.
  */
 export type Mp3Meta = {
   title?: string;
@@ -16,5 +22,5 @@ export type Mp3Meta = {
   trackNo?: number;
   year?: number;
   picture?: { data: Uint8Array; format: string };
-  coverUrl?: string; // 互換用
+  coverUrl?: string;
 };

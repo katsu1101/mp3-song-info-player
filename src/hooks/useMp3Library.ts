@@ -6,7 +6,8 @@ import {useObjectUrlPool}                                       from "@/hooks/us
 import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
 import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
-import type {Covers}                                            from "@/types/mp3";
+import type {Covers}                                            from "@/types/covers";
+import type {FantiaMappingEntry}                                from "@/types/fantia";
 import type {Mp3Entry}                                          from "@/types/mp3Entry";
 import {SettingActions}                                         from "@/types/setting";
 import type {TrackMetaByPath}                                   from "@/types/trackMeta";
@@ -21,6 +22,7 @@ type UseMp3LibraryOptions = {
  * - meta/covers/dirCover は全て空（UIを壊さないためのダミー）
  */
 export const useMp3Library = (options: UseMp3LibraryOptions) => {
+
   const {shuffle} = options;
   // ===== external hooks =====
   const {track, revokeAll} = useObjectUrlPool();
@@ -45,6 +47,10 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
   const [dirCoverUrlByDir, setDirCoverUrlByDir] = useState<Record<string, string | null>>({});
   const dirCoverRunIdRef = useRef(0);
 
+  // ===== Fantia mapping (progressive) =====
+  const [fantiaEntryByPath, setFantiaEntryByPath] =
+    useState<Record<string, FantiaMappingEntry | null>>({});
+
   // ===== internal utilities =====
   const resetView = useCallback(() => {
     // cancel progressive workers
@@ -61,6 +67,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     setMetaByPath({});
     setCoverUrlByPath({});
     setDirCoverUrlByDir({});
+    setFantiaEntryByPath({});
 
     // revoke object URLs
     revokeAll();
@@ -151,5 +158,5 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     forget,
   };
 
-  return {mp3List, covers, settingState, settingActions};
+  return {mp3List, covers, settingState, settingActions, fantiaEntryByPath};
 };
