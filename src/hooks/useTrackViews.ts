@@ -83,13 +83,18 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const fantiaEntry = prefixId ? (mappingByPrefixId.get(prefixId) ?? null) : null;
 
       const displayTitle =
-        pickText(meta?.title, fantiaEntry?.title, item.fileHandle.name) ?? item.fileHandle.name;
+        fantiaEntry?.title?.trim()
+        || meta?.title?.trim()
+        || item.fileHandle.name;
 
       const displayArtist =
-        pickText(meta?.artist) ?? ""; // ← Fantia originalArtist は混ぜない方針
+        fantiaEntry?.originalArtist?.trim()
+        || meta?.artist?.trim()
+        || "";
 
       const displayAlbumTitle =
-        pickText(meta?.album); // Fantia releaseYm を album に混ぜない
+        fantiaEntry?.releaseYm?.trim()
+        || pickText(meta?.album); // Fantia releaseYm を album に混ぜない
 
       // 任意: 表示用の補助情報（欲しくなったらUIに出す用）
       const displaySub =
