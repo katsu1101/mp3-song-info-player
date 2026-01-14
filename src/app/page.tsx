@@ -64,12 +64,13 @@ export default function Page(): JSX.Element {
           folderName={settingState.folderName}
         />
       }
-      sidebar={
+      sidebar={({closeSidebar}) => (
         <SidebarStub
           state={settingState}
           commands={commands}
+          closeSidebar={closeSidebar}
         />
-      }
+      )}
       main={
         <>
           {settingState.errorMessage ? (

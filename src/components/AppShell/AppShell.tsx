@@ -17,7 +17,7 @@ export type PlayerVariant = "mini" | "full" | "full2";
  */
 type AppShellProps = {
   header: React.ReactNode;
-  sidebar: React.ReactNode;
+  sidebar: (api: { closeSidebar: () => void }) => React.ReactNode;
   main: React.ReactNode;
 
   // 追加：プレイヤーを「ミニ/フル」で描画し分ける
@@ -131,7 +131,7 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
             </button>
           </div>
 
-          {sidebar}
+          {sidebar({closeSidebar: closeSidebar})}
         </aside>
 
         <main className={`${styles.scrollPane} ${styles.mainPane} scrollbar`}>

@@ -20,10 +20,21 @@ export const trackGridSizeOptions = [
 type SidebarMenuProps = {
   state: SettingState
   commands: AppCommands;
+  closeSidebar: () => void;
 };
 
-export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Element {
+export function SidebarStub({state, commands, closeSidebar}: SidebarMenuProps): React.JSX.Element {
   const {settings, toggleSetting, setSetting} = useSettings();
+
+  // 追加：実行後に閉じるラッパー（PromiseでもOK）
+  const runAndClose = useCallback(
+    async (action?: () => void | Promise<void>) => {
+      if (!action) return;
+      await action();
+      closeSidebar();
+    },
+    [closeSidebar]
+  );
 
   const toggleContinuous = () => toggleSetting("playback.continuous");
   const toggleShuffle = () => {
@@ -47,14 +58,15 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
     const ok = window.confirm("保存しているフォルダの記憶を消します。よろしいですか？");
     if (!ok) return;
     void commands.forget();
+    closeSidebar();
   };
 
   return (
     <div className="grid gap-4">
-      <SideButton onClick={commands.pickFolder}>フォルダを選ぶ</SideButton>
+      <SideButton onClick={() => void runAndClose(commands.pickFolder)}>フォルダを選ぶ</SideButton>
 
       {state.savedHandle && state.needsReconnect ? (
-        <SideButton onClick={commands.reconnect} variant="ghost">
+        <SideButton onClick={() => void runAndClose(commands.reconnect)} variant="ghost">
           再接続
         </SideButton>
       ) : null}
@@ -65,7 +77,10 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
         <ToggleControl
           ariaLabel="連続再生"
           checked={settings.playback.continuous}
-          onChangeAction={toggleContinuous}
+          onChangeAction={() => {
+            toggleContinuous();
+            closeSidebar();
+          }}
         />
       </div>
 
@@ -74,7 +89,10 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
         <ToggleControl
           ariaLabel="シャッフル"
           checked={settings.playback.shuffle}
-          onChangeAction={toggleShuffle}
+          onChangeAction={() => {
+            toggleShuffle();
+            closeSidebar();
+          }}
         />
       </div>
 
@@ -85,14 +103,20 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
         label="モード"
         value={settings.ui.trackListViewMode}
         options={trackListViewModeOptions}
-        onChangeAction={(next) => setTrackListViewMode(next)}
+        onChangeAction={(next) => {
+          setTrackListViewMode(next);
+          closeSidebar();
+        }}
       />
       <SegmentedControl
         iconOnly
         label="サイズ"
         value={settings.ui.trackGridSize}
         options={trackGridSizeOptions}
-        onChangeAction={(next) => setTrackGridSize(next)}
+        onChangeAction={(next) => {
+          setTrackGridSize(next);
+          closeSidebar();
+        }}
       />
 
 
@@ -108,7 +132,7 @@ export function SidebarStub({state, commands}: SidebarMenuProps): React.JSX.Elem
       {state.savedHandle ? (
         <>
           <SectionTitle>危険操作</SectionTitle>
-          <SideButton onClick={handleForget} variant="danger">
+          <SideButton onClick={() => void handleForget()} variant="danger">
             記憶を消す
           </SideButton>
         </>
