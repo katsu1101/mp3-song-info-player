@@ -66,15 +66,12 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
 
   // ===== internal utilities =====
   const resetView = useCallback(() => {
-    // cancel progressive workers
     dirCoverRunIdRef.current += 1;
     metaRunIdRef.current += 1;
 
-    // reset UI + data
     setErrorMessage("");
     setFolderName("");
-    setNeedsReconnect(false); // ※必要ならここで（今は各action側でもOK）
-    setSavedHandle(null);     // ※forget以外では入れないなら外す
+    setNeedsReconnect(false);
 
     setMp3List([]);
     setMetaByPath({});
@@ -82,9 +79,9 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
     setDirCoverUrlByDir({});
     setFantiaEntryByPath({});
 
-    // revoke object URLs
     revokeAll();
   }, [revokeAll]);
+
 
   // ===== core build =====
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
@@ -177,10 +174,9 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
 
     return buildDirAlbums({
       mp3List,
-      folderName,
       dirCoverUrlByDir: covers.dirCoverUrlByDir,
     });
-  }, [mp3List, folderName, covers.dirCoverUrlByDir]);
+  }, [mp3List, covers.dirCoverUrlByDir]);
 
 
   return {

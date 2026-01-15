@@ -1,16 +1,16 @@
+// src/components/TrackList/TrackList.tsx
 "use client";
 
-import {ArtworkSquare}                          from "@/components/Artwork/ArtworkSquare";
-import {EmptyStateFolderActions}                from "@/components/EmptyStateFolderActions";
-import {useSettings}                            from "@/components/Settings/SettingsProvider";
-import {TrackRow}                               from "@/components/TrackRow/TrackRow";
-import {AppCommands}                            from "@/hooks/useAppCommands";
-import {type AlbumTrackRow, sortAlbumTracks}    from "@/lib/mp3/album/sortAlbumTracks";
-import {DirAlbumView}                           from "@/types/albumView";
-import {SettingState}                           from "@/types/setting";
-import {TrackView}                              from "@/types/views";
-import React, {JSX, useEffect, useMemo, useRef} from "react";
-import styles                                   from "./TrackList.module.scss";
+import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare";
+import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
+import {useSettings}                   from "@/components/Settings/SettingsProvider";
+import {TrackRow}                      from "@/components/TrackRow/TrackRow";
+import {AppCommands}                   from "@/hooks/useAppCommands";
+import {DirAlbumView}                  from "@/types/albumView";
+import {SettingState}                  from "@/types/setting";
+import {TrackView}                     from "@/types/views";
+import React, {JSX, useEffect, useRef} from "react";
+import styles                          from "./TrackList.module.scss";
 
 type TrackListProps = {
   trackViews: readonly TrackView[];
@@ -41,7 +41,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
   const showFilePath = settings.ui.showFilePath;
 
   useEffect(() => {
-    if (!nowPlayingID) return;
+    if (nowPlayingID == null) return; // 0を許す
     const el = nowItemRef.current;
     if (!el) return;
 
@@ -53,27 +53,27 @@ export function TrackList(props: TrackListProps): JSX.Element {
   }, [nowPlayingID]);
 
   // ✅ TrackList側で「確実に」ソートした albums を作る（最小で安全）
-  const sortedAlbums = useMemo<readonly DirAlbumView[]>(() => {
-    if (!shouldShowAlbums || !albums) return [];
-
-    const next: DirAlbumView[] = albums.map((album: DirAlbumView) => {
-      const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
-      return {
-        ...album,
-        tracks: sortedTracks,
-        trackCount: sortedTracks.length,
-      };
-    });
-
-    next.sort((a, b) => a.title.localeCompare(b.title, "ja"));
-    return next;
-  }, [shouldShowAlbums, albums]);
+  // const sortedAlbums = useMemo<readonly DirAlbumView[]>(() => {
+  //   if (!shouldShowAlbums || !albums) return [];
+  //
+  //   const next: DirAlbumView[] = albums.map((album: DirAlbumView) => {
+  //     const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
+  //     return {
+  //       ...album,
+  //       tracks: sortedTracks,
+  //       trackCount: sortedTracks.length,
+  //     };
+  //   });
+  //
+  //   next.sort((a, b) => a.title.localeCompare(b.title, "ja"));
+  //   return next;
+  // }, [shouldShowAlbums, albums]);
 
 
   if (!state.folderName || state.needsReconnect) {
     return <EmptyStateFolderActions state={state} commands={commands}/>;
   }
-  if (trackViews.length === 0) return <>読み込み中</>;
+  if (!shouldShowAlbums && trackViews.length === 0) return <>読み込み中</>;
 
   return (
     <section
@@ -96,7 +96,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
       <ul className={styles.list} role="list">
         {shouldShowAlbums ? (
-          sortedAlbums.map((album) => (
+          albums!.map((album) => (
             <li key={album.key} className={styles.albumSection}>
               {/* TODO ✅ アルバム見出し（将来ここを button にしてアコーディオン化） */}
               <div className={styles.albumHeader}>
@@ -111,7 +111,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
               <ul className={styles.albumTracks} role="list">
                 {album.tracks.map(({t, index}) => (
                   <TrackRow
-                    key={`${album.key}:${t.item.id ?? index}`}
+                    key={`${album.key}:${t.item.path}`}
                     trackView={t}
                     index={index}
                     nowPlayingID={nowPlayingID}
@@ -129,7 +129,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
         ) : (
           trackViews.map((t, index) => (
             <TrackRow
-              key={t.item.id ?? index}
+              key={t.item.path}
               trackView={t}
               index={index}
               nowPlayingID={nowPlayingID}

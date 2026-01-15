@@ -106,9 +106,6 @@ export function SidebarStub({state, commands, closeSidebar}: SidebarMenuProps): 
           onChangeAction={() => {
             toggleSetting("ui.showAlbums");
             closeSidebar();
-
-            // TODO: albumsページ/アルバム表示モードへ切り替える処理を後で追加
-            // 例: commands.navigate?.("albums") / setSetting("ui.viewMode", "albums") など
           }}
         />
       </div>

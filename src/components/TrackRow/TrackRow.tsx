@@ -1,7 +1,7 @@
 "use client";
 
 import {NowPlayingPulse}  from "@/components/NowPlayingPulse";
-import styles             from "@/components/TrackList.module.scss";
+import styles             from "@/components/TrackList/TrackList.module.scss";
 import type {AppCommands} from "@/hooks/useAppCommands";
 import type {TrackView}   from "@/types/views";
 import Image              from "next/image";

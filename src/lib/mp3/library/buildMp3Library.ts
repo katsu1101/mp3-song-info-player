@@ -3,7 +3,6 @@
 import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
 import {startDirCoverWorker}      from "@/lib/mp3/workers/startDirCoverWorker";
 import {startMetaWorker}          from "@/lib/mp3/workers/startMetaWorker";
-import {shuffleArray}             from "@/lib/shuffle";
 import type {Mp3Entry}            from "@/types/mp3Entry";
 import type {TrackMetaByPath}     from "@/types/trackMeta";
 import {Dispatch, SetStateAction} from "react";
@@ -13,6 +12,11 @@ type RunIdRef = { current: number };
 
 type BuildMp3LibraryArgs = {
   handle: FileSystemDirectoryHandle;
+
+  /**
+   * NOTE:
+   * shuffle は「再生キュー」で扱う（ライブラリの items は安定させる）
+   */
   shuffle: boolean;
 
   // objectURL 管理
@@ -50,7 +54,7 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
 export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> => {
   const {
     handle,
-    shuffle,
+    // shuffle, // ✅ ここでは使わない（再生キュー側へ）
     track,
     dirCoverRunIdRef,
     metaRunIdRef,
@@ -63,11 +67,11 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
 
   setFolderName(handle.name);
 
-  let items = await readMp3FromDirectory(handle, "");
+  const items = await readMp3FromDirectory(handle, "");
 
-  if (shuffle) {
-    items = shuffleArray(items);
-    for (let i = 0; i < items.length; i++) items[i]!.id = i + 1;
+  // ✅ id は読み込み順で固定（shuffleで書き換えない）
+  for (let i = 0; i < items.length; i += 1) {
+    items[i]!.id = i + 1;
   }
 
   setMp3List(items);

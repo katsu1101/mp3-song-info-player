@@ -1,20 +1,22 @@
 "use client";
 
-import {AppShell}              from "@/components/AppShell/AppShell";
-import {NowPlayingPanel}       from "@/components/NowPlayingPanel";
-import {useSettings}           from "@/components/Settings/SettingsProvider";
-import {SidebarStub}           from "@/components/Sidebar";
-import {TopBar}                from "@/components/TopBar";
-import {TrackList}             from "@/components/TrackList";
-import {useAppCommands}        from "@/hooks/useAppCommands";
-import {useAudioPlaybackState} from "@/hooks/useAudioPlaybackState";
-import {useAudioPlayer}        from "@/hooks/useAudioPlayer";
-import {useFantiaMapping}      from "@/hooks/useFantiaMapping";
-import {useMp3Library}         from "@/hooks/useMp3Library"; // ← I/F変更後を想定
-import {usePlaylistPlayer}     from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
-import {useTrackViews}         from "@/hooks/useTrackViews";
-import {buildDirAlbumViews}    from "@/lib/mp3/album/buildDirAlbumViews";
-import React, {JSX}            from "react";
+import {AppShell}                            from "@/components/AppShell/AppShell";
+import {NowPlayingPanel}                     from "@/components/NowPlayingPanel";
+import {useSettings}                         from "@/components/Settings/SettingsProvider";
+import {SidebarStub}                         from "@/components/Sidebar";
+import {TopBar}                              from "@/components/TopBar";
+import {TrackList}                           from "@/components/TrackList/TrackList";
+import {useAppCommands}                      from "@/hooks/useAppCommands";
+import {useAudioPlaybackState}               from "@/hooks/useAudioPlaybackState";
+import {useAudioPlayer}                      from "@/hooks/useAudioPlayer";
+import {useFantiaMapping}                    from "@/hooks/useFantiaMapping";
+import {useMp3Library}                       from "@/hooks/useMp3Library"; // ← I/F変更後を想定
+import {usePlaylistPlayer}                   from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
+import {useTrackViews}                       from "@/hooks/useTrackViews";
+import {buildDirAlbumViews}                  from "@/lib/mp3/album/buildDirAlbumViews";
+import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
+import React, {JSX}                          from "react";
+
 
 export default function Page(): JSX.Element {
   const {settings} = useSettings();
@@ -41,22 +43,6 @@ export default function Page(): JSX.Element {
     mappingByPrefixId,
   });
 
-  // ===== Playlist（連続再生アクション）=====
-  const playlist = usePlaylistPlayer({
-    audioRef,
-    playEntry,
-    trackViews,
-    resetKey: settingState.folderName, // フォルダ切替でindexリセット
-    settings,
-    stopAndClear
-  });
-
-  const commands = useAppCommands({
-    audioRef,
-    playActions: playlist.playActions,
-    settingActions,
-  });
-
   const dirAlbums = React.useMemo(() => {
     return buildDirAlbumViews({
       albums,
@@ -64,6 +50,38 @@ export default function Page(): JSX.Element {
       folderName: settingState.folderName,
     });
   }, [albums, trackViews, settingState.folderName]);
+
+// ✅ 追加：ここで “アルバム内＆アルバム順” を確定させる（UIとプレイヤー共通）
+  const sortedDirAlbums = React.useMemo(() => {
+    const next = dirAlbums.map((album) => {
+      const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
+      return {
+        ...album,
+        tracks: sortedTracks,
+        trackCount: sortedTracks.length,
+      };
+    });
+
+    next.sort((a, b) => a.title.localeCompare(b.title, "ja"));
+    return next;
+  }, [dirAlbums]);
+
+// ===== Playlist =====
+  const playlist = usePlaylistPlayer({
+    audioRef,
+    playEntry,
+    trackViews,
+    resetKey: settingState.folderName,
+    settings,
+    albumViews: sortedDirAlbums, // ✅ こっちに
+    stopAndClear,
+  });
+
+  const commands = useAppCommands({
+    audioRef,
+    playActions: playlist.playActions,
+    settingActions,
+  });
 
   return (
     <AppShell

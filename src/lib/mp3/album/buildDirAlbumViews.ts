@@ -1,4 +1,6 @@
 // src/lib/mp3/album/buildDirAlbumViews.ts
+// TODO: いずれ useMp3Library 側へ寄せるか検討（ただし TrackView 依存が増えるので慎重に）
+
 import {UI_TEXT}                             from "@/const/uiText";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
 import type {AlbumInfo}                      from "@/types/albumInfo";

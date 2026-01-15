@@ -5,7 +5,6 @@ import type {Mp3Entry} from "@/types/mp3Entry";
 
 export type BuildDirAlbumsArgs = {
   mp3List: readonly Mp3Entry[];
-  folderName: string;
   dirCoverUrlByDir: Record<string, string | null>;
 };
 
