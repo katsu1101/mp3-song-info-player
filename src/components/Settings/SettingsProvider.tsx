@@ -250,6 +250,7 @@ const loadSettings = (): Settings => {
         trackListViewMode: parsed.ui?.trackListViewMode ?? defaultSettings.ui.trackListViewMode,
         trackGridSize: parsed.ui?.trackGridSize ?? defaultSettings.ui.trackGridSize,
         showFilePath: parsed.ui?.showFilePath ?? defaultSettings.ui.showFilePath,
+        showAlbums: parsed.ui?.showAlbums ?? defaultSettings.ui.showAlbums,
       },
       playback: {
         continuous: parsed.playback?.continuous ?? defaultSettings.playback.continuous,

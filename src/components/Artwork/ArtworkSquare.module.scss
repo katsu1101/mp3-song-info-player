@@ -1,0 +1,26 @@
+.box {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.inner {
+  display: block;
+  position: relative;
+
+  width: var(--art-size);
+  height: var(--art-size);
+
+  border-radius: var(--art-radius);
+  overflow: hidden;
+
+  border: 1px solid var(--list-chip-border);
+  background: var(--list-chip-bg);
+
+  :global(img) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 50% 0 !important; /* ✅ 上優先 */
+    display: block;
+  }
+}

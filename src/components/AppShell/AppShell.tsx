@@ -134,7 +134,7 @@ export function AppShell({header, sidebar, main, renderPlayer}: AppShellProps): 
           {sidebar({closeSidebar: closeSidebar})}
         </aside>
 
-        <main className={`${styles.scrollPane} ${styles.mainPane} scrollbar`}>
+        <main className={`${styles.scrollPane} ${styles.mainPane} scrollbar ml-3`}>
           {main}
         </main>
 

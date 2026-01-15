@@ -2,6 +2,7 @@
 
 import {PlayerVariant}       from "@/components/AppShell/AppShell";
 import {AppCommands}         from "@/hooks/useAppCommands";
+import {getBasename}         from "@/lib/path/getBasename";
 import {TrackView}           from "@/types/views";
 import Image                 from "next/image";
 import React, {JSX, useMemo} from "react";
@@ -16,20 +17,6 @@ type NowPlayingPanelProps = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   commands: AppCommands;
   isPlaying: boolean;
-};
-
-/**
- * 指定されたファイルパスからベース名（最後の部分）を抽出します。
- *
- * この関数はファイルパスをパラメータとして受け取り、ディレクトリ区切り文字「/」で構成要素に分割し、パスの最後のセグメントを返します。
- * 渡されたパスに有効なセグメントが含まれていない場合、元のパスが返されます。
- *
- * @param {string} path - ベース名を抽出するファイルパス。
- * @returns {string} ベース名、または有効なセグメントが見つからない場合は元のパス。
- */
-export const getBasename = (path: string): string => {
-  const parts = path.split("/").filter(Boolean);
-  return parts[parts.length - 1] ?? path;
 };
 
 /**

@@ -1,12 +1,13 @@
 "use client";
 
+import {DirAlbumView}                  from "@/components/Albums/AlbumList";
+import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare";
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
-import {NowPlayingPulse}               from "@/components/NowPlayingPulse";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
+import {TrackRow}                      from "@/components/TrackRow/TrackRow";
 import {AppCommands}                   from "@/hooks/useAppCommands";
 import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
-import Image                           from "next/image";
 import React, {JSX, useEffect, useRef} from "react";
 import styles                          from "./TrackList.module.scss";
 
@@ -16,10 +17,11 @@ type TrackListProps = {
   isPlaying: boolean;
   state: SettingState;
   commands: AppCommands;
+  albums?: readonly DirAlbumView[];
 };
 
 export function TrackList(props: TrackListProps): JSX.Element {
-  const {trackViews, nowPlayingID, isPlaying, state, commands} = props;
+  const {trackViews, nowPlayingID, isPlaying, state, commands, albums} = props;
 
   const nowItemRef = useRef<HTMLButtonElement | null>(null);
 
@@ -30,9 +32,11 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
   const {settings} = useSettings();
 
-  // 手動切替（設定）
-  const viewMode = settings.ui.trackListViewMode ?? "list"; // "details" | "tiles"
-  // const viewMode = "list"
+  // ✅ albums表示ONかつalbumsがあるときだけアルバム表示
+  const shouldShowAlbums = Boolean(settings.ui.showAlbums && albums && albums.length > 0);
+
+  // ✅ アルバム表示中は一旦 list 固定（gridは後で対応）
+  const viewMode = shouldShowAlbums ? "list" : (settings.ui.trackListViewMode ?? "list");
   const showFilePath = settings.ui.showFilePath;
 
   useEffect(() => {
@@ -72,68 +76,51 @@ export function TrackList(props: TrackListProps): JSX.Element {
       </div>
 
       <ul className={styles.list} role="list">
-        {trackViews.map((t, index) => {
-          const isActive = nowPlayingID === t.item.id;
+        {shouldShowAlbums ? (
+          albums!.map((album) => (
+            <React.Fragment key={album.key}>
+              {/* ✅ アルバム見出し（将来アコーディオン化しやすい） */}
+              <div className="flex items-center gap-3 min-w-0">
+                <ArtworkSquare url={album.coverUrl} size={64} radius={12}/>
+                <div className="min-w-0">
+                  <div className="font-extrabold truncate">{album.title}</div>
+                  <div className="text-sm opacity-70">{album.trackCount} 曲</div>
+                </div>
+              </div>
 
-          return (
-            <li
+              {/* ✅ アルバム内トラック（indexはグローバル index を使う） */}
+              {album.tracks.map(({t, index}) => (
+                <TrackRow
+                  key={`${album.key}:${t.item.id ?? index}`}
+                  trackView={t}
+                  index={index}
+                  nowPlayingID={nowPlayingID}
+                  isPlaying={isPlaying}
+                  commands={commands}
+                  setNowItemRef={(node) => {
+                    nowItemRef.current = node;
+                  }}
+                  variant="full"
+                />
+              ))}
+            </React.Fragment>
+          ))
+        ) : (
+          trackViews.map((t, index) => (
+            <TrackRow
               key={t.item.id ?? index}
-              className={styles.item}
-              data-now-playing={isActive ? "1" : "0"}
-            >
-              <button
-                ref={isActive ? (node) => {
-                  nowItemRef.current = node;
-                } : undefined}
-                type="button"
-                className={styles.rowButton}
-                // aria-current={isActive ? "true" : undefined}
-                onClick={() => commands.playAtIndex(index)}
-              >
-                <span className={styles.colAction} aria-hidden>
-                  {isActive ? (isPlaying ? <NowPlayingPulse/> : "⏸") : "▶"}
-                </span>
-
-                <span className={styles.colNo}>{index + 1}</span>
-
-                <span className={styles.colArt} aria-hidden>
-                  <span className={styles.artBox} aria-hidden>
-                    <span className={styles.artInner}>
-                      {t.coverUrl ? (
-                        <Image
-                          src={t.coverUrl}
-                          alt=""
-                          fill
-                          unoptimized
-                          style={{
-                            objectFit: "cover",
-                            objectPosition: "50% 0%", // ✅ 上を優先して切り取る
-                          }}
-                        />
-                      ) : (
-                        <span className={styles.noArt} aria-label="ジャケットなし" title="ジャケットなし">
-                          {t.orderLabel === "" ? t.originalArtist ?? t.displayTitle ?? "No" : t.orderLabel}
-                        </span>
-                      )}
-                    </span>
-                  </span>
-
-                </span>
-
-                <span className={styles.colTitle} title={t.displayTitle ?? ""}>
-                  {t.displayTitle ?? "（無題）"}
-                </span>
-
-                <span className={styles.colYm}>{t.orderLabel}</span>
-                <span className={styles.colOrig}>{t.originalArtist}</span>
-
-                <span className={styles.colPath} title={t.item.path ?? ""}>
-                  {t.item.path ?? "なし"}
-                </span>
-              </button>
-            </li>
-          );
-        })}
+              trackView={t}
+              index={index}
+              nowPlayingID={nowPlayingID}
+              isPlaying={isPlaying}
+              commands={commands}
+              setNowItemRef={(node) => {
+                nowItemRef.current = node;
+              }}
+              variant="full"
+            />
+          ))
+        )}
       </ul>
     </section>
   );

@@ -135,7 +135,10 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         orderLabel,
         originalArtist,
         coverUrl,
-      };
+        trackNoRaw: meta?.trackNo ?? null,
+        discNoRaw: null, // TODO
+        releaseYm: mapping?.releaseYm
+      } as TrackView;
     });
   }, [mp3List, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
 };

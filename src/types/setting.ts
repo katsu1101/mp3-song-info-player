@@ -41,6 +41,7 @@ export type Settings = {
     trackListViewMode: TrackListViewMode;
     trackGridSize: TrackGridSize;
     showFilePath: boolean;
+    showAlbums: boolean; // アルバム表示
   };
   playback: {
     continuous: boolean;
@@ -66,6 +67,7 @@ export const defaultSettings: Settings = {
     trackListViewMode: "list",
     trackGridSize: "md",
     showFilePath: false,
+    showAlbums: false,
   },
   playback: {
     continuous: false,

@@ -98,6 +98,20 @@ export function SidebarStub({state, commands, closeSidebar}: SidebarMenuProps): 
 
 
       <SectionTitle>表示</SectionTitle>
+      <div className="flex items-center justify-between gap-3 px-1">
+        <span className="text-sm opacity-90">アルバム</span>
+        <ToggleControl
+          ariaLabel="アルバム"
+          checked={settings.ui.showAlbums}
+          onChangeAction={() => {
+            toggleSetting("ui.showAlbums");
+            closeSidebar();
+
+            // TODO: albumsページ/アルバム表示モードへ切り替える処理を後で追加
+            // 例: commands.navigate?.("albums") / setSetting("ui.viewMode", "albums") など
+          }}
+        />
+      </div>
       <SegmentedControl
         iconOnly
         label="モード"
