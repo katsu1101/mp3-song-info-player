@@ -5,34 +5,33 @@ import type {Mp3Entry}  from "@/types/mp3Entry";
 
 export type BuildDirAlbumsArgs = {
   mp3List: readonly Mp3Entry[] | null | undefined;
-  dirCoverUrlByDir: Readonly<Record<string, string | null>>;
+  dirCoverUrlByDir: Record<string, string | null | undefined>;
 };
 
 export const buildDirAlbums = (args: BuildDirAlbumsArgs): AlbumInfo[] => {
-  const list = Array.isArray(args.mp3List) ? args.mp3List : [];
+  const {mp3List, dirCoverUrlByDir} = args;
+
+  // ✅ Runtime防御: "mp3List is not iterable" を潰す
+  if (!Array.isArray(mp3List) || mp3List.length === 0) return [];
 
   const pathsByDir = new Map<string, string[]>();
-  for (const entry of list) {
+
+  for (const entry of mp3List) {
     const dirKey = getDirname(entry.path);
     const paths = pathsByDir.get(dirKey) ?? [];
     paths.push(entry.path);
     pathsByDir.set(dirKey, paths);
   }
 
-  const albums: AlbumInfo[] = Array.from(pathsByDir.entries()).map(([dirKey, trackPaths]) => {
-    const coverUrl = args.dirCoverUrlByDir[dirKey] ?? null;
+  return Array.from(pathsByDir.entries()).map(([dirKey, trackPaths]) => {
+    const dirCoverUrl = dirCoverUrlByDir[dirKey] ?? null;
 
     return {
       key: `dir:${dirKey}`,
       kind: "dir",
-      albumTitle: null,
-      albumArtist: null,
       dirKey,
       trackPaths,
-      cover: coverUrl ? {type: "dir", url: coverUrl} : {type: "none", url: null},
+      dirCoverUrl,
     };
   });
-
-  albums.sort((a, b) => a.dirKey.localeCompare(b.dirKey, "ja"));
-  return albums;
 };
