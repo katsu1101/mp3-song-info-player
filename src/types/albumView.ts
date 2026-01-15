@@ -12,5 +12,5 @@ export type DirAlbumView = {
   title: string;
   trackCount: number;
   coverUrl: string | null;
-  tracks: AlbumTrackRow[];
+  tracks: readonly AlbumTrackRow[];
 };

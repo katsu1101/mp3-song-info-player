@@ -112,7 +112,7 @@
   .colOrig,
   .colPath,
   .headerRow > div {
-    min-width: 0;          /* ✅ これがないと縮まず突き抜ける */
+    min-width: 0; /* ✅ これがないと縮まず突き抜ける */
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -136,6 +136,7 @@
     text-align: right;
     justify-self: end;
   }
+
   .colTitle,
   .colYm,
   .colOrig,
@@ -165,7 +166,10 @@
   /* showPath=0 は “変数を0にする” + 要素を隠す */
   &[data-show-path="0"] {
     --col-path: 0px;
-    .colPath { display: none; }
+
+    .colPath {
+      display: none;
+    }
   }
 
   /* 再生中 */
@@ -174,7 +178,6 @@
     border-color: color-mix(in srgb, var(--list-border) 60%, var(--sel-ring) 40%);
   }
 }
-
 
 
 /* =========================
@@ -377,4 +380,44 @@
       display: none;
     }
   }
+}
+
+/* Album section (list mode only 想定) */
+.albumSection {
+  padding: 10px 6px 14px;
+  border-bottom: 1px solid var(--list-border);
+}
+
+.albumHeader {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 6px 2px 10px;
+  min-width: 0;
+}
+
+.albumHeaderText {
+  min-width: 0;
+}
+
+.albumTitle {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.albumMeta {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.2;
+}
+
+.albumTracks {
+  display: grid;
+  gap: 2px; /* 行の密度調整 */
 }

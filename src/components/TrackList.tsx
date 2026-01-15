@@ -1,15 +1,16 @@
 "use client";
 
-import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare";
-import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
-import {useSettings}                   from "@/components/Settings/SettingsProvider";
-import {TrackRow}                      from "@/components/TrackRow/TrackRow";
-import {AppCommands}                   from "@/hooks/useAppCommands";
-import {DirAlbumView}                  from "@/types/albumView";
-import {SettingState}                  from "@/types/setting";
-import {TrackView}                     from "@/types/views";
-import React, {JSX, useEffect, useRef} from "react";
-import styles                          from "./TrackList.module.scss";
+import {ArtworkSquare}                          from "@/components/Artwork/ArtworkSquare";
+import {EmptyStateFolderActions}                from "@/components/EmptyStateFolderActions";
+import {useSettings}                            from "@/components/Settings/SettingsProvider";
+import {TrackRow}                               from "@/components/TrackRow/TrackRow";
+import {AppCommands}                            from "@/hooks/useAppCommands";
+import {type AlbumTrackRow, sortAlbumTracks}    from "@/lib/mp3/album/sortAlbumTracks";
+import {DirAlbumView}                           from "@/types/albumView";
+import {SettingState}                           from "@/types/setting";
+import {TrackView}                              from "@/types/views";
+import React, {JSX, useEffect, useMemo, useRef} from "react";
+import styles                                   from "./TrackList.module.scss";
 
 type TrackListProps = {
   trackViews: readonly TrackView[];
@@ -17,7 +18,7 @@ type TrackListProps = {
   isPlaying: boolean;
   state: SettingState;
   commands: AppCommands;
-  albums?: readonly DirAlbumView[];
+  albums?: readonly DirAlbumView[]; // ✅ ここを types/albumView の DirAlbumView に
 };
 
 export function TrackList(props: TrackListProps): JSX.Element {
@@ -51,6 +52,24 @@ export function TrackList(props: TrackListProps): JSX.Element {
     });
   }, [nowPlayingID]);
 
+  // ✅ TrackList側で「確実に」ソートした albums を作る（最小で安全）
+  const sortedAlbums = useMemo<readonly DirAlbumView[]>(() => {
+    if (!shouldShowAlbums || !albums) return [];
+
+    const next: DirAlbumView[] = albums.map((album: DirAlbumView) => {
+      const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
+      return {
+        ...album,
+        tracks: sortedTracks,
+        trackCount: sortedTracks.length,
+      };
+    });
+
+    next.sort((a, b) => a.title.localeCompare(b.title, "ja"));
+    return next;
+  }, [shouldShowAlbums, albums]);
+
+
   if (!state.folderName || state.needsReconnect) {
     return <EmptyStateFolderActions state={state} commands={commands}/>;
   }
@@ -77,33 +96,35 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
       <ul className={styles.list} role="list">
         {shouldShowAlbums ? (
-          albums!.map((album) => (
-            <React.Fragment key={album.key}>
-              {/* ✅ アルバム見出し（将来アコーディオン化しやすい） */}
-              <div className="flex items-center gap-3 min-w-0">
-                <ArtworkSquare url={album.coverUrl} size={64} radius={12}/>
-                <div className="min-w-0">
-                  <div className="font-extrabold truncate">{album.title}</div>
-                  <div className="text-sm opacity-70">{album.trackCount} 曲</div>
+          sortedAlbums.map((album) => (
+            <li key={album.key} className={styles.albumSection}>
+              {/* TODO ✅ アルバム見出し（将来ここを button にしてアコーディオン化） */}
+              <div className={styles.albumHeader}>
+                <ArtworkSquare url={album.coverUrl} size={56} radius={12}/>
+                <div className={styles.albumHeaderText}>
+                  <div className={styles.albumTitle} title={album.title}>{album.title}</div>
+                  <div className={styles.albumMeta}>{album.trackCount} 曲</div>
                 </div>
               </div>
 
-              {/* ✅ アルバム内トラック（indexはグローバル index を使う） */}
-              {album.tracks.map(({t, index}) => (
-                <TrackRow
-                  key={`${album.key}:${t.item.id ?? index}`}
-                  trackView={t}
-                  index={index}
-                  nowPlayingID={nowPlayingID}
-                  isPlaying={isPlaying}
-                  commands={commands}
-                  setNowItemRef={(node) => {
-                    nowItemRef.current = node;
-                  }}
-                  variant="full"
-                />
-              ))}
-            </React.Fragment>
+              {/* ✅ アルバム内トラック（TrackRowは<li>を返す想定） */}
+              <ul className={styles.albumTracks} role="list">
+                {album.tracks.map(({t, index}) => (
+                  <TrackRow
+                    key={`${album.key}:${t.item.id ?? index}`}
+                    trackView={t}
+                    index={index}
+                    nowPlayingID={nowPlayingID}
+                    isPlaying={isPlaying}
+                    commands={commands}
+                    setNowItemRef={(node) => {
+                      nowItemRef.current = node;
+                    }}
+                    variant="full"
+                  />
+                ))}
+              </ul>
+            </li>
           ))
         ) : (
           trackViews.map((t, index) => (
