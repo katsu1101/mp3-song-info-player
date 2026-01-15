@@ -3,11 +3,11 @@
 
 import {useMp3LibraryBoot}                                      from "@/hooks/useMp3LibraryBoot";
 import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
-import {buildDirAlbums}                                         from "@/lib/mp3/album/buildDirAlbums";
+import {buildDirAlbums}                                         from "@/lib/mp3/album/buildDirAlbums"; // あとで作る/すでにある前提
 import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
 import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
-import type {AlbumInfo}                                         from "@/types/album";
+import type {AlbumInfo}                                         from "@/types/albumInfo";
 import type {Covers}                                            from "@/types/covers";
 import type {FantiaMappingEntry}                                from "@/types/fantia";
 import type {Mp3Entry}                                          from "@/types/mp3Entry";
@@ -34,7 +34,7 @@ export type UseMp3LibraryResult = {
  * 暫定: mp3List だけ最優先で返す。
  * - meta/covers/dirCover は全て空（UIを壊さないためのダミー）
  */
-export const useMp3Library = (options: UseMp3LibraryOptions) => {
+export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResult => {
 
   const {shuffle} = options;
   // ===== external hooks =====
@@ -62,7 +62,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
 
   // ===== Fantia mapping (progressive) =====
   const [fantiaEntryByPath, setFantiaEntryByPath] =
-    useState<Record<string, FantiaMappingEntry | null>>({});
+    useState<Record<string, FantiaMappingEntry | undefined>>({});
 
   // ===== internal utilities =====
   const resetView = useCallback(() => {
@@ -171,12 +171,17 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     forget,
   };
 
-  const albums = useMemo<AlbumInfo[]>(() => {
+  const albums: AlbumInfo[] = useMemo(() => {
+    // mp3List が未確定の瞬間があると落ちるのでガード
+    if (!Array.isArray(mp3List) || mp3List.length === 0) return [];
+
     return buildDirAlbums({
       mp3List,
+      folderName,
       dirCoverUrlByDir: covers.dirCoverUrlByDir,
     });
-  }, [mp3List, covers.dirCoverUrlByDir]);
+  }, [mp3List, folderName, covers.dirCoverUrlByDir]);
+
 
   return {
     mp3List, covers, settingState, settingActions, fantiaEntryByPath,

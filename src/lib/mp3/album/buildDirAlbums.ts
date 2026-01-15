@@ -1,11 +1,12 @@
 // src/lib/mp3/album/buildDirAlbums.ts
-import {getDirname}     from "@/lib/path/getDirname";
-import type {AlbumInfo} from "@/types/album";
-import type {Mp3Entry}  from "@/types/mp3Entry";
+import {getDirname}    from "@/lib/path/getDirname";
+import {AlbumInfo}     from "@/types/albumInfo";
+import type {Mp3Entry} from "@/types/mp3Entry";
 
 export type BuildDirAlbumsArgs = {
-  mp3List: readonly Mp3Entry[] | null | undefined;
-  dirCoverUrlByDir: Record<string, string | null | undefined>;
+  mp3List: readonly Mp3Entry[];
+  folderName: string;
+  dirCoverUrlByDir: Record<string, string | null>;
 };
 
 export const buildDirAlbums = (args: BuildDirAlbumsArgs): AlbumInfo[] => {

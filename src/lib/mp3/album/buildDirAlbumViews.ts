@@ -1,7 +1,7 @@
 // src/lib/mp3/album/buildDirAlbumViews.ts
 import {UI_TEXT}                             from "@/const/uiText";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
-import type {AlbumInfo}                      from "@/types/album";
+import type {AlbumInfo}                      from "@/types/albumInfo";
 import type {DirAlbumView}                   from "@/types/albumView";
 import type {TrackView}                      from "@/types/views";
 
