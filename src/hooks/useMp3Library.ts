@@ -6,6 +6,7 @@ import {useObjectUrlPool}                                       from "@/hooks/us
 import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
 import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
+import {AlbumInfo}                                              from "@/types/album";
 import type {Covers}                                            from "@/types/covers";
 import type {FantiaMappingEntry}                                from "@/types/fantia";
 import type {Mp3Entry}                                          from "@/types/mp3Entry";
@@ -158,5 +159,13 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     forget,
   };
 
-  return {mp3List, covers, settingState, settingActions, fantiaEntryByPath};
+  return {
+    mp3List, covers, settingState, settingActions, fantiaEntryByPath,
+    albums: [] as AlbumInfo[],
+    // TODO(album):
+    // - TrackViewではなく「TrackCore（path, dirKey, tag, mapping要約）」を元に集約する
+    // - スキャン直後は dirKey 仮想アルバムだけ生成
+    // - meta後追いで albumKey 再計算して移動
+    // - runId で古い更新を破棄
+  };
 };

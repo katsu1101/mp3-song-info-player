@@ -121,24 +121,40 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
       const dirPath = getDirname(item.path);
       const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
+// src/hooks/useTrackViews.ts（mapの中）
+
+      // ① Fantiaの releaseYm を正規化して TrackView.releaseYm に入れる
+      //    mapping と fantiaEntry が同じならどっちでもいいけど、ここでは fantiaEntry を優先
+      const releaseYm = normalizeReleaseYm(fantiaEntry?.releaseYm ?? null);
+
+      // ② track/disc を “生文字列” に正規化（number混入を防ぐ）
+      const trackNoRaw = toRawStringOrNull(meta?.trackNo ?? null);
+
+      // TODO: Mp3Tag 側に discNo があるならここに差し替え
+      // 例）meta?.discNo / meta?.diskNo / meta?.discNumber 等、実プロパティに合わせて変更
+      const discNoRaw = toRawStringOrNull(meta.discNo ?? meta.diskNo ?? null);
 
       return {
         item,
-        index,
+        index, // ここは TrackView に無いなら後で消す（今は動作優先でOK）
+
         display: {
           title: displayTitle,
           artist: displayArtist,
           albumTitle: displayAlbumTitle,
-          sub: displaySub, // TODO: UIに出したくなったら
+          sub: displaySub,
         },
+
         displayTitle,
         orderLabel,
         originalArtist,
         coverUrl,
-        trackNoRaw: meta?.trackNo ?? null,
-        discNoRaw: null, // TODO
-        releaseYm: mapping?.releaseYm
+
+        trackNoRaw,  // ✅ string|null
+        discNoRaw,   // ✅ string|null
+        releaseYm,   // ✅ "YYYY-MM" or null
       } as TrackView;
+
     });
   }, [mp3List, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
 };
@@ -149,4 +165,34 @@ const pickText = (...candidates: Array<string | null | undefined>): string | nul
     if (v.length > 0) return v;
   }
   return null;
+};
+
+// src/hooks/useTrackViews.ts
+
+const toRawStringOrNull = (v: unknown): string | null => {
+  if (v == null) return null;
+  if (typeof v === "string") {
+    const s = v.trim();
+    return s.length > 0 ? s : null;
+  }
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  return null;
+};
+
+// "2022-11", "2022/11", "2022/11/01", "2022/11 / 01" → "2022-11"
+const normalizeReleaseYm = (v: unknown): string | null => {
+  if (typeof v !== "string") return null;
+  const s = v.trim();
+  if (s.length === 0) return null;
+
+  const m = s.match(/(\d{4})\D+(\d{1,2})/);
+  if (!m) return null;
+
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
+  if (month < 1 || month > 12) return null;
+
+  const mm = String(month).padStart(2, "0");
+  return `${year}-${mm}`;
 };

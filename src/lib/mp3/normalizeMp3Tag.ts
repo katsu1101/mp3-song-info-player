@@ -28,5 +28,7 @@ export const normalizeMp3Tag = (meta: Mp3Meta | null | undefined): Mp3Tag => {
     trackNo: toNumberOrNull(meta?.trackNo),
     year: toNumberOrNull(meta?.year),
     picture,
+    discNo: null,
+    diskNo: null,
   };
 };

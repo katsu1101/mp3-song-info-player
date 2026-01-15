@@ -1,7 +1,5 @@
 "use client";
 
-import {DirAlbumView} from "@/components/Albums/AlbumList";
-
 import {AppShell}              from "@/components/AppShell/AppShell";
 import {NowPlayingPanel}       from "@/components/NowPlayingPanel";
 import {useSettings}           from "@/components/Settings/SettingsProvider";
@@ -15,9 +13,8 @@ import {useFantiaMapping}      from "@/hooks/useFantiaMapping";
 import {useMp3Library}         from "@/hooks/useMp3Library"; // ← I/F変更後を想定
 import {usePlaylistPlayer}     from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
 import {useTrackViews}         from "@/hooks/useTrackViews";
-import {sortAlbumTracks}       from "@/lib/mp3/album/sortAlbumTracks";
-import {getDirname}            from "@/lib/path/getDirname";
-import {TrackView}             from "@/types/views";
+import {buildDirAlbums}        from "@/lib/mp3/album/buildDirAlbums";
+import {DirAlbumView}          from "@/types/albumView";
 import React, {JSX}            from "react";
 
 export default function Page(): JSX.Element {
@@ -61,40 +58,11 @@ export default function Page(): JSX.Element {
     settingActions,
   });
 
-  // TODO あとで外に出す
   const dirAlbums = React.useMemo<DirAlbumView[]>(() => {
-    // dirPath -> AlbumTrackRow[]
-    const rowsByDir = new Map<string, { t: TrackView; index: number }[]>();
-
-    trackViews.forEach((t, index) => {
-      const dirPath = getDirname(t.item.path);
-      const rows = rowsByDir.get(dirPath) ?? [];
-      rows.push({t, index});
-      rowsByDir.set(dirPath, rows);
+    return buildDirAlbums({
+      trackViews,
+      folderName: settingState.folderName,
     });
-
-    const albums: DirAlbumView[] = Array.from(rowsByDir.entries()).map(([dirPath, rows]) => {
-      const tracks = sortAlbumTracks(rows); // ✅ ここが反映ポイント
-
-      const title = dirPath.length > 0 ? dirPath : `${settingState.folderName}（直下）`; // ここは後で定数化OK
-      const coverUrl =
-        tracks[0]?.t.coverUrl ??
-        null;
-
-      return {
-        key: `dir:${dirPath}`,
-        dirPath,
-        title,
-        trackCount: tracks.length,
-        coverUrl,
-        tracks,
-      };
-    });
-
-    // 好みでアルバム自体もソート（例：タイトル）
-    albums.sort((a, b) => a.title.localeCompare(b.title, "ja"));
-
-    return albums;
   }, [trackViews, settingState.folderName]);
 
 

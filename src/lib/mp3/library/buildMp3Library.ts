@@ -34,13 +34,14 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
   const next: TrackMetaByPath = {};
   for (const e of items) {
     next[e.path] = {
+      discNo: null, diskNo: null,
       albumArtist: null,
       picture: null,
       title: e.fileHandle.name,
       artist: "",
       album: "",
       trackNo: null,
-      year: null,
+      year: null
     };
   }
   return next;

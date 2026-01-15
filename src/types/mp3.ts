@@ -9,6 +9,8 @@ export type Mp3Tag = {
   trackNo: number | null;
   year: number | null;
   picture: EmbeddedPicture | null;
+  discNo: string | null;
+  diskNo: string | null;
 };
 
 /**

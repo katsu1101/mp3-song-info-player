@@ -5,21 +5,13 @@ import {useSettings}   from "@/components/Settings/SettingsProvider";
 import styles          from "@/components/TrackList.module.scss";
 import {TrackRow}      from "@/components/TrackRow/TrackRow";
 import {AppCommands}   from "@/hooks/useAppCommands";
+import {DirAlbumView}  from "@/types/albumView";
 import {TrackView}     from "@/types/views";
 import React           from "react";
 
 export type AlbumTrackRow = {
   t: TrackView;
   index: number; // ✅ trackViews全体での index（playAtIndex用）
-};
-
-export type DirAlbumView = {
-  key: string;        // 例: dir:<dirKey>
-  dirPath: string;
-  title: string;      // 例: dirKey（相対パス）
-  trackCount: number;
-  coverUrl: string | null;
-  tracks: AlbumTrackRow[]; // ✅ 追加
 };
 
 type AlbumListProps = {

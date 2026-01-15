@@ -1,11 +1,11 @@
 "use client";
 
-import {DirAlbumView}                  from "@/components/Albums/AlbumList";
 import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare";
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
 import {TrackRow}                      from "@/components/TrackRow/TrackRow";
 import {AppCommands}                   from "@/hooks/useAppCommands";
+import {DirAlbumView}                  from "@/types/albumView";
 import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
 import React, {JSX, useEffect, useRef} from "react";
