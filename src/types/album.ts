@@ -3,39 +3,37 @@
 export type AlbumKey = string;
 
 export type AlbumKind =
-  | "tag"
-  | "dir"
-  | "artist-unclassified"
-  | "none";
+  | "dir"               // フォルダ仮想アルバム
+// TODO | "tag"               // タグ由来アルバム（後で）
+// TODO | "artist-unclassified"
+// TODO | "none";
+
+export type AlbumCover =
+  | { type: "dir"; url: string | null }
+  // TODO | { type: "embedded"; url: string | null }
+  | { type: "none"; url: null };
+
 
 export type AlbumCoverType =
   | "embedded"
   | "dir"
   | "none";
 
-export type AlbumCover = {
-  type: AlbumCoverType;
-  url: string | null; // objectURL / blobURL / dataURL など（現状の運用に合わせる）
-};
-
 export type AlbumInfo = {
   key: AlbumKey;
 
   kind: AlbumKind;
 
-  // ✅ UI向けに保持（未確定なら null）
+  // tag由来（将来用）
   albumTitle: string | null;
   albumArtist: string | null;
 
-  // ✅ 仮想アルバム由来なら埋まる（dirKey=相対パスなど）
-  dirKey: string | null;
+  // dir由来（将来用）
+  dirKey: string;          // ✅ フォルダ仮想アルバムのキー;
 
   // ✅ 代表画像（暫定含む）
   cover: AlbumCover;
 
-  // ✅ トラック所属（表示順は別途 sort で決める）
-  trackPaths: string[];
-
-  // 任意: 作成理由やデバッグのヒント
-  // reason?: string;
+  // ✅ 依存を減らすため TrackView ではなく path だけ
+  trackPaths: string[];    // ✅ TrackView依存を避けるため path で持つ
 };

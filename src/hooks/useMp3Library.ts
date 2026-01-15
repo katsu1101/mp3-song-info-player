@@ -3,19 +3,31 @@
 
 import {useMp3LibraryBoot}                                      from "@/hooks/useMp3LibraryBoot";
 import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
+import {buildDirAlbums}                                         from "@/lib/mp3/album/buildDirAlbums";
 import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
 import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
-import {AlbumInfo}                                              from "@/types/album";
+import type {AlbumInfo}                                         from "@/types/album";
 import type {Covers}                                            from "@/types/covers";
 import type {FantiaMappingEntry}                                from "@/types/fantia";
 import type {Mp3Entry}                                          from "@/types/mp3Entry";
-import {SettingActions}                                         from "@/types/setting";
+import {SettingActions, SettingState}                           from "@/types/setting";
 import type {TrackMetaByPath}                                   from "@/types/trackMeta";
 import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;
+};
+
+// return 型（もし明示してるなら）に albums を足す
+export type UseMp3LibraryResult = {
+  mp3List: Mp3Entry[];
+  covers: Covers;
+  settingState: SettingState;
+  settingActions: SettingActions;
+  fantiaEntryByPath: Record<string, FantiaMappingEntry | undefined>;
+
+  albums: AlbumInfo[]; // ✅ 追加
 };
 
 /**
@@ -159,13 +171,15 @@ export const useMp3Library = (options: UseMp3LibraryOptions) => {
     forget,
   };
 
+  const albums = useMemo<AlbumInfo[]>(() => {
+    return buildDirAlbums({
+      mp3List,
+      dirCoverUrlByDir: covers.dirCoverUrlByDir,
+    });
+  }, [mp3List, covers.dirCoverUrlByDir]);
+
   return {
     mp3List, covers, settingState, settingActions, fantiaEntryByPath,
-    albums: [] as AlbumInfo[],
-    // TODO(album):
-    // - TrackViewではなく「TrackCore（path, dirKey, tag, mapping要約）」を元に集約する
-    // - スキャン直後は dirKey 仮想アルバムだけ生成
-    // - meta後追いで albumKey 再計算して移動
-    // - runId で古い更新を破棄
+    albums
   };
 };

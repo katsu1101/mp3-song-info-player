@@ -1,44 +1,38 @@
 // src/lib/mp3/album/buildDirAlbums.ts
-import {sortAlbumTracks}   from "@/lib/mp3/album/sortAlbumTracks";
-import {getDirname}        from "@/lib/path/getDirname";
-import type {DirAlbumView} from "@/types/albumView";
-import type {TrackView}    from "@/types/views";
+import {getDirname}     from "@/lib/path/getDirname";
+import type {AlbumInfo} from "@/types/album";
+import type {Mp3Entry}  from "@/types/mp3Entry";
 
-// Page内の { t, index } 型と一致させる
-type AlbumTrackRow = { t: TrackView; index: number };
+export type BuildDirAlbumsArgs = {
+  mp3List: readonly Mp3Entry[] | null | undefined;
+  dirCoverUrlByDir: Readonly<Record<string, string | null>>;
+};
 
-export const buildDirAlbums = (args: {
-  trackViews: readonly TrackView[];
-  folderName: string;
-}): DirAlbumView[] => {
-  const {trackViews, folderName} = args;
+export const buildDirAlbums = (args: BuildDirAlbumsArgs): AlbumInfo[] => {
+  const list = Array.isArray(args.mp3List) ? args.mp3List : [];
 
-  const rowsByDir = new Map<string, AlbumTrackRow[]>();
+  const pathsByDir = new Map<string, string[]>();
+  for (const entry of list) {
+    const dirKey = getDirname(entry.path);
+    const paths = pathsByDir.get(dirKey) ?? [];
+    paths.push(entry.path);
+    pathsByDir.set(dirKey, paths);
+  }
 
-  trackViews.forEach((t, index) => {
-    const dirPath = getDirname(t.item.path);
-    const rows = rowsByDir.get(dirPath) ?? [];
-    rows.push({t, index});
-    rowsByDir.set(dirPath, rows);
-  });
-
-  const albums: DirAlbumView[] = Array.from(rowsByDir.entries()).map(([dirPath, rows]) => {
-    const tracks = sortAlbumTracks(rows);
-
-    // TODO: 表示文言の定数化（後で）
-    const title = dirPath.length > 0 ? dirPath : `${folderName}（直下）`;
-    const coverUrl = tracks[0]?.t.coverUrl ?? null;
+  const albums: AlbumInfo[] = Array.from(pathsByDir.entries()).map(([dirKey, trackPaths]) => {
+    const coverUrl = args.dirCoverUrlByDir[dirKey] ?? null;
 
     return {
-      key: `dir:${dirPath}`,
-      dirPath,
-      title,
-      trackCount: tracks.length,
-      coverUrl,
-      tracks,
+      key: `dir:${dirKey}`,
+      kind: "dir",
+      albumTitle: null,
+      albumArtist: null,
+      dirKey,
+      trackPaths,
+      cover: coverUrl ? {type: "dir", url: coverUrl} : {type: "none", url: null},
     };
   });
 
-  albums.sort((a, b) => a.title.localeCompare(b.title, "ja"));
+  albums.sort((a, b) => a.dirKey.localeCompare(b.dirKey, "ja"));
   return albums;
 };

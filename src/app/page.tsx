@@ -13,8 +13,7 @@ import {useFantiaMapping}      from "@/hooks/useFantiaMapping";
 import {useMp3Library}         from "@/hooks/useMp3Library"; // ← I/F変更後を想定
 import {usePlaylistPlayer}     from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
 import {useTrackViews}         from "@/hooks/useTrackViews";
-import {buildDirAlbums}        from "@/lib/mp3/album/buildDirAlbums";
-import {DirAlbumView}          from "@/types/albumView";
+import {buildDirAlbumViews}    from "@/lib/mp3/album/buildDirAlbumViews";
 import React, {JSX}            from "react";
 
 export default function Page(): JSX.Element {
@@ -29,7 +28,7 @@ export default function Page(): JSX.Element {
   const mapping = useFantiaMapping();
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = mapping;
 
-  const {mp3List, covers, settingState, settingActions} = useMp3Library({
+  const {mp3List, covers, settingState, settingActions, albums} = useMp3Library({
     shuffle: settings.playback.shuffle,
   });
 
@@ -58,13 +57,13 @@ export default function Page(): JSX.Element {
     settingActions,
   });
 
-  const dirAlbums = React.useMemo<DirAlbumView[]>(() => {
-    return buildDirAlbums({
+  const dirAlbums = React.useMemo(() => {
+    return buildDirAlbumViews({
+      albums,
       trackViews,
       folderName: settingState.folderName,
     });
-  }, [trackViews, settingState.folderName]);
-
+  }, [albums, trackViews, settingState.folderName]);
 
   return (
     <AppShell
