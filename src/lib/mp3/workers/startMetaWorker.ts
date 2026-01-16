@@ -17,6 +17,7 @@ type Args = {
   setMetaByPath: React.Dispatch<React.SetStateAction<TrackMetaByPath>>;
   setCoverUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
 
+  shouldDeferTag?: (entry: Mp3Entry) => boolean;
 };
 
 const yieldToBrowser = async (): Promise<void> => {
@@ -33,11 +34,11 @@ const createCoverUrl = (track: (url: string) => void, picture?: Picture): string
 };
 
 export const startMetaWorker = async (args: Args): Promise<void> => {
-  const {items, runIdRef, track, setMetaByPath, setCoverUrlByPath} = args;
+  const {items, runIdRef, track, setMetaByPath, setCoverUrlByPath, shouldDeferTag} = args;
 
   const myRunId = ++runIdRef.current;
 
-  for (const entry of items) {
+  const doOne = async (entry: Mp3Entry): Promise<void> => {
     if (runIdRef.current !== myRunId) return;
 
     try {
@@ -48,7 +49,6 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
 
       if (runIdRef.current !== myRunId) return;
 
-      // ✅ 既に登録済みなら上書きしない（Refなしで安全）
       if (createdCoverUrl) {
         setCoverUrlByPath((prev) => {
           if (prev[entry.path]) return prev;
@@ -56,7 +56,6 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
         });
       }
 
-      // ここは既存のまま setMetaByPath を使ってOK（型だけMp3Tagになっている）
       setMetaByPath((previous) => ({
         ...previous,
         [entry.path]: tag,
@@ -66,5 +65,25 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
     }
 
     await yieldToBrowser();
+  };
+
+  const deferred: Mp3Entry[] = [];
+
+  // 1st pass: 先に処理する（=後回しじゃないもの）
+  for (const entry of items) {
+    if (runIdRef.current !== myRunId) return;
+
+    if (shouldDeferTag?.(entry)) {
+      deferred.push(entry);
+      continue;
+    }
+
+    await doOne(entry);
+  }
+
+  // 2nd pass: 後回し分（Fantiaなど）を最後に処理
+  for (const entry of deferred) {
+    if (runIdRef.current !== myRunId) return;
+    await doOne(entry);
   }
 };

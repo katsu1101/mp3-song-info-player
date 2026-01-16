@@ -1,6 +1,7 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
 import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
+import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
 import {startDirCoverWorker}      from "@/lib/mp3/workers/startDirCoverWorker";
 import {startMetaWorker}          from "@/lib/mp3/workers/startMetaWorker";
 import type {Mp3Entry}            from "@/types/mp3Entry";
@@ -97,5 +98,6 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     track,
     setMetaByPath,
     setCoverUrlByPath,
+    shouldDeferTag: (entry) => !!extractPrefixIdFromPath(entry.path),
   });
 };
