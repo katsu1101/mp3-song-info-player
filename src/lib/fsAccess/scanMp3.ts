@@ -1,4 +1,5 @@
-import {Mp3Entry} from "@/types/mp3Entry";
+import {getLowerExt, SOUND_EXT, VIDEO_EXT} from "@/const/constants";
+import {Mp3Entry}                          from "@/types/mp3Entry";
 
 /**
  * 指定されたディレクトリとそのサブディレクトリから、すべてのMP3ファイルを非同期で読み込み取得します。
@@ -31,8 +32,8 @@ export const readMp3FromDirectory = async (
     const currentPath = basePath ? `${basePath}/${name}` : name;
 
     if (handle.kind === "file") {
-      if (!name.toLowerCase().endsWith(".mp3")
-        && !name.toLowerCase().endsWith(".m4a")) continue;
+      const ext = getLowerExt(name);
+      if (!SOUND_EXT.has(ext) && !VIDEO_EXT.has(ext)) continue;
 
       const fileHandle = handle as FileSystemFileHandle;
       const fileName = fileHandle.name;

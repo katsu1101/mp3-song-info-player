@@ -30,7 +30,9 @@ export const STORAGE = {
  *
  * このセットは、ファイルタイプの検証や画像ファイルのフィルタリングを行う際に、画像拡張子を素早く参照できるようにします。
  */
-export const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "gif"]);
+export const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif"]);
+export const SOUND_EXT = new Set(["mp3", "wav", "ogg"]);
+export const VIDEO_EXT = new Set(["mp4", "m4v", "webm", "mov"]);
 
 export const getLowerExt = (name: string): string => {
   const dot = name.lastIndexOf(".");

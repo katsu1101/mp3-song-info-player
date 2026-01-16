@@ -1,5 +1,5 @@
 // src/lib/fsAccess/findFirstImageFileHandle.ts
-import {getLowerExt, IMAGE_EXTS} from "@/const/constants";
+import {getLowerExt, IMAGE_EXT} from "@/const/constants";
 
 export const findFirstImageFileHandle = async (
   directoryHandle: FileSystemDirectoryHandle
@@ -10,7 +10,7 @@ export const findFirstImageFileHandle = async (
 
   for await (const [name, entry] of iterable) {
     if (entry.kind !== "file") continue;
-    if (!IMAGE_EXTS.has(getLowerExt(name))) continue;
+    if (!IMAGE_EXT.has(getLowerExt(name))) continue;
     return entry as FileSystemFileHandle;
   }
   return null;
