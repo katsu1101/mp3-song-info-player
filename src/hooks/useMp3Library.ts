@@ -9,7 +9,7 @@ import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/
 import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
 import type {AlbumInfo}                                         from "@/types/albumInfo";
 import type {Covers}                                            from "@/types/covers";
-import type {FantiaMappingEntry}                                from "@/types/fantia";
+import {FantiaMappingRow}                                       from "@/types/fantia";
 import type {Mp3Entry}                                          from "@/types/mp3Entry";
 import {SettingActions, SettingState}                           from "@/types/setting";
 import type {TrackMetaByPath}                                   from "@/types/trackMeta";
@@ -25,7 +25,7 @@ export type UseMp3LibraryResult = {
   covers: Covers;
   settingState: SettingState;
   settingActions: SettingActions;
-  fantiaEntryByPath: Record<string, FantiaMappingEntry | undefined>;
+  fantiaEntryByPath: Record<string, FantiaMappingRow | undefined>;
 
   albums: AlbumInfo[]; // ✅ 追加
 };
@@ -62,7 +62,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
 
   // ===== Fantia mapping (progressive) =====
   const [fantiaEntryByPath, setFantiaEntryByPath] =
-    useState<Record<string, FantiaMappingEntry | undefined>>({});
+    useState<Record<string, FantiaMappingRow | undefined>>({});
 
   // ===== internal utilities =====
   const resetView = useCallback(() => {

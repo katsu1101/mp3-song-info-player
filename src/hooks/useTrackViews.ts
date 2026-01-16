@@ -1,8 +1,7 @@
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import {getDirname}              from "@/lib/path/getDirname";
-import {buildReleaseOrderLabel}  from "@/lib/playlist/label";
 import {Covers}                  from "@/types";
-import type {FantiaMappingEntry} from "@/types/fantia";
+import {FantiaMappingRow}        from "@/types/fantia";
 import type {Mp3Entry}           from "@/types/mp3Entry";
 import {TrackMetaByPath}         from "@/types/trackMeta";
 import {TrackView}               from "@/types/views";
@@ -29,7 +28,7 @@ type UseTrackViewsArgs = {
   // ✅ cover（曲 > フォルダ代表）はこのまま
   covers: Covers;
 
-  mappingByPrefixId: ReadonlyMap<string, FantiaMappingEntry>;
+  mappingByPrefixId: ReadonlyMap<string, FantiaMappingRow>;
 };
 
 /**
@@ -92,28 +91,14 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         || meta?.artist?.trim()
         || "";
 
-      const displayAlbumTitle =
-        fantiaEntry?.releaseYm?.trim()
+      const displayAlbumName =
+        fantiaEntry?.albumName?.trim()
         || pickText(meta?.album); // Fantia releaseYm を album に混ぜない
-
-      // 任意: 表示用の補助情報（欲しくなったらUIに出す用）
-      const displaySub =
-        pickText(
-          fantiaEntry?.releaseYm ? `Fantia ${fantiaEntry.releaseYm}` : null,
-          fantiaEntry?.originalArtist ? `原曲: ${fantiaEntry.originalArtist}` : null,
-        );
 
       const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
 
 
-      const albumName = meta?.album ?? null;
-      const trackNo = meta?.trackNo ?? null;
-
-      const albumOrderLabel =
-        albumName ? (trackNo ? `${albumName} / ${toTwoDigits(trackNo)}` : albumName) : null;
-
-      const releaseOrderLabel = buildReleaseOrderLabel(mapping) ?? "";
-      const orderLabel = albumOrderLabel ?? releaseOrderLabel;
+      const albumName = fantiaEntry?.albumName ?? meta?.album ?? null;
 
       const tagArtist = normalizeText(meta?.artist);
       const mappingOriginal = normalizeText(mapping?.originalArtist);
@@ -121,11 +106,6 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
       const dirPath = getDirname(item.path);
       const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
-// src/hooks/useTrackViews.ts（mapの中）
-
-      // ① Fantiaの releaseYm を正規化して TrackView.releaseYm に入れる
-      //    mapping と fantiaEntry が同じならどっちでもいいけど、ここでは fantiaEntry を優先
-      const releaseYm = normalizeReleaseYm(fantiaEntry?.releaseYm ?? null);
 
       // ② track/disc を “生文字列” に正規化（number混入を防ぐ）
       const trackNoRaw = toRawStringOrNull(meta?.trackNo ?? null);
@@ -141,21 +121,20 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         display: {
           title: displayTitle,
           artist: displayArtist,
-          albumTitle: displayAlbumTitle,
-          sub: displaySub,
+          albumName: displayAlbumName,
         },
 
         displayTitle,
-        orderLabel,
         originalArtist,
         coverUrl,
 
         trackNoRaw,  // ✅ string|null
         discNoRaw,   // ✅ string|null
-        releaseYm,   // ✅ "YYYY-MM" or null
+        albumName,   // ✅ "YYYY-MM" or null
 
         lyrics: meta?.lyrics ?? null,
         lyricsLrc: meta?.lyricsLrc ?? null,
+
       } as TrackView;
 
     });
@@ -180,22 +159,4 @@ const toRawStringOrNull = (v: unknown): string | null => {
   }
   if (typeof v === "number" && Number.isFinite(v)) return String(v);
   return null;
-};
-
-// "2022-11", "2022/11", "2022/11/01", "2022/11 / 01" → "2022-11"
-const normalizeReleaseYm = (v: unknown): string | null => {
-  if (typeof v !== "string") return null;
-  const s = v.trim();
-  if (s.length === 0) return null;
-
-  const m = s.match(/(\d{4})\D+(\d{1,2})/);
-  if (!m) return null;
-
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-  if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
-  if (month < 1 || month > 12) return null;
-
-  const mm = String(month).padStart(2, "0");
-  return `${year}-${mm}`;
 };

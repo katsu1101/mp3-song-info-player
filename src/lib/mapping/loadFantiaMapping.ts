@@ -1,5 +1,5 @@
 import {parseFantiaMappingText} from "@/lib/mapping/parseFantiaMapping";
-import {FantiaMappingEntry}     from "@/types/fantia";
+import {FantiaMappingRow}       from "@/types/fantia";
 
 /**
  * アプリケーションのベースパスを取得し、末尾にスラッシュが付かないことを保証します。
@@ -45,12 +45,12 @@ const fetchTextUtf8 = async (url: string): Promise<string> => {
  * その内容を解析し、解析されたマッピングエントリの配列を返します。
  *
  * @param {string} [filename="fantia-mapping.tsv"] - 読み込むファイル名。指定しない場合、デフォルトは "fantia-mapping.tsv" です。
- * @returns {Promise<FantiaMappingEntry[]>} Fantia マッピングエントリの配列を解決するプロミス。
+ * @returns {Promise<FantiaMappingRow[]>} Fantia マッピングエントリの配列を解決するプロミス。
  * @throws {Error} ファイルの取得または解析に失敗した場合、または指定されたマッピングが無効な場合。
  */
 export const loadFantiaMappingFromPublic = async (
   filename: string = "fantia-mapping.tsv"
-): Promise<FantiaMappingEntry[]> => {
+): Promise<FantiaMappingRow[]> => {
   const basePath = getBasePath();
   const url = `${basePath}/data/${filename}`;
   const text = await fetchTextUtf8(url);

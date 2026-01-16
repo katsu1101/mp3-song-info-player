@@ -27,29 +27,6 @@ const parseIndexOfTotal = (raw: unknown): number | null => {
 };
 
 
-const parseReleaseYm = (ym: string | null | undefined): number | null => {
-  if (!ym) return null;
-
-  // 年と月だけ拾う
-  const m = ym.match(/(\d{4})\D+(\d{1,2})/);
-
-  if (!m) return null;
-
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-
-  if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
-  if (month < 1 || month > 12) return null;
-
-  return year * 100 + month; // 202211
-};
-
-
-const isFantiaTrack = (t: TrackView): boolean => {
-  return looksLikeYm(t.releaseYm) || looksLikeYm(t.orderLabel);
-};
-
-
 /**
  * 混在時の優先順位:
  * ① Fantia（releaseYm）
@@ -57,7 +34,6 @@ const isFantiaTrack = (t: TrackView): boolean => {
  * ③ fileName
  */
 const getSortRank = (t: TrackView): 0 | 1 | 2 => {
-  if (isFantiaTrack(t)) return 0;
 
   const discNo = parseIndexOfTotal(t.discNoRaw);
   const trackNo = parseIndexOfTotal(t.trackNoRaw);
@@ -77,8 +53,8 @@ export const sortAlbumTracks = (rows: readonly AlbumTrackRow[]): AlbumTrackRow[]
 
     // --- ① Fantia: releaseYm ---
     if (aRank === 0) {
-      const aYm = parseReleaseYm(getFantiaYmSource(a.t));
-      const bYm = parseReleaseYm(getFantiaYmSource(b.t));
+      const aYm = getSortRank(a.t);
+      const bYm = getSortRank(b.t);
 
       // releaseYm無しは末尾
       if (aYm != null && bYm != null && aYm !== bYm) return aYm - bYm;
@@ -114,12 +90,4 @@ export const sortAlbumTracks = (rows: readonly AlbumTrackRow[]): AlbumTrackRow[]
     return a.index - b.index; // 安定化
   });
 };
-// ✅ 追加: "2022-11" / "2022/11" / "2022/11/01" / "2022/11 / 01" を許容
-const looksLikeYm = (s: string | null | undefined): boolean => {
-  if (!s) return false;
-  return /(\d{4})\D+(\d{1,2})/.test(s);
-};
 
-const getFantiaYmSource = (t: TrackView): string | null => {
-  return t.releaseYm ?? t.orderLabel ?? null;
-};

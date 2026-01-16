@@ -1,8 +1,8 @@
 "use client";
 
-import {loadFantiaMappingFromPublic}            from "@/lib/mapping/loadFantiaMapping";
-import {FantiaMappingEntry, FantiaMappingState} from "@/types/fantia";
-import {useEffect, useMemo, useState}           from "react";
+import {loadFantiaMappingFromPublic}          from "@/lib/mapping/loadFantiaMapping";
+import {FantiaMappingRow, FantiaMappingState} from "@/types/fantia";
+import {useEffect, useMemo, useState}         from "react";
 
 /**
  * Fantiaのマッピングデータを処理するための状態と機能を提供するカスタムフック。
@@ -17,7 +17,7 @@ import {useEffect, useMemo, useState}           from "react";
  * - `isLoading`: データの読み込みがまだ進行中かどうかを示すブール値。
  */
 export const useFantiaMapping = (): FantiaMappingState => {
-  const [mapping, setMapping] = useState<FantiaMappingEntry[]>([]);
+  const [mapping, setMapping] = useState<FantiaMappingRow[]>([]);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -43,7 +43,7 @@ export const useFantiaMapping = (): FantiaMappingState => {
   }, []);
 
   const mappingByPrefixId = useMemo(() => {
-    const map = new Map<string, FantiaMappingEntry>();
+    const map = new Map<string, FantiaMappingRow>();
     for (const entry of mapping) {
       if (!entry.prefixId) continue;
       map.set(entry.prefixId.toLowerCase(), entry);

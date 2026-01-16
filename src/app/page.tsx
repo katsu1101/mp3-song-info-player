@@ -13,7 +13,7 @@ import {useFantiaMapping}                    from "@/hooks/useFantiaMapping";
 import {useMp3Library}                       from "@/hooks/useMp3Library"; // ← I/F変更後を想定
 import {usePlaylistPlayer}                   from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
 import {useTrackViews}                       from "@/hooks/useTrackViews";
-import {buildDirAlbumViews}                  from "@/lib/mp3/album/buildDirAlbumViews";
+import {buildAlbumViewsFantiaFirst}          from "@/lib/mp3/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
 import React, {JSX}                          from "react";
 
@@ -44,12 +44,12 @@ export default function Page(): JSX.Element {
   });
 
   const dirAlbums = React.useMemo(() => {
-    return buildDirAlbumViews({
-      albums,
+    return buildAlbumViewsFantiaFirst({
       trackViews,
       folderName: settingState.folderName,
+      dirCoverUrlByDir: covers.dirCoverUrlByDir,
     });
-  }, [albums, trackViews, settingState.folderName]);
+  }, [trackViews, settingState.folderName, covers.dirCoverUrlByDir]);
 
 // ✅ 追加：ここで “アルバム内＆アルバム順” を確定させる（UIとプレイヤー共通）
   const sortedDirAlbums = React.useMemo(() => {

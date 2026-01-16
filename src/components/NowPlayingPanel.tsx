@@ -366,8 +366,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
       </div> : null}
 
       <div style={{marginTop: 12, display: "grid", gap: 6}}>
-        <InfoRow label="年月/順" value={nowTrackView?.orderLabel ?? "—"}/>
-        <InfoRow label="原曲" value={nowTrackView?.originalArtist ?? "—"}/>
+        <InfoRow label="アルバム" value={nowTrackView?.albumName ?? "—"}/>
+        <InfoRow label="アーティスト" value={nowTrackView?.originalArtist ?? "—"}/>
         <InfoRow label="ファイル" value={fileName}/>
         {dirName ? <InfoRow label="フォルダ" value={dirName}/> : null}
       </div>

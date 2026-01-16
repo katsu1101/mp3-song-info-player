@@ -1,31 +1,4 @@
-import {FantiaMappingEntry, FantiaMappingRowInput} from "@/types/fantia";
-
-/**
- * 指定された年と月を表す文字列を構造化された形式に正規化します。
- *
- * 入力文字列は「YYYY-MM」または「YYYY/MM」の形式であることが想定されます。
- * このメソッドは入力を検証し、
- * 年と月が整数であること、および月が有効範囲（1から12）内にあることを確認します。
- * 入力が有効な場合、関数は解析された年、月、および「YYYY-MM」形式の正規化された文字列を含むオブジェクトを返します。
- * 入力が無効な場合、メソッドはnullを返します。
- *
- * @param {string} value - 年と月を表す入力文字列。
- * @returns {{ year: number, month: number, normalized: string } | null}
- *         年、月、正規化された文字列を含むオブジェクト、または入力が無効な場合はnull。
- */
-const normalizeReleaseYm = (value: string): { year: number; month: number; normalized: string } | null => {
-  const trimmed = value.trim();
-  const match = /^(\d{4})[\/-](\d{1,2})$/.exec(trimmed);
-  if (!match) return null;
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  if (!Number.isInteger(year) || !Number.isInteger(month)) return null;
-  if (month < 1 || month > 12) return null;
-
-  const mm = String(month).padStart(2, "0");
-  return {year, month, normalized: `${year}-${mm}`};
-};
+import {FantiaMappingRow} from "@/types/fantia";
 
 /**
  * セルの値をトリムされた文字列であることを保証してクリーンアップします。
@@ -39,6 +12,10 @@ const normalizeReleaseYm = (value: string): { year: number; month: number; norma
  */
 const cleanCell = (value: string | undefined): string => (value ?? "").trim();
 
+const cleanCellN = (value: string | undefined): number => {
+  if (!value) return 0;
+  return Number(cleanCell(value));
+}
 /**
  * 単一行のテキストを、入力データの行を表す構造化オブジェクトに解析します。
  *
@@ -47,10 +24,10 @@ const cleanCell = (value: string | undefined): string => (value ?? "").trim();
  *
  * @param {string} line - 解析対象のテキスト行。
  * @param {"\t" | ","} delimiter - 行を列に分割する区切り文字。タブ（`\t`）またはコンマ（`,`）のいずれか。
- * @returns {FantiaMappingRowInput | null} 解析されたフィールド（`prefixId`、`releaseYm`、`title`、`originalArtist`）を含む構造化オブジェクト。
+ * @returns {FantiaMappingRow | null} 解析されたフィールド（`prefixId`、`releaseYm`、`title`、`originalArtist`）を含む構造化オブジェクト。
  * 行が無効またはスキップすべき場合は`null`を返す。
  */
-const parseLineToRow = (line: string, delimiter: "\t" | ","): FantiaMappingRowInput | null => {
+const parseLineToRow = (line: string, delimiter: "\t" | ","): FantiaMappingRow | null => {
   const raw = line.trim();
   if (!raw) return null;
   if (raw.startsWith("#")) return null;
@@ -58,16 +35,17 @@ const parseLineToRow = (line: string, delimiter: "\t" | ","): FantiaMappingRowIn
   const cols = raw.split(delimiter);
   // 想定: prefixId, releaseYm, title, originalArtist
   const prefixIdRaw = cleanCell(cols[0]);
-  const releaseYm = cleanCell(cols[1]);
-  const title = cleanCell(cols[2]);
-  const originalArtistRaw = cleanCell(cols[3]);
+  const albumName = cleanCell(cols[1]);
+  const track = cleanCellN(cols[2]);
+  const title = cleanCell(cols[3]);
+  const originalArtistRaw = cleanCell(cols[4]);
 
-  if (!releaseYm || !title) return null;
+  if (!albumName || !title) return null;
 
   const prefixId = prefixIdRaw ? prefixIdRaw : null;
   const originalArtist = originalArtistRaw ? originalArtistRaw : null;
 
-  return {prefixId, releaseYm, title, originalArtist};
+  return {prefixId, albumName, track, title, originalArtist};
 };
 
 /**
@@ -80,46 +58,21 @@ const parseLineToRow = (line: string, delimiter: "\t" | ","): FantiaMappingRowIn
  * 3. 同一リリース月の行については、時系列順に基づいて月内インデックスとトラック番号が自動割り当てされます。
  *
  * @param {string} text - マッピングデータを含む入力テキスト。
- * @returns {FantiaMappingEntry[]} 処理済みマッピングエントリの配列。
+ * @returns {FantiaMappingRow[]} 処理済みマッピングエントリの配列。
  *                                 各エントリは正規化されたデータと割り当てられたインデックスを含む。
  */
-export const parseFantiaMappingText = (text: string): FantiaMappingEntry[] => {
+export const parseFantiaMappingText = (text: string): FantiaMappingRow[] => {
   const lines = text.split(/\r?\n/);
 
   // デリミタ自動判定（最初の非空行にタブが多ければTSV）
   const firstDataLine = lines.find((l) => l.trim() && !l.trim().startsWith("#")) ?? "";
   const delimiter: "\t" | "," = firstDataLine.includes("\t") ? "\t" : ",";
 
-  const rows: FantiaMappingRowInput[] = [];
+  const rows: FantiaMappingRow[] = [];
   for (const line of lines) {
     const row = parseLineToRow(line, delimiter);
     if (row) rows.push(row);
   }
 
-  // 同月内連番を、出現順に 1,2,3... 自動採番
-  const withinMonthCounter = new Map<string, number>();
-
-  const entries: FantiaMappingEntry[] = [];
-  for (const row of rows) {
-    const normalized = normalizeReleaseYm(row.releaseYm);
-    if (!normalized) continue; // フォーマット不正は落とす（必要ならログに）
-    const {year, month, normalized: releaseYmNormalized} = normalized;
-
-    const key = releaseYmNormalized;
-    const nextIndex = (withinMonthCounter.get(key) ?? 0) + 1;
-    withinMonthCounter.set(key, nextIndex);
-
-    const track = month * 10 + nextIndex;
-
-    entries.push({
-      ...row,
-      releaseYm: releaseYmNormalized,
-      year,
-      month,
-      withinMonthIndex: nextIndex,
-      track,
-    });
-  }
-
-  return entries;
+  return rows;
 };
