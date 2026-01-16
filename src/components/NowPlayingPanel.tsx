@@ -371,8 +371,6 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         <InfoRow label="ファイル" value={fileName}/>
         {dirName ? <InfoRow label="フォルダ" value={dirName}/> : null}
       </div>
-      {nowTrackView?.lyrics}
-      {nowTrackView?.lyricsLrc}
       {filePath ? (
         <details style={{marginTop: 10}}>
           <summary style={{cursor: "pointer", fontSize: 12, opacity: 0.7}}>パス</summary>
