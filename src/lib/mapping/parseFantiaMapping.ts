@@ -35,17 +35,17 @@ const parseLineToRow = (line: string, delimiter: "\t" | ","): FantiaMappingRow |
   const cols = raw.split(delimiter);
   // 想定: prefixId, releaseYm, title, originalArtist
   const prefixIdRaw = cleanCell(cols[0]);
-  const albumName = cleanCell(cols[1]);
+  const albumTitle = cleanCell(cols[1]);
   const track = cleanCellN(cols[2]);
   const title = cleanCell(cols[3]);
   const originalArtistRaw = cleanCell(cols[4]);
 
-  if (!albumName || !title) return null;
+  if (!albumTitle || !title) return null;
 
   const prefixId = prefixIdRaw ? prefixIdRaw : null;
   const originalArtist = originalArtistRaw ? originalArtistRaw : null;
 
-  return {prefixId, albumName, track, title, originalArtist};
+  return {prefixId, albumTitle: albumTitle, track, title, originalArtist};
 };
 
 /**

@@ -17,5 +17,5 @@ export type TrackView = {
   lyrics?: string | null;     // USLT（非同期歌詞）
   lyricsLrc?: string | null;  // SYLT（同期/LRC相当が取れた場合）
 
-  albumName: string | null;
+  albumTitle: string | null;
 };

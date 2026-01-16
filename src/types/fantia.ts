@@ -17,7 +17,7 @@ export type FantiaMappingRow = {
   /** ファイル名先頭の8桁hex（空もあり得る） */
   prefixId: string | null;
   /** アルバム名 */
-  albumName: string;
+  albumTitle: string;
   /** トラックNo. */
   track: number; // 10, 40, 111 など
   /** 曲名 */

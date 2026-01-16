@@ -81,7 +81,7 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
 
         {variant === "full" ? (
           <>
-            <span className={styles.colYm}>{t.albumName}</span>
+            <span className={styles.colYm}>{t.albumTitle}</span>
             <span className={styles.colOrig}>{t.originalArtist}</span>
 
             <span className={styles.colPath} title={t.item.path ?? ""}>

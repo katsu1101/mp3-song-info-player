@@ -32,15 +32,6 @@ type UseTrackViewsArgs = {
 };
 
 /**
- * 数値を2桁の文字列表現に変換します。
- * 数値が1桁の場合、先頭に0を付加します。
- *
- * @param {number} n - 2桁の文字列に変換する数値。
- * @returns {string} 指定された数値の2桁の文字列表現。
- */
-const toTwoDigits = (n: number): string => String(n).padStart(2, "0");
-
-/**
  * 入力値を正規化し、文字列から周囲の空白をトリミングします。
  * 入力が文字列でない場合、またはトリミング結果が空文字列の場合、nullを返します。
  * それ以外の場合は、トリミングされた文字列を返します。
@@ -91,14 +82,14 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         || meta?.artist?.trim()
         || "";
 
-      const displayAlbumName =
-        fantiaEntry?.albumName?.trim()
+      const displayAlbumTitle =
+        fantiaEntry?.albumTitle?.trim()
         || pickText(meta?.album); // Fantia releaseYm を album に混ぜない
 
       const mapping = prefixId ? mappingByPrefixId.get(prefixId) : undefined;
 
 
-      const albumName = fantiaEntry?.albumName ?? meta?.album ?? null;
+      const albumTitle = fantiaEntry?.albumTitle ?? meta?.album ?? null;
 
       const tagArtist = normalizeText(meta?.artist);
       const mappingOriginal = normalizeText(mapping?.originalArtist);
@@ -121,7 +112,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         display: {
           title: displayTitle,
           artist: displayArtist,
-          albumName: displayAlbumName,
+          albumTitle: displayAlbumTitle,
         },
 
         displayTitle,
@@ -130,7 +121,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
         trackNoRaw,  // ✅ string|null
         discNoRaw,   // ✅ string|null
-        albumName,   // ✅ "YYYY-MM" or null
+        albumTitle: albumTitle,   // ✅ "YYYY-MM" or null
 
         lyrics: meta?.lyrics ?? null,
         lyricsLrc: meta?.lyricsLrc ?? null,
