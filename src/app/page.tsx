@@ -126,6 +126,7 @@ export default function Page(): JSX.Element {
           variant={variant}
           nowPlayingID={nowPlayingID}
           trackViews={trackViews}
+          albumViews={sortedDirAlbums}
           audioRef={audioRef}
           commands={commands}
           isPlaying={isPlaying}

@@ -52,24 +52,6 @@ export function TrackList(props: TrackListProps): JSX.Element {
     });
   }, [nowPlayingID]);
 
-  // ✅ TrackList側で「確実に」ソートした albums を作る（最小で安全）
-  // const sortedAlbums = useMemo<readonly DirAlbumView[]>(() => {
-  //   if (!shouldShowAlbums || !albums) return [];
-  //
-  //   const next: DirAlbumView[] = albums.map((album: DirAlbumView) => {
-  //     const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
-  //     return {
-  //       ...album,
-  //       tracks: sortedTracks,
-  //       trackCount: sortedTracks.length,
-  //     };
-  //   });
-  //
-  //   next.sort((a, b) => a.title.localeCompare(b.title, "ja"));
-  //   return next;
-  // }, [shouldShowAlbums, albums]);
-
-
   if (!state.folderName || state.needsReconnect) {
     return <EmptyStateFolderActions state={state} commands={commands}/>;
   }
@@ -89,8 +71,8 @@ export function TrackList(props: TrackListProps): JSX.Element {
         <div className={styles.colNo}>#</div>
         <div className={styles.colArt}>🎨</div>
         <div className={styles.colTitle}>曲名</div>
-        <div className={styles.colYm}>アルバム</div>
-        <div className={styles.colOrig}>原曲</div>
+        <div className={styles.colYm}>アルバム/年月</div>
+        <div className={styles.colOrig}>アーティスト/原曲</div>
         <div className={styles.colPath}>ファイル</div>
       </div>
 
@@ -100,7 +82,10 @@ export function TrackList(props: TrackListProps): JSX.Element {
             <li key={album.key} className={styles.albumSection}>
               {/* TODO ✅ アルバム見出し（将来ここを button にしてアコーディオン化） */}
               <div className={styles.albumHeader}>
-                <ArtworkSquare url={album.coverUrl} size={56} radius={12}/>
+                <ArtworkSquare
+                  url={album.coverUrl} size={56} radius={12}
+                  fallbackText={album.title} seed={album.title}
+                />
                 <div className={styles.albumHeaderText}>
                   <div className={styles.albumTitle} title={album.title}>{album.title}</div>
                   <div className={styles.albumMeta}>{album.trackCount} 曲</div>
@@ -109,15 +94,16 @@ export function TrackList(props: TrackListProps): JSX.Element {
 
               {/* ✅ アルバム内トラック（TrackRowは<li>を返す想定） */}
               <ul className={styles.albumTracks} role="list">
-                {album.tracks.map(({t, index}) => (
+                {album.tracks.map(({t, index}, albumPos) => (
                   <TrackRow
                     key={`${album.key}:${t.item.path}`}
                     trackView={t}
+                    displayNo={albumPos + 1}
                     index={index}
                     nowPlayingID={nowPlayingID}
                     isPlaying={isPlaying}
                     commands={commands}
-                    setNowItemRef={(node) => {
+                    setNowItemAction={(node) => {
                       nowItemRef.current = node;
                     }}
                     variant="full"
@@ -135,7 +121,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
               nowPlayingID={nowPlayingID}
               isPlaying={isPlaying}
               commands={commands}
-              setNowItemRef={(node) => {
+              setNowItemAction={(node) => {
                 nowItemRef.current = node;
               }}
               variant="full"

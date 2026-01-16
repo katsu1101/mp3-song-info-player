@@ -1,13 +1,13 @@
 "use client";
 
+import {ArtworkSquare}    from "@/components/Artwork/ArtworkSquare";
 import {NowPlayingPulse}  from "@/components/NowPlayingPulse";
 import styles             from "@/components/TrackList/TrackList.module.scss";
 import type {AppCommands} from "@/hooks/useAppCommands";
 import type {TrackView}   from "@/types/views";
-import Image              from "next/image";
 import React              from "react";
 
-export type TrackRowVariant = "full" | "compact"; // TODO: album側はcompactを使う想定
+export type TrackRowVariant = "full" | "compact";
 
 type TrackRowProps = {
   displayNo?: number; // ✅ 表示用番号（未指定なら index+1）
@@ -20,7 +20,7 @@ type TrackRowProps = {
   commands: AppCommands;
 
   /** 再生中の行だけ scrollIntoView したいので、TrackList側でrefを持つ */
-  setNowItemRef?: (el: HTMLButtonElement | null) => void;
+  setNowItemAction?: (el: HTMLButtonElement | null) => void;
 
   variant?: TrackRowVariant; // TODO: 今回は未使用（TrackListはfull）
 };
@@ -33,7 +33,7 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
     nowPlayingID,
     isPlaying,
     commands,
-    setNowItemRef,
+    setNowItemAction,
     variant = "full",
   } = props;
 
@@ -47,7 +47,7 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
       data-now-playing={isActive ? "1" : "0"}
     >
       <button
-        ref={isActive ? (node) => setNowItemRef?.(node) : undefined}
+        ref={isActive ? (node) => setNowItemAction?.(node) : undefined}
         type="button"
         className={styles.rowButton}
         onClick={() => commands.playAtIndex(index)}
@@ -61,22 +61,11 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
         <span className={styles.colArt} aria-hidden>
           <span className={styles.artBox} aria-hidden>
             <span className={styles.artInner}>
-              {t.coverUrl ? (
-                <Image
-                  src={t.coverUrl}
-                  alt=""
-                  fill
-                  unoptimized
-                  style={{
-                    objectFit: "cover",
-                    objectPosition: "50% 0%",
-                  }}
-                />
-              ) : (
-                <span className={styles.noArt} aria-label="ジャケットなし" title="ジャケットなし">
-                  {t.orderLabel === "" ? t.originalArtist ?? t.displayTitle ?? "No" : t.orderLabel}
-                </span>
-              )}
+              <ArtworkSquare
+                url={t.coverUrl}
+                fallbackText={t.displayTitle ?? ""}
+                seed={t.displayTitle ?? ""}
+              />
             </span>
           </span>
         </span>
@@ -94,7 +83,7 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
               {t.item.path ?? "なし"}
             </span>
           </>
-        ) : null /* TODO: compactはアルバム表示用 */}
+        ) : null}
       </button>
     </li>
   );

@@ -1,10 +1,11 @@
 "use client";
 
 import {PlayerVariant}       from "@/components/AppShell/AppShell";
+import {ArtworkSquare}       from "@/components/Artwork/ArtworkSquare";
 import {AppCommands}         from "@/hooks/useAppCommands";
 import {getBasename}         from "@/lib/path/getBasename";
+import type {DirAlbumView}   from "@/types/albumView";
 import {TrackView}           from "@/types/views";
-import Image                 from "next/image";
 import React, {JSX, useMemo} from "react";
 
 /**
@@ -14,6 +15,7 @@ type NowPlayingPanelProps = {
   variant: PlayerVariant;
   nowPlayingID: number;
   trackViews: readonly TrackView[];
+  albumViews: DirAlbumView[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
   commands: AppCommands;
   isPlaying: boolean;
@@ -49,6 +51,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   const {
     nowPlayingID,
     trackViews,
+    albumViews,
     audioRef,
     commands,
     isPlaying,
@@ -58,7 +61,6 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     if (!nowPlayingID) return null;
     return trackViews.find((t) => t.item.id === nowPlayingID) ?? null;
   }, [nowPlayingID, trackViews]);
-  // TODO
 
   const title = nowTrackView?.displayTitle ?? "";
 
@@ -86,6 +88,41 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
     audio.pause();
   };
+
+  const currentTrack = useMemo(() => {
+    // id が 1..n で入ってる前提の設計に見えるので id で引く
+    return trackViews.find(t => t.item.id === nowPlayingID) ?? null;
+  }, [trackViews, nowPlayingID]);
+
+  const albumByTrackId = useMemo(() => {
+    const map = new Map<number, DirAlbumView>();
+    for (const album of albumViews ?? []) {
+      for (const row of album.tracks) {
+        const id = row.t.item.id;
+        map.set(id, album);
+      }
+    }
+    return map;
+  }, [albumViews]);
+
+  const currentAlbum = useMemo(() => {
+    if (!currentTrack) return null;
+    const id = currentTrack.item.id;
+    return albumByTrackId.get(id) ?? null;
+  }, [currentTrack, albumByTrackId]);
+
+  const albumPosition = useMemo(() => {
+    if (!currentAlbum || !currentTrack) return null;
+    const id = currentTrack.item.id;
+
+    const pos = currentAlbum.tracks.findIndex(r => r.t.item.id === id);
+    if (pos < 0) return null;
+
+    return {
+      indexInAlbum: pos + 1,
+      totalInAlbum: currentAlbum.tracks.length,
+    };
+  }, [currentAlbum, currentTrack]);
 
   const variant = props.variant ?? "full";
   if (variant === "mini") {
@@ -128,18 +165,11 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             placeItems: "center",
           }}
         >
-          {nowTrackView?.coverUrl ? (
-            <Image
-              src={nowTrackView.coverUrl}
-              alt=""
-              width={256}
-              height={256}
-              unoptimized
-              style={{width: "100%", height: "100%", objectFit: "cover"}}
-            />
-          ) : (
-            <span style={{fontSize: 11, opacity: 0.6}}>No Art</span>
-          )}
+          <ArtworkSquare
+            url={nowTrackView?.coverUrl}
+            fallbackText={nowTrackView?.displayTitle ?? ""}
+            seed={nowTrackView?.displayTitle ?? ""}
+          />
         </div>
 
         {/* 右：上=タイトル / 下=ボタン */}
@@ -223,7 +253,25 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         color: "var(--foreground)",
       }}
     >
-      <div style={{display: "grid", placeItems: "center"}}>
+      <div style={{display: "grid", placeItems: "left"}}>
+        {currentAlbum ? (
+          <div style={{display: "grid", gridTemplateColumns: "44px minmax(0,1fr)", gap: 10, alignItems: "center"}}>
+            <ArtworkSquare
+              url={currentAlbum.coverUrl}
+              radius={12}
+              fallbackText={currentAlbum.title}
+              seed={currentAlbum.title}
+            />
+            <div style={{minWidth: 0}}>
+              <div style={{fontWeight: 900, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>
+                {currentAlbum.title}
+              </div>
+              <div style={{opacity: 0.7, fontSize: 13}}>
+                {albumPosition ? `${albumPosition.indexInAlbum} / ${albumPosition.totalInAlbum}` : `${currentAlbum.trackCount} 曲`}
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div
           style={{
             width: "100%",
@@ -237,18 +285,11 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             placeItems: "center",
           }}
         >
-          {nowTrackView?.coverUrl ? (
-            <Image
-              src={nowTrackView.coverUrl}
-              alt=""
-              width={COVER_MAX}
-              height={COVER_MAX}
-              unoptimized
-              style={{width: "100%", height: "100%", objectFit: "cover"}}
-            />
-          ) : (
-            <span style={{fontSize: 12, opacity: 0.7}}>No Art</span>
-          )}
+          <ArtworkSquare
+            url={nowTrackView?.coverUrl}
+            fallbackText={nowTrackView?.displayTitle ?? ""}
+            seed={nowTrackView?.displayTitle ?? ""}
+          />
         </div>
       </div>
 
