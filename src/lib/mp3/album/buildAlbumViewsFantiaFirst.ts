@@ -1,7 +1,7 @@
 import {UI_TEXT}                             from "@/const/uiText";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
 import {getDirname}                          from "@/lib/path/getDirname";
-import type {DirAlbumView}                   from "@/types/albumView";
+import {AlbumView}                           from "@/types/albumView";
 import type {TrackView}                      from "@/types/views";
 
 export type BuildAlbumViewsFantiaFirstArgs = {
@@ -18,7 +18,7 @@ const groupOrder: Record<GroupKind, number> = {
   dir: 1,
 };
 
-export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs): DirAlbumView[] => {
+export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs): AlbumView[] => {
   const {trackViews, folderName, dirCoverUrlByDir} = args;
   if (trackViews.length === 0) return [];
 
@@ -43,7 +43,7 @@ export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs)
   }
 
   // 3) DirAlbumView 化
-  const views: DirAlbumView[] = [];
+  const views: AlbumView[] = [];
 
   for (const g of groupRows.values()) {
     const tracks = sortAlbumTracks(g.rows);
@@ -54,6 +54,7 @@ export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs)
 
     views.push({
       key: `${g.kind}:${g.title}`,
+      kind: "dir",
       dirPath: g.dirKey,
       title: g.title,
       trackCount: tracks.length,

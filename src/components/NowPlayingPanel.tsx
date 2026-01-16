@@ -4,9 +4,9 @@ import {PlayerVariant}                      from "@/components/AppShell/AppShell
 import {ArtworkSquare}                      from "@/components/Artwork/ArtworkSquare";
 import {AppCommands}                        from "@/hooks/useAppCommands";
 import {useProgressScroll}                  from "@/hooks/useProgressScroll";
-import {getBasename}                        from "@/lib/path/getBasename";
-import type {DirAlbumView}                  from "@/types/albumView";
-import {TrackView}                          from "@/types/views";
+import {getBasename}    from "@/lib/path/getBasename";
+import type {AlbumView} from "@/types/albumView";
+import {TrackView}      from "@/types/views";
 import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
 import React, {JSX, useMemo, useRef}        from "react";
 import styles                               from "./NowPlayingPanel.module.scss";
@@ -18,7 +18,7 @@ type NowPlayingPanelProps = {
   variant: PlayerVariant;
   nowPlayingID: number;
   trackViews: readonly TrackView[];
-  albumViews: DirAlbumView[];
+  albumViews: AlbumView[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
   commands: AppCommands;
   isPlaying: boolean;
@@ -100,7 +100,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   }, [trackViews, nowPlayingID]);
 
   const albumByTrackId = useMemo(() => {
-    const map = new Map<number, DirAlbumView>();
+    const map = new Map<number, AlbumView>();
     for (const album of albumViews ?? []) {
       for (const row of album.tracks) {
         const id = row.t.item.id;

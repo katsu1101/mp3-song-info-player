@@ -5,9 +5,9 @@ import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare"
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
 import {TrackRow}                      from "@/components/TrackRow/TrackRow";
-import {AppCommands}                   from "@/hooks/useAppCommands";
-import {DirAlbumView}                  from "@/types/albumView";
-import {SettingState}                  from "@/types/setting";
+import {AppCommands}  from "@/hooks/useAppCommands";
+import {AlbumView}    from "@/types/albumView";
+import {SettingState} from "@/types/setting";
 import {TrackView}                     from "@/types/views";
 import React, {JSX, useEffect, useRef} from "react";
 import styles                          from "./TrackList.module.scss";
@@ -18,7 +18,7 @@ type TrackListProps = {
   isPlaying: boolean;
   state: SettingState;
   commands: AppCommands;
-  albums?: readonly DirAlbumView[]; // ✅ ここを types/albumView の DirAlbumView に
+  albums?: readonly AlbumView[]; // ✅ ここを types/albumView の DirAlbumView に
 };
 
 export function TrackList(props: TrackListProps): JSX.Element {

@@ -2,7 +2,7 @@
 import {isTypingTarget} from "@/lib/dom/isTypingTarget";
 
 import {PlayActions}                                    from "@/types/actions";
-import type {DirAlbumView}                              from "@/types/albumView"; // ✅ 追加
+import type {AlbumView}                                 from "@/types/albumView"; // ✅ 追加
 import type {Mp3Entry}                                  from "@/types/mp3Entry";
 import {Settings}                                       from "@/types/setting";
 import {TrackView}                                      from "@/types/views";
@@ -47,7 +47,7 @@ type UsePlaylistPlayerArgs = {
   settings: Settings;
 
   // ✅ 追加: アルバム表示（TrackView依存）
-  albumViews?: readonly DirAlbumView[];
+  albumViews?: readonly AlbumView[];
 
   stopAndClear?: () => void;
 };
