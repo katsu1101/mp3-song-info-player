@@ -93,7 +93,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
       const tagArtist = normalizeText(meta?.artist);
       const mappingOriginal = normalizeText(mapping?.originalArtist);
-      const originalArtist = tagArtist ?? mappingOriginal;
+      const originalArtist =  mappingOriginal ?? tagArtist;
 
       const dirPath = getDirname(item.path);
       const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
