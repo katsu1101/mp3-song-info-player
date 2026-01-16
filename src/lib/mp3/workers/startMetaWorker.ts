@@ -1,6 +1,5 @@
 // src/lib/mp3/workers/startMetaWorker.ts
 
-import {normalizeMp3Tag}      from "@/lib/mp3/normalizeMp3Tag";
 import {readMp3Meta}          from "@/lib/mp3/readMp3Meta";
 import type {Mp3Entry}        from "@/types/mp3Entry";
 import type {TrackMetaByPath} from "@/types/trackMeta";
@@ -43,10 +42,9 @@ export const startMetaWorker = async (args: Args): Promise<void> => {
 
     try {
       const file = await entry.fileHandle.getFile();
-      const rawMeta = await readMp3Meta(file);
-      const tag = normalizeMp3Tag(rawMeta);
+      const tag = await readMp3Meta(file);
 
-      const createdCoverUrl = createCoverUrl(track, rawMeta.picture);
+      const createdCoverUrl = createCoverUrl(track, tag.picture ?? undefined);
 
       if (runIdRef.current !== myRunId) return;
 

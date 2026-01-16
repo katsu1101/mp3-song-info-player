@@ -1,5 +1,5 @@
-import {Mp3Meta}        from "@/types/mp3";
-import {IAudioMetadata} from "music-metadata";
+import {Mp3Tag}                     from "@/types";
+import {IAudioMetadata, ILyricsTag} from "music-metadata";
 
 const looksLikeSjisMojibake = (text: string): boolean => {
   // 0x80-0xFFが多いのに日本語がほぼ無い → Shift-JISバイト列が文字化けしてる疑い
@@ -34,11 +34,49 @@ const repairSjisIfNeeded = (text: string): string => {
   return trimmed;
 };
 
-const pickNativeText = (ids: string[], metadata: IAudioMetadata): string | undefined => {
+type LyricsLike =
+  | string
+  | ILyricsTag
+  | Array<string | ILyricsTag>
+  | undefined;
+
+const toLyricsText = (value: LyricsLike): string | undefined => {
+  if (!value) return undefined;
+
+  // 配列なら先頭から有効なものを拾う
+  if (Array.isArray(value)) {
+    for (const v of value) {
+      const text = toLyricsText(v);
+      if (text) return text;
+    }
+    return undefined;
+  }
+
+  // 文字列ならそのまま
+  if (typeof value === "string") return value;
+
+  // ILyricsTag（想定）: text を優先
+  // TODO: ILyricsTag の実型に合わせてフィールド名を追加（lyrics / value / data など）
+  const maybeText = value.text;
+  if (typeof maybeText === "string" && maybeText.trim().length > 0) return maybeText;
+
+  return undefined;
+};
+const normalizeLyrics = (value: string | undefined): string | null => {
+  if (!value) return null;
+
+  const normalized = value
+    .replace(/\r\n?/g, "\n")
+    .trim();
+
+  return normalized.length > 0 ? normalized : null;
+};
+
+const pickNativeText = (ids: string[], metadata: IAudioMetadata): string | null => {
   const native = (metadata as IAudioMetadata).native as
     | Record<string, Array<{ id: string; value: unknown }>>
     | undefined;
-  if (!native) return undefined;
+  if (!native) return null;
 
   const tagTypePriority = ["ID3v2.3", "ID3v2.4", "ID3v2.2", "ID3v1"];
 
@@ -66,10 +104,10 @@ const pickNativeText = (ids: string[], metadata: IAudioMetadata): string | undef
       }
     }
   }
-  return undefined;
+  return null;
 };
 
-export const readMp3Meta = async (file: File): Promise<Mp3Meta> => {
+export const readMp3Meta = async (file: File): Promise<Mp3Tag> => {
   // ブラウザ側でだけ読み込ませる（SSRの巻き込みを避ける）
   const {parseBlob} = await import("music-metadata");
 
@@ -78,14 +116,31 @@ export const readMp3Meta = async (file: File): Promise<Mp3Meta> => {
 
   const firstPicture = common.picture?.[0];
 
+  // ✅ common.lyrics は string[] だったりするので最初を拾う
+  const commonLyrics = Array.isArray(common.lyrics) ? common.lyrics[0] : undefined;
+
+  const lyricsRaw =
+    pickNativeText(["USLT", "ULT"], metadata)
+    ?? commonLyrics
+    ?? undefined;
+
+  const lyricsLrcRaw =
+    pickNativeText(["SYLT", "SLT"], metadata)
+    ?? undefined;
+
   return {
-    title: pickNativeText(["TIT2", "TT2"], metadata) ?? common.title,
-    artist: pickNativeText(["TPE1", "TP1"], metadata) ?? (common.artist ?? common.artists?.join(", ")),
-    album: pickNativeText(["TALB", "TAL"], metadata) ?? common.album,
-    trackNo: common.track?.no ?? undefined,
-    year: common.year ?? undefined,
+    title: pickNativeText(["TIT2", "TT2"], metadata) ?? common.title ?? null,
+    artist: pickNativeText(["TPE1", "TP1"], metadata) ?? (common.artist ?? common.artists?.join(", ") ?? null),
+    album: pickNativeText(["TALB", "TAL"], metadata) ?? common.album ?? null,
+    trackNo: common.track?.no ?? null,
+    year: common.year ?? null,
     picture: firstPicture
       ? {data: firstPicture.data, format: firstPicture.format}
-      : undefined,
+      : null,
+    lyrics: normalizeLyrics(toLyricsText(lyricsRaw)),
+    lyricsLrc: normalizeLyrics(toLyricsText(lyricsLrcRaw)),
+    albumArtist: null,
+    discNo: null,
+    diskNo: null,
   };
 };

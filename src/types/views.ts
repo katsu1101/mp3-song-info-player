@@ -15,4 +15,7 @@ export type TrackView = {
   trackNoRaw: string | null; // "1/12"
   discNoRaw: string | null;  // "1/2"
   releaseYm: string | null;
+
+  lyrics?: string | null;     // USLT（非同期歌詞）
+  lyricsLrc?: string | null;  // SYLT（同期/LRC相当が取れた場合）
 };

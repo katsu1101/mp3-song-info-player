@@ -1,0 +1,70 @@
+.coverFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+}
+
+/* ArtworkSquare 内部の img を薄くする（※中身が img 前提） */
+.coverFrame[data-has-lyrics="1"] :global(img) {
+  //opacity: 0.45;              /* ← 0.22 からUP（おすすめは 0.4〜0.55） */
+  filter: saturate(1.05) contrast(1.02); /* 彩度/コントラストを少し戻す */
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  padding: 14px 14px 12px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+
+  /* 読みやすさの“膜” */
+  background:
+          radial-gradient(120% 100% at 50% 0%, rgba(0,0,0,0.12), transparent 55%),
+          linear-gradient(to bottom, rgba(255,255,255,0.72), rgba(255,255,255,0.50));
+  backdrop-filter: blur(6px);
+}
+
+.lyricsBox {
+  overflow: auto;
+  max-height: 100%;
+  padding-right: 6px; /* 細いスクロールバー分の余白 */
+}
+
+/* 歌詞の表示 */
+.lyricsText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.65;
+  font-size: 13px;
+  color: rgba(0,0,0,0.82);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+/* 目立たないスクロールバー */
+.lyricsBox {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(0,0,0,0.18) transparent;
+}
+
+.lyricsBox::-webkit-scrollbar {
+  width: 8px;
+}
+.lyricsBox::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lyricsBox::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.lyricsBox::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.26);
+  background-clip: content-box;
+}

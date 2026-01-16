@@ -11,18 +11,6 @@ export type Mp3Tag = {
   picture: EmbeddedPicture | null;
   discNo: string | null;
   diskNo: string | null;
-};
-
-/**
- * 旧互換。将来的に Mp3Tag へ統一するため廃止予定。
- * @deprecated Use Mp3Tag instead.
- */
-export type Mp3Meta = {
-  title?: string;
-  artist?: string;
-  album?: string;
-  trackNo?: number;
-  year?: number;
-  picture?: { data: Uint8Array; format: string };
-  coverUrl?: string;
+  lyrics: string | null;
+  lyricsLrc: string | null;
 };

@@ -153,6 +153,9 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
         trackNoRaw,  // ✅ string|null
         discNoRaw,   // ✅ string|null
         releaseYm,   // ✅ "YYYY-MM" or null
+
+        lyrics: meta?.lyrics ?? null,
+        lyricsLrc: meta?.lyricsLrc ?? null,
       } as TrackView;
 
     });

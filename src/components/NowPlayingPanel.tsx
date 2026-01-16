@@ -3,11 +3,13 @@
 import {PlayerVariant}                      from "@/components/AppShell/AppShell";
 import {ArtworkSquare}                      from "@/components/Artwork/ArtworkSquare";
 import {AppCommands}                        from "@/hooks/useAppCommands";
+import {useProgressScroll}                  from "@/hooks/useProgressScroll";
 import {getBasename}                        from "@/lib/path/getBasename";
 import type {DirAlbumView}                  from "@/types/albumView";
 import {TrackView}                          from "@/types/views";
 import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
-import React, {JSX, useMemo}                from "react";
+import React, {JSX, useMemo, useRef}        from "react";
+import styles                               from "./NowPlayingPanel.module.scss";
 
 /**
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
@@ -57,6 +59,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     commands,
     isPlaying,
   } = props;
+
+  const lyricsBoxRef = useRef<HTMLDivElement | null>(null);
 
   const nowTrackView = useMemo(() => {
     if (!nowPlayingID) return null;
@@ -124,6 +128,17 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
       totalInAlbum: currentAlbum.tracks.length,
     };
   }, [currentAlbum, currentTrack]);
+
+  const lyrics = nowTrackView?.lyrics ?? null;
+  const hasLyrics = Boolean(lyrics && lyrics.trim().length > 0);
+
+  useProgressScroll({
+    audioRef,
+    scrollRef: lyricsBoxRef,
+    enabled: hasLyrics,          // とりあえず歌詞がある時だけ
+    pauseMs: 2500,
+    useAnimationFrame: false,    // 必要なら true
+  });
 
   const variant = props.variant ?? "full";
   if (variant === "mini") {
@@ -276,23 +291,22 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           </div>
         ) : null}
         <div
-          style={{
-            width: "100%",
-            maxWidth: COVER_MAX,
-            aspectRatio: "1 / 1",
-            borderRadius: 18,
-            overflow: "hidden",
-            border: "1px solid var(--panel-border)",
-            background: "var(--panel)",
-            display: "grid",
-            placeItems: "center",
-          }}
+          className={styles.coverFrame}
+          data-has-lyrics={hasLyrics ? "1" : "0"}
+          style={{maxWidth: COVER_MAX}} // 既存の制約があるなら残す
         >
           <ArtworkSquare
             url={nowTrackView?.coverUrl}
             fallbackText={nowTrackView?.displayTitle ?? ""}
             seed={nowTrackView?.displayTitle ?? ""}
           />
+          {hasLyrics ? (
+            <div className={styles.overlay}>
+              <div className={styles.lyricsBox} ref={lyricsBoxRef} aria-label="歌詞">
+                <div className={styles.lyricsText}>{lyrics}</div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -357,7 +371,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         <InfoRow label="ファイル" value={fileName}/>
         {dirName ? <InfoRow label="フォルダ" value={dirName}/> : null}
       </div>
-
+      {nowTrackView?.lyrics}
+      {nowTrackView?.lyricsLrc}
       {filePath ? (
         <details style={{marginTop: 10}}>
           <summary style={{cursor: "pointer", fontSize: 12, opacity: 0.7}}>パス</summary>

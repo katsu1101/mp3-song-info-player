@@ -1,5 +1,5 @@
 // src/lib/mp3/normalizeMp3Tag.ts
-import type {Mp3Meta, Mp3Tag} from "@/types/mp3";
+import type {Mp3Tag} from "@/types/mp3";
 
 const toTextOrNull = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -12,7 +12,7 @@ const toNumberOrNull = (value: unknown): number | null => {
   return value;
 };
 
-export const normalizeMp3Tag = (meta: Mp3Meta | null | undefined): Mp3Tag => {
+export const normalizeMp3Tag = (meta: Mp3Tag | null | undefined): Mp3Tag => {
   const picture = meta?.picture
     ? {data: meta.picture.data, format: meta.picture.format}
     : null;
@@ -30,5 +30,7 @@ export const normalizeMp3Tag = (meta: Mp3Meta | null | undefined): Mp3Tag => {
     picture,
     discNo: null,
     diskNo: null,
+    lyrics: toTextOrNull(meta?.lyrics),
+    lyricsLrc: toTextOrNull(meta?.lyricsLrc),
   };
 };

@@ -45,7 +45,9 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
       artist: "",
       album: "",
       trackNo: null,
-      year: null
+      year: null,
+      lyrics: null,
+      lyricsLrc: null,
     };
   }
   return next;
