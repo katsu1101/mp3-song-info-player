@@ -5,6 +5,7 @@ import {NowPlayingPulse}  from "@/components/NowPlayingPulse";
 import styles             from "@/components/TrackList/TrackList.module.scss";
 import type {AppCommands} from "@/hooks/useAppCommands";
 import type {TrackView}   from "@/types/views";
+import {Pause, Play}      from "lucide-react";
 import React              from "react";
 
 export type TrackRowVariant = "full" | "compact";
@@ -53,7 +54,11 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
         onClick={() => commands.playAtIndex(index)}
       >
         <span className={styles.colAction} aria-hidden>
-          {isActive ? (isPlaying ? <NowPlayingPulse/> : "⏸") : "▶"}
+          {isActive
+            ? (isPlaying
+              ? <NowPlayingPulse/>
+              : <Pause size={20} strokeWidth={2.5} aria-hidden/>)
+            : <Play size={20} strokeWidth={2.5} aria-hidden/>}
         </span>
 
         <span className={styles.colNo}>{shownNo}</span>

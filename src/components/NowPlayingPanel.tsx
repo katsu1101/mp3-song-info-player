@@ -1,12 +1,13 @@
 "use client";
 
-import {PlayerVariant}       from "@/components/AppShell/AppShell";
-import {ArtworkSquare}       from "@/components/Artwork/ArtworkSquare";
-import {AppCommands}         from "@/hooks/useAppCommands";
-import {getBasename}         from "@/lib/path/getBasename";
-import type {DirAlbumView}   from "@/types/albumView";
-import {TrackView}           from "@/types/views";
-import React, {JSX, useMemo} from "react";
+import {PlayerVariant}                      from "@/components/AppShell/AppShell";
+import {ArtworkSquare}                      from "@/components/Artwork/ArtworkSquare";
+import {AppCommands}                        from "@/hooks/useAppCommands";
+import {getBasename}                        from "@/lib/path/getBasename";
+import type {DirAlbumView}                  from "@/types/albumView";
+import {TrackView}                          from "@/types/views";
+import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
+import React, {JSX, useMemo}                from "react";
 
 /**
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
@@ -209,7 +210,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               style={miniBarButtonStyle(!canControl)}
               title="前へ"
             >
-              ⏮
+              <SkipBack size={20} strokeWidth={2.5} aria-hidden/>
             </button>
 
             <button
@@ -219,7 +220,9 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               style={miniBarButtonStyle(!canControl)}
               title={isPlaying ? "一時停止" : "再生"}
             >
-              {isPlaying ? "⏸" : "▶"}
+              {isPlaying
+                ? <Pause size={20} strokeWidth={2.5} aria-hidden/>
+                : <Play size={20} strokeWidth={2.5} aria-hidden/>}
             </button>
 
             <button
@@ -229,7 +232,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               style={miniBarButtonStyle(!canControl)}
               title="次へ"
             >
-              ⏭
+              <SkipForward size={20} strokeWidth={2.5} aria-hidden/>
             </button>
           </div>
         </div>
@@ -317,7 +320,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             style={fullIconButtonStyle(!canControl)}
             title="前へ"
           >
-            ⏮
+            <SkipBack size={20} strokeWidth={2.5} aria-hidden/>
           </button>
 
           <button
@@ -327,7 +330,9 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             style={fullIconButtonStyle(!canControl)}
             title={isPlaying ? "一時停止" : "再生"}
           >
-            {isPlaying ? "⏸" : "▶"}
+            {isPlaying
+              ? <Pause size={20} strokeWidth={2.5} aria-hidden/>
+              : <Play size={20} strokeWidth={2.5} aria-hidden/>}
           </button>
 
           <button
@@ -337,7 +342,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             style={fullIconButtonStyle(!canControl)}
             title="次へ"
           >
-            ⏭
+            <SkipForward size={20} strokeWidth={2.5} aria-hidden/>
           </button>
         </div>
       </div>
@@ -400,11 +405,11 @@ function fullIconButtonStyle(disabled: boolean): React.CSSProperties {
     width: 44,
     height: 34,
     borderRadius: 999,
-    border: "1px solid var(--panel-border)",
-    background: "var(--panel-hover)",
-    color: "white",
+    border: disabled ? "1px solid var(--panel-border)" : "1px solid rgba(0,0,0,0.18)",
+    background: disabled ? "var(--panel)" : "rgba(0,0,0,0.06)",
+    color: disabled ? "rgba(0,0,0,0.35)" : "var(--foreground)",
     fontWeight: 900,
-    opacity: disabled ? 0.45 : 1,
+    opacity: 1,
     cursor: disabled ? "not-allowed" : "pointer",
     display: "grid",
     placeItems: "center",
