@@ -1,8 +1,8 @@
 // src/lib/mp3/workers/startMetaWorker.ts
 
-import {readMp3Meta}          from "@/lib/mp3/readMp3Meta";
-import type {Mp3Entry}        from "@/types/mp3Entry";
-import type {TrackMetaByPath} from "@/types/trackMeta";
+import {readMp3Meta}          from "@/features/mp3/lib/readMp3Meta";
+import type {Mp3Entry}        from "@/features/mp3/types/mp3Entry";
+import type {TrackMetaByPath} from "@/features/mp3/types/trackMeta";
 import React                  from "react";
 
 type Picture = { data: Uint8Array; format: string };

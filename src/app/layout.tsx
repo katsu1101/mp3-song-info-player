@@ -1,8 +1,10 @@
 import {Providers}         from "@/app/providers";
 import type {Metadata}     from "next";
 import {Geist, Geist_Mono} from "next/font/google";
-import "./globals.css";
 import React, {JSX}        from "react";
+
+import "./globals.css";
+import "./globals.scss";
 
 /**
  * `geistSans`変数は`Geist`関数で作成された設定オブジェクトであり、Geist Sansフォントに関する一連のフォント関連設定を定義します。

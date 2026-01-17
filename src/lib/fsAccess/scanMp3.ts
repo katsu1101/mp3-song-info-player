@@ -1,5 +1,5 @@
 import {getLowerExt, SOUND_EXT, VIDEO_EXT} from "@/const/constants";
-import {Mp3Entry}                          from "@/types/mp3Entry";
+import {Mp3Entry}                          from "@/features/mp3/types/mp3Entry";
 
 /**
  * 指定されたディレクトリとそのサブディレクトリから、すべてのMP3ファイルを非同期で読み込み取得します。

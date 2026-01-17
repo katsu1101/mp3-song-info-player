@@ -1,13 +1,13 @@
 // src/components/TrackList/TrackList.tsx
 "use client";
 
-import {ArtworkSquare}                 from "@/components/Artwork/ArtworkSquare";
+import {ArtworkSquare}                 from "@/features/mp3/components/Artwork/ArtworkSquare";
 import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
 import {useSettings}                   from "@/components/Settings/SettingsProvider";
-import {TrackRow}                      from "@/components/TrackRow/TrackRow";
-import {AppCommands}  from "@/hooks/useAppCommands";
-import {AlbumView}    from "@/types/albumView";
-import {SettingState} from "@/types/setting";
+import {TrackRow}                      from "@/features/mp3/components/TrackRow/TrackRow";
+import {AppCommands}                   from "@/hooks/useAppCommands";
+import {AlbumView}                     from "@/features/mp3/types/albumView";
+import {SettingState}                  from "@/types/setting";
 import {TrackView}                     from "@/types/views";
 import React, {JSX, useEffect, useRef} from "react";
 import styles                          from "./TrackList.module.scss";

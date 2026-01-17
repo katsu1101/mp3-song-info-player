@@ -1,12 +1,12 @@
 "use client";
 
 import {PlayerVariant}                      from "@/components/AppShell/AppShell";
-import {ArtworkSquare}                      from "@/components/Artwork/ArtworkSquare";
+import {ArtworkSquare}                      from "@/features/mp3/components/Artwork/ArtworkSquare";
 import {AppCommands}                        from "@/hooks/useAppCommands";
 import {useProgressScroll}                  from "@/hooks/useProgressScroll";
-import {getBasename}    from "@/lib/path/getBasename";
-import type {AlbumView} from "@/types/albumView";
-import {TrackView}      from "@/types/views";
+import {getBasename}                        from "@/lib/path/getBasename";
+import type {AlbumView}                     from "@/features/mp3/types/albumView";
+import {TrackView}                          from "@/types/views";
 import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
 import React, {JSX, useMemo, useRef}        from "react";
 import styles                               from "./NowPlayingPanel.module.scss";

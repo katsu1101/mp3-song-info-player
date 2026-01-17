@@ -1,5 +1,5 @@
 import {parseFantiaMappingText} from "@/lib/mapping/parseFantiaMapping";
-import {FantiaMappingRow}       from "@/types/fantia";
+import {FantiaMappingRow}       from "@/features/mp3/types/fantia";
 
 /**
  * アプリケーションのベースパスを取得し、末尾にスラッシュが付かないことを保証します。

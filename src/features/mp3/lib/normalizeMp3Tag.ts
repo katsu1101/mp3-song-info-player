@@ -1,5 +1,5 @@
 // src/lib/mp3/normalizeMp3Tag.ts
-import type {Mp3Tag} from "@/types/mp3";
+import type {Mp3Tag} from "@/features/mp3/types/mp3";
 
 const toTextOrNull = (value: unknown): string | null => {
   if (typeof value !== "string") return null;

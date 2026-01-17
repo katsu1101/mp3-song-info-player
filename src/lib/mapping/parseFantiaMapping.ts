@@ -1,4 +1,4 @@
-import {FantiaMappingRow} from "@/types/fantia";
+import {FantiaMappingRow} from "@/features/mp3/types/fantia";
 
 /**
  * セルの値をトリムされた文字列であることを保証してクリーンアップします。

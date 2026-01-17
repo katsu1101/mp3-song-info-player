@@ -1,9 +1,9 @@
 // src/lib/mp3/album/buildAlbumViewsFantiaFirst.ts
-import {UI_TEXT}                             from "@/const/uiText";
-import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
-import {getDirname}                          from "@/lib/path/getDirname";
-import {AlbumView}                           from "@/types/albumView";
-import type {TrackView}                      from "@/types/views";
+import {UI_TEXT}                             from "@/const/text";
+import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
+import {getDirname}     from "@/lib/path/getDirname";
+import {AlbumView}      from "@/features/mp3/types/albumView";
+import type {TrackView} from "@/types/views";
 
 export type BuildAlbumViewsFantiaFirstArgs = {
   trackViews: readonly TrackView[];

@@ -1,19 +1,19 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
-import {useMp3LibraryBoot}                                      from "@/hooks/useMp3LibraryBoot";
+import {useMp3LibraryBoot}                                      from "@/features/mp3/hooks/useMp3LibraryBoot";
 import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
-import {buildDirAlbums}                                         from "@/lib/mp3/album/buildDirAlbums"; // あとで作る/すでにある前提
-import {buildMp3Library}                                        from "@/lib/mp3/library/buildMp3Library";
-import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/lib/mp3/library/mp3LibraryActions";
-import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
-import type {AlbumInfo}                                         from "@/types/albumInfo";
-import type {Covers}                                            from "@/types/covers";
-import {FantiaMappingRow}                                       from "@/types/fantia";
-import type {Mp3Entry}                                          from "@/types/mp3Entry";
-import {SettingActions, SettingState}                           from "@/types/setting";
-import type {TrackMetaByPath}                                   from "@/types/trackMeta";
-import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
+import {buildDirAlbums}                                         from "@/features/mp3/lib/album/buildDirAlbums"; // あとで作る/すでにある前提
+import {buildMp3Library}                                        from "@/features/mp3/lib/library/buildMp3Library";
+import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/features/mp3/lib/library/mp3LibraryActions";
+import {createMp3SettingState}                             from "@/lib/settings/createMp3SettingState";
+import type {AlbumInfo}                                    from "@/features/mp3/types/albumInfo";
+import type {Covers}                                       from "@/features/mp3/types/covers";
+import {FantiaMappingRow}                                  from "@/features/mp3/types/fantia";
+import type {Mp3Entry}                                     from "@/features/mp3/types/mp3Entry";
+import {SettingActions, SettingState}                      from "@/types/setting";
+import type {TrackMetaByPath}                              from "@/features/mp3/types/trackMeta";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 type UseMp3LibraryOptions = {
   shuffle: boolean;

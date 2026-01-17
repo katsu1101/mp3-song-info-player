@@ -1,6 +1,6 @@
 "use client";
 
-import type {Mp3Entry}                 from "@/types/mp3Entry";
+import type {Mp3Entry}                 from "@/features/mp3/types/mp3Entry";
 import {useCallback, useRef, useState} from "react";
 
 /**

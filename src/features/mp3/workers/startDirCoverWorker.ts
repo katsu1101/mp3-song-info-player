@@ -2,9 +2,9 @@
 
 import {findFirstImageFileHandle} from "@/lib/fsAccess/findFirstImageFileHandle";
 import {resolveDirectoryHandle}   from "@/lib/fsAccess/resolveDirectoryHandle";
-import {getDirname}               from "@/lib/path/getDirname";
-import type {Mp3Entry}            from "@/types/mp3Entry";
-import React                      from "react";
+import {getDirname}    from "@/lib/path/getDirname";
+import type {Mp3Entry} from "@/features/mp3/types/mp3Entry";
+import React           from "react";
 
 type RunIdRef = { current: number };
 type Args = {

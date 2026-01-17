@@ -1,11 +1,11 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
 import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
-import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
-import {startDirCoverWorker}      from "@/lib/mp3/workers/startDirCoverWorker";
-import {startMetaWorker}          from "@/lib/mp3/workers/startMetaWorker";
-import type {Mp3Entry}            from "@/types/mp3Entry";
-import type {TrackMetaByPath}     from "@/types/trackMeta";
+import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
+import {startDirCoverWorker}     from "@/features/mp3/workers/startDirCoverWorker";
+import {startMetaWorker}          from "@/features/mp3/workers/startMetaWorker";
+import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
+import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
 import {Dispatch, SetStateAction} from "react";
 
 

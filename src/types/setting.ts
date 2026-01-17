@@ -1,4 +1,4 @@
-import {TrackMetaByPath} from "@/types/trackMeta";
+import {TrackMetaByPath} from "@/features/mp3/types/trackMeta";
 
 
 export type SettingState = {

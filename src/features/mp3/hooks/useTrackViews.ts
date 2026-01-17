@@ -1,10 +1,10 @@
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
-import {getDirname}              from "@/lib/path/getDirname";
-import {Covers}                  from "@/types";
-import {FantiaMappingRow}        from "@/types/fantia";
-import type {Mp3Entry}           from "@/types/mp3Entry";
-import {TrackMetaByPath}         from "@/types/trackMeta";
-import {TrackView}               from "@/types/views";
+import {getDirname}       from "@/lib/path/getDirname";
+import {Covers}           from "@/features/mp3/types";
+import {FantiaMappingRow} from "@/features/mp3/types/fantia";
+import type {Mp3Entry}    from "@/features/mp3/types/mp3Entry";
+import {TrackMetaByPath}  from "@/features/mp3/types/trackMeta";
+import {TrackView}        from "@/types/views";
 import React                     from "react";
 
 /**

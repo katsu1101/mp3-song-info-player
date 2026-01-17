@@ -1,4 +1,4 @@
-import type {Mp3Entry} from "@/types/mp3Entry";
+import type {Mp3Entry} from "@/features/mp3/types/mp3Entry";
 
 /**
  * トラックとその関連メタデータを表示するためのビューモデルを表します。

@@ -1,7 +1,7 @@
 "use client";
 
 import {loadFantiaMappingFromPublic}          from "@/lib/mapping/loadFantiaMapping";
-import {FantiaMappingRow, FantiaMappingState} from "@/types/fantia";
+import {FantiaMappingRow, FantiaMappingState} from "@/features/mp3/types/fantia";
 import {useEffect, useMemo, useState}         from "react";
 
 /**

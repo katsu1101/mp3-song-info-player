@@ -1,8 +1,8 @@
 "use client";
 
-import {ArtworkSquare}    from "@/components/Artwork/ArtworkSquare";
-import {NowPlayingPulse}  from "@/components/NowPlayingPulse";
-import styles             from "@/components/TrackList/TrackList.module.scss";
+import {ArtworkSquare}    from "@/features/mp3/components/Artwork/ArtworkSquare";
+import {NowPlayingPulse}  from "@/features/mp3/components/NowPlayingPulse";
+import styles             from "@/features/mp3/components/TrackList/TrackList.module.scss";
 import type {AppCommands} from "@/hooks/useAppCommands";
 import type {TrackView}   from "@/types/views";
 import {Pause, Play}      from "lucide-react";

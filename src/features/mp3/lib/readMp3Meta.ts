@@ -1,4 +1,4 @@
-import {Mp3Tag}                     from "@/types";
+import {Mp3Tag}                     from "@/features/mp3/types";
 import {IAudioMetadata, ILyricsTag} from "music-metadata";
 
 const looksLikeSjisMojibake = (text: string): boolean => {

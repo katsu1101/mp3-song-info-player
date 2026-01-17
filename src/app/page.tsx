@@ -1,20 +1,20 @@
 "use client";
 
-import {AppShell}                            from "@/components/AppShell/AppShell";
-import {NowPlayingPanel}                     from "@/components/NowPlayingPanel";
+import {AppShell}        from "@/components/AppShell/AppShell";
+import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
 import {useSettings}                         from "@/components/Settings/SettingsProvider";
 import {SidebarStub}                         from "@/components/Sidebar";
 import {TopBar}                              from "@/components/TopBar";
-import {TrackList}                           from "@/components/TrackList/TrackList";
+import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
 import {useAppCommands}                      from "@/hooks/useAppCommands";
-import {useAudioPlaybackState}               from "@/hooks/useAudioPlaybackState";
-import {useAudioPlayer}                      from "@/hooks/useAudioPlayer";
-import {useFantiaMapping}                    from "@/hooks/useFantiaMapping";
-import {useMp3Library}                       from "@/hooks/useMp3Library"; // ← I/F変更後を想定
-import {usePlaylistPlayer}                   from "@/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
-import {useTrackViews}                       from "@/hooks/useTrackViews";
-import {buildAlbumViewsFantiaFirst}          from "@/lib/mp3/album/buildAlbumViewsFantiaFirst";
-import {type AlbumTrackRow, sortAlbumTracks} from "@/lib/mp3/album/sortAlbumTracks";
+import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudioPlaybackState";
+import {useAudioPlayer}                      from "@/features/mp3/hooks/useAudioPlayer";
+import {useFantiaMapping}                    from "@/features/mp3/hooks/useFantiaMapping";
+import {useMp3Library}                       from "@/features/mp3/hooks/useMp3Library"; // ← I/F変更後を想定
+import {usePlaylistPlayer}                   from "@/features/mp3/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
+import {useTrackViews}                       from "@/features/mp3/hooks/useTrackViews";
+import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
+import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
 import React, {JSX}                          from "react";
 
 

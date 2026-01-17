@@ -1,5 +1,5 @@
 // src/types/trackMeta.ts
-import type {Mp3Tag} from "@/types/mp3";
+import type {Mp3Tag} from "@/features/mp3/types/mp3";
 
 /**
  * 旧名互換: metaByPath の型
