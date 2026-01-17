@@ -1,11 +1,11 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
-import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
-import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
-import {startDirCoverWorker}     from "@/features/mp3/workers/startDirCoverWorker";
-import {startMetaWorker}          from "@/features/mp3/workers/startMetaWorker";
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
+import {runMetaScanner}           from "@/features/mp3/workers/runMetaScanner";
+import {startDirCoverWorker}      from "@/features/mp3/workers/startDirCoverWorker";
+import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
+import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
 import {Dispatch, SetStateAction} from "react";
 
 
@@ -92,7 +92,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   });
 
   // ✅ metaも後追い（1曲ずつ）
-  void startMetaWorker({
+  void runMetaScanner({
     items,
     runIdRef: metaRunIdRef,
     track,

@@ -1,5 +1,5 @@
 import React  from "react";
-import styles from "./NowPlayingRing.module.css";
+import styles from "./NowPlayingRing.module.scss";
 
 type NowPlayingWaveProps = {
   isPaused?: boolean;

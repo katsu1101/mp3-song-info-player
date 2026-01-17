@@ -1,9 +1,9 @@
 // src/components/TrackList/TrackList.tsx
 "use client";
 
-import {ArtworkSquare}                 from "@/features/mp3/components/Artwork/ArtworkSquare";
-import {EmptyStateFolderActions}       from "@/components/EmptyStateFolderActions";
-import {useSettings}                   from "@/components/Settings/SettingsProvider";
+import {ArtworkSquare}    from "@/features/mp3/components/Artwork/ArtworkSquare";
+import {FolderEmptyState} from "@/components/FolderEmptyState";
+import {useSettings}      from "@/components/Settings/SettingsProvider";
 import {TrackRow}                      from "@/features/mp3/components/TrackRow/TrackRow";
 import {AppCommands}                   from "@/hooks/useAppCommands";
 import {AlbumView}                     from "@/features/mp3/types/albumView";
@@ -53,7 +53,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
   }, [nowPlayingID]);
 
   if (!state.folderName || state.needsReconnect) {
-    return <EmptyStateFolderActions state={state} commands={commands}/>;
+    return <FolderEmptyState state={state} commands={commands}/>;
   }
   if (!shouldShowAlbums && trackViews.length === 0) return <>読み込み中</>;
 

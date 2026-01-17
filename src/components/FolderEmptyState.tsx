@@ -9,7 +9,7 @@ type Props = {
   commands: AppCommands;
 };
 
-export function EmptyStateFolderActions({state, commands}: Props): React.JSX.Element {
+export function FolderEmptyState({state, commands}: Props): React.JSX.Element {
   const canReconnect = Boolean(state.savedHandle && state.needsReconnect);
 
   return (

@@ -1,4 +1,4 @@
-// src/lib/mp3/workers/startMetaWorker.ts
+// src/lib/mp3/workers/runMetaScanner.ts
 
 import {readMp3Meta}          from "@/features/mp3/lib/readMp3Meta";
 import type {Mp3Entry}        from "@/features/mp3/types/mp3Entry";
@@ -33,7 +33,7 @@ const createCoverUrl = (track: (url: string) => void, picture?: Picture): string
   return url;
 };
 
-export const startMetaWorker = async (args: Args): Promise<void> => {
+export const runMetaScanner = async (args: Args): Promise<void> => {
   const {items, runIdRef, track, setMetaByPath, setCoverUrlByPath, shouldDeferTag} = args;
 
   const myRunId = ++runIdRef.current;

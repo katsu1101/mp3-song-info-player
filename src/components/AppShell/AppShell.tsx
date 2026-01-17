@@ -1,5 +1,5 @@
 import React, {JSX, useCallback, useEffect, useId, useMemo, useState} from "react";
-import styles                                                         from "./AppShell.module.css";
+import styles                                                         from "./AppShell.module.scss";
 
 export type PlayerVariant = "mini" | "full" | "full2";
 

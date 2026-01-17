@@ -1,0 +1,1 @@
+//TODO　名前付き export（export const UI_TEXT = ...）で管理する
