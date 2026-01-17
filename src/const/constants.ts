@@ -11,10 +11,10 @@
  * @property {number} IDB.VERSION IndexedDBデータベーススキーマのバージョン。
  */
 export const STORAGE = {
-  APP_ID: "mp3-song-info-editor",
+  APP_ID: "mp3-song-info-player",
 
   IDB: {
-    DB_NAME: "mp3-song-info-editor",
+    DB_NAME: "mp3-song-info-player",
     STORE_HANDLES: "handles",
     KEY_MUSIC_DIR: "musicDir",
     VERSION: 1,

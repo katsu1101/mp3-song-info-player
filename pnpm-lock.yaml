@@ -32,6 +32,9 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      react-lrc:
+        specifier: ^3.2.1
+        version: 3.2.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -925,6 +928,9 @@ packages:
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
 
+  clrc@3.1.4:
+    resolution: {integrity: sha512-lNWVrD2u+PRB9sQimJOjpAUdqRNsgQgx2c+oI00Uqxt4p2Aiusx0MlPLNjXs5t0mqQqz7UlyzqTIHVPIAjAGLg==}
+
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -1792,6 +1798,12 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
+  react-lrc@3.2.1:
+    resolution: {integrity: sha512-CRmjtFjjL6Y4RLGSgBxpP7RD9rAJqLLJeRKbC7TYzBFxWFQysOzc2j1dtjGc8rOsOMz6Pfeh4352qUh97dBhZA==}
+    peerDependencies:
+      react: '>=17.0.0'
+      react-dom: '>=17.0.0'
+
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
@@ -1807,6 +1819,9 @@ packages:
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
+
+  resize-observer-polyfill@1.5.1:
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -2919,6 +2934,8 @@ snapshots:
 
   client-only@0.0.1: {}
 
+  clrc@3.1.4: {}
+
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -3915,6 +3932,13 @@ snapshots:
 
   react-is@16.13.1: {}
 
+  react-lrc@3.2.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      clrc: 3.1.4
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      resize-observer-polyfill: 1.5.1
+
   react@19.2.3: {}
 
   readdirp@4.1.2: {}
@@ -3938,6 +3962,8 @@ snapshots:
       get-proto: 1.0.1
       gopd: 1.2.0
       set-function-name: 2.0.2
+
+  resize-observer-polyfill@1.5.1: {}
 
   resolve-from@4.0.0: {}
 

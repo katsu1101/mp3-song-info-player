@@ -15,7 +15,7 @@ let dbPromise: Promise<IDBPDatabase<AppDbSchema>> | null = null;
 
 export const getDb = (): Promise<IDBPDatabase<AppDbSchema>> => {
   if (!dbPromise) {
-    dbPromise = openDB<AppDbSchema>("mp3-song-info-editor", 1, {
+    dbPromise = openDB<AppDbSchema>("mp3-song-info-player", 1, {
       upgrade(db) {
         db.createObjectStore("mp3Lists");
       },

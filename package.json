@@ -1,11 +1,11 @@
 {
-  "name": "mp3-song-info-editor",
+  "name": "mp3-song-info-player",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.26.2",
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/mp3-song-info-editor next build",
+    "build": "cross-env NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/mp3-song-info-player next build",
     "lint": "eslint",
     "test": "pnpm tsc --noEmit"
   },
@@ -17,7 +17,8 @@
     "next": "16.1.1",
     "pnpm": "^10.27.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-lrc": "^3.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
