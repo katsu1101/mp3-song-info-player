@@ -91,6 +91,8 @@ export const ArtworkSquare = (props: ArtworkSquareProps): React.ReactElement => 
     height: size ?? "100%",
     borderRadius: radius,
     "--hue": hue,
+    objectFit: "cover",
+    objectPosition: "top"
   };
 
   if (showFallback) {
