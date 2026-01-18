@@ -78,6 +78,8 @@ export default function Page(): JSX.Element {
 
   // 例: playlist 作成の直後
   useMediaSessionControls({
+    trackViews: trackViews,
+    nowPlayingID: nowPlayingID,
     playAction: () => playlist.playActions.playAtIndex(0),
     pauseAction: playlist.playActions.pause,
     nextAction: playlist.playActions.playNext,
