@@ -1,6 +1,6 @@
 // src/lib/settings/createMp3SettingState.ts
-import type {SettingState}    from "@/types/setting";
 import type {TrackMetaByPath} from "@/features/mp3/types/trackMeta";
+import type {SettingState}    from "@/types/setting";
 
 export const createMp3SettingState = (args: {
   folderName: string;

@@ -2,22 +2,18 @@
 "use client";
 
 import {useMp3LibraryBoot}                                      from "@/features/mp3/hooks/useMp3LibraryBoot";
-import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
 import {buildDirAlbums}                                         from "@/features/mp3/lib/album/buildDirAlbums"; // あとで作る/すでにある前提
 import {buildMp3Library}                                        from "@/features/mp3/lib/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/features/mp3/lib/library/mp3LibraryActions";
-import {createMp3SettingState}                             from "@/lib/settings/createMp3SettingState";
-import type {AlbumInfo}                                    from "@/features/mp3/types/albumInfo";
-import type {Covers}                                       from "@/features/mp3/types/covers";
-import {FantiaMappingRow}                                  from "@/features/mp3/types/fantia";
-import type {Mp3Entry}                                     from "@/features/mp3/types/mp3Entry";
-import {SettingActions, SettingState}                      from "@/types/setting";
-import type {TrackMetaByPath}                              from "@/features/mp3/types/trackMeta";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-
-type UseMp3LibraryOptions = {
-  shuffle: boolean;
-};
+import type {AlbumInfo}                                         from "@/features/mp3/types/albumInfo";
+import type {Covers}                                            from "@/features/mp3/types/covers";
+import {FantiaMappingRow}                                       from "@/features/mp3/types/fantia";
+import type {Mp3Entry}                                          from "@/features/mp3/types/mp3Entry";
+import type {TrackMetaByPath}                                   from "@/features/mp3/types/trackMeta";
+import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
+import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
+import {SettingActions, SettingState}                           from "@/types/setting";
+import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
 
 // return 型（もし明示してるなら）に albums を足す
 export type UseMp3LibraryResult = {
@@ -34,9 +30,8 @@ export type UseMp3LibraryResult = {
  * 暫定: mp3List だけ最優先で返す。
  * - meta/covers/dirCover は全て空（UIを壊さないためのダミー）
  */
-export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResult => {
+export const useMp3Library = (): UseMp3LibraryResult => {
 
-  const {shuffle} = options;
   // ===== external hooks =====
   const {track, revokeAll} = useObjectUrlPool();
 
@@ -87,7 +82,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
   const buildList = useCallback(async (handle: FileSystemDirectoryHandle) => {
     await buildMp3Library({
       handle,
-      shuffle,
       track,
 
       dirCoverRunIdRef,
@@ -99,7 +93,7 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
       setCoverUrlByPath,
       setDirCoverUrlByDir,
     });
-  }, [shuffle, track]);
+  }, [track]);
 
   // ===== boot (restore) =====
   useMp3LibraryBoot({
@@ -177,7 +171,6 @@ export const useMp3Library = (options: UseMp3LibraryOptions): UseMp3LibraryResul
       dirCoverUrlByDir: covers.dirCoverUrlByDir,
     });
   }, [mp3List, covers.dirCoverUrlByDir]);
-
 
   return {
     mp3List, covers, settingState, settingActions, fantiaEntryByPath,

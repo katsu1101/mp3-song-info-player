@@ -16,6 +16,7 @@ declare global {
     name: string;
 
     queryPermission?(descriptor?: FileSystemPermissionDescriptor): Promise<PermissionState>;
+
     requestPermission?(descriptor?: FileSystemPermissionDescriptor): Promise<PermissionState>;
   }
 
@@ -24,6 +25,6 @@ declare global {
   }
 
   // interface FileSystemDirectoryHandle extends FileSystemHandle {
-    // ここは敢えて空でOK（反復は scanMp3 側でキャストしてるため）
+  // ここは敢えて空でOK（反復は scanMp3 側でキャストしてるため）
   // }
 }

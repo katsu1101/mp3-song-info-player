@@ -1,9 +1,9 @@
 // src/hooks/usePlaylistPlayer.ts
+import type {AlbumView} from "@/features/mp3/types/albumView"; // ✅ 追加
+import type {Mp3Entry}  from "@/features/mp3/types/mp3Entry";
 import {isTypingTarget} from "@/lib/dom/isTypingTarget";
 
 import {PlayActions}                                    from "@/types/actions";
-import type {AlbumView}                                 from "@/features/mp3/types/albumView"; // ✅ 追加
-import type {Mp3Entry}                                  from "@/features/mp3/types/mp3Entry";
 import {Settings}                                       from "@/types/setting";
 import {TrackView}                                      from "@/types/views";
 import React, {useCallback, useEffect, useMemo, useRef} from "react";

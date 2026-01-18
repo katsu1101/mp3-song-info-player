@@ -1,7 +1,7 @@
 // src/lib/mp3/album/buildDirAlbums.ts
-import {getDirname}    from "@/lib/path/getDirname";
 import {AlbumInfo}     from "@/features/mp3/types/albumInfo";
 import type {Mp3Entry} from "@/features/mp3/types/mp3Entry";
+import {getDirname}    from "@/lib/path";
 
 export type BuildDirAlbumsArgs = {
   mp3List: readonly Mp3Entry[];

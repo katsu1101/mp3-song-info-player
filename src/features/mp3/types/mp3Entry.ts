@@ -8,4 +8,6 @@ export type Mp3Entry = {
   lastModified: number | null;
 
   fileHandle: FileSystemFileHandle;
+
+  lyricsTextHandle?: FileSystemFileHandle; // 歌詞ファイルへのハンドル
 };

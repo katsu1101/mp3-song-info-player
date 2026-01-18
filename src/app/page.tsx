@@ -1,12 +1,11 @@
 "use client";
 
-import {AppShell}        from "@/components/AppShell/AppShell";
-import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
+import {AppShell}                            from "@/components/AppShell/AppShell";
 import {useSettings}                         from "@/components/Settings/SettingsProvider";
 import {SidebarStub}                         from "@/components/Sidebar";
 import {TopBar}                              from "@/components/TopBar";
+import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
 import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
-import {useAppCommands}                      from "@/hooks/useAppCommands";
 import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudioPlaybackState";
 import {useAudioPlayer}                      from "@/features/mp3/hooks/useAudioPlayer";
 import {useFantiaMapping}                    from "@/features/mp3/hooks/useFantiaMapping";
@@ -15,6 +14,7 @@ import {usePlaylistPlayer}                   from "@/features/mp3/hooks/usePlayl
 import {useTrackViews}                       from "@/features/mp3/hooks/useTrackViews";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
+import {useAppCommands}                      from "@/hooks/useAppCommands";
 import React, {JSX}                          from "react";
 
 
@@ -30,9 +30,7 @@ export default function Page(): JSX.Element {
   const mapping = useFantiaMapping();
   const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = mapping;
 
-  const {mp3List, covers, settingState, settingActions, albums} = useMp3Library({
-    shuffle: settings.playback.shuffle,
-  });
+  const {mp3List, covers, settingState, settingActions} = useMp3Library();
 
   // ===== 表示用（trackViews）=====
   // ✅ mp3List の順序を正本とする（メタ後追いで並べ替えしない）

@@ -4,8 +4,9 @@ import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
 import {runMetaScanner}           from "@/features/mp3/workers/runMetaScanner";
 import {startDirCoverWorker}      from "@/features/mp3/workers/startDirCoverWorker";
-import {readMp3FromDirectory}     from "@/lib/fsAccess/scanMp3";
+import {scanMediaTree}            from "@/lib/fsAccess/scanMediaTree";
 import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
+import {startTrackCoverWorker}    from "@/lib/mp3/workers/startTrackCoverWorker";
 import {Dispatch, SetStateAction} from "react";
 
 
@@ -13,12 +14,6 @@ type RunIdRef = { current: number };
 
 type BuildMp3LibraryArgs = {
   handle: FileSystemDirectoryHandle;
-
-  /**
-   * NOTE:
-   * shuffle は「再生キュー」で扱う（ライブラリの items は安定させる）
-   */
-  shuffle: boolean;
 
   // objectURL 管理
   track: (url: string) => void;
@@ -57,7 +52,6 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
 export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> => {
   const {
     handle,
-    // shuffle, // ✅ ここでは使わない（再生キュー側へ）
     track,
     dirCoverRunIdRef,
     metaRunIdRef,
@@ -70,23 +64,31 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
 
   setFolderName(handle.name);
 
-  const items = await readMp3FromDirectory(handle, "");
-
-  // ✅ id は読み込み順で固定（shuffleで書き換えない）
-  for (let i = 0; i < items.length; i += 1) {
-    items[i]!.id = i + 1;
-  }
+  // ✅ scanResult を取る
+  const {scanResult, items} = await readLibraryFromDirectory(handle, "");
 
   setMp3List(items);
-
-  // ✅ まずダミーで一括初期化（即表示）
   setMetaByPath(() => buildInitialMetaByPath(items));
+
+// ✅ cover系は同じ runId を共有（ここで1回だけ増やす）
+  const coverRunId = ++dirCoverRunIdRef.current;
+
+// ✅ 曲の外部画像（同名）を先に補完
+  void startTrackCoverWorker({
+    scanResult,
+    items,
+    runIdRef: dirCoverRunIdRef,
+    runId: coverRunId,
+    track,
+    setCoverUrlByPath,
+  });
 
   // ✅ フォルダ代表画像だけ後追い開始
   void startDirCoverWorker({
-    rootHandle: handle,
+    scanResult,
     items,
     runIdRef: dirCoverRunIdRef,
+    runId: coverRunId, // ✅ 同じ値
     track,
     setDirCoverUrlByDir,
   });
@@ -100,4 +102,57 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     setCoverUrlByPath,
     shouldDeferTag: (entry) => !!extractPrefixIdFromPath(entry.path),
   });
+};
+
+export type ReadLibraryResult = {
+  scanResult: Awaited<ReturnType<typeof scanMediaTree>>;
+  items: Mp3Entry[];
+};
+
+export const readLibraryFromDirectory = async (
+  directoryHandle: FileSystemDirectoryHandle,
+  basePath: string
+): Promise<ReadLibraryResult> => {
+  const scanResult = await scanMediaTree(directoryHandle, basePath);
+
+  const collator = new Intl.Collator("ja", {
+    numeric: true,
+    sensitivity: "base",
+  });
+
+  const normalizeRelPath = (p: string): string =>
+    p.replaceAll("\\", "/"); // 念のため
+
+  const splitSegs = (p: string): string[] =>
+    normalizeRelPath(p).split("/").filter(Boolean);
+
+  const compareRelPath = (a: string, b: string): number => {
+    const aSegs = splitSegs(a);
+    const bSegs = splitSegs(b);
+
+    const minLen = Math.min(aSegs.length, bSegs.length);
+    for (let i = 0; i < minLen; i += 1) {
+      const diff = collator.compare(aSegs[i]!, bSegs[i]!);
+      if (diff !== 0) return diff;
+    }
+    return aSegs.length - bSegs.length;
+  };
+
+  const audioBundles = scanResult.bundles
+    .filter((b) => b.audio != null)
+    .sort((a, b) => compareRelPath(a.audio!.path, b.audio!.path));
+
+  const items: Mp3Entry[] = audioBundles.map((bundle, index) => {
+    const audio = bundle.audio!;
+    return {
+      id: index + 1,
+      path: audio.path,
+      name: audio.handle.name,
+      lastModified: null,
+      fileHandle: audio.handle,
+      // TODO: lyricsTextHandle: bundle.lyricsTxt?.handle,
+    };
+  });
+
+  return {scanResult, items};
 };

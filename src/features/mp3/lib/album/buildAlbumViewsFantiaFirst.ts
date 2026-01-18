@@ -1,9 +1,9 @@
 // src/lib/mp3/album/buildAlbumViewsFantiaFirst.ts
 import {UI_TEXT}                             from "@/const/text";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
-import {getDirname}     from "@/lib/path/getDirname";
-import {AlbumView}      from "@/features/mp3/types/albumView";
-import type {TrackView} from "@/types/views";
+import {AlbumView}                           from "@/features/mp3/types/albumView";
+import {getDirname}                          from "@/lib/path";
+import type {TrackView}                      from "@/types/views";
 
 export type BuildAlbumViewsFantiaFirstArgs = {
   trackViews: readonly TrackView[];
@@ -63,8 +63,8 @@ export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs)
   for (const g of groupRows.values()) {
     const tracks = sortAlbumTracks(g.rows);
     const coverUrl =
-      tracks[0]?.t.coverUrl
-      ?? (g.kind === "dir" ? (dirCoverUrlByDir[g.dirKey] ?? null) : null)
+      (g.kind === "dir" ? (dirCoverUrlByDir[g.dirKey] ?? null) : null)
+      ?? tracks[0]?.t.coverUrl
       ?? null;
 
     views.push({

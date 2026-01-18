@@ -1,10 +1,10 @@
+import {Covers}                  from "@/features/mp3/types";
+import {FantiaMappingRow}        from "@/features/mp3/types/fantia";
+import type {Mp3Entry}           from "@/features/mp3/types/mp3Entry";
+import {TrackMetaByPath}         from "@/features/mp3/types/trackMeta";
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
-import {getDirname}       from "@/lib/path/getDirname";
-import {Covers}           from "@/features/mp3/types";
-import {FantiaMappingRow} from "@/features/mp3/types/fantia";
-import type {Mp3Entry}    from "@/features/mp3/types/mp3Entry";
-import {TrackMetaByPath}  from "@/features/mp3/types/trackMeta";
-import {TrackView}        from "@/types/views";
+import {getDirname}              from "@/lib/path";
+import {TrackView}               from "@/types/views";
 import React                     from "react";
 
 /**
@@ -93,7 +93,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
       const tagArtist = normalizeText(meta?.artist);
       const mappingOriginal = normalizeText(mapping?.originalArtist);
-      const originalArtist =  mappingOriginal ?? tagArtist;
+      const originalArtist = mappingOriginal ?? tagArtist;
 
       const dirPath = getDirname(item.path);
       const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
@@ -103,7 +103,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
       // TODO: Mp3Tag 側に discNo があるならここに差し替え
       // 例）meta?.discNo / meta?.diskNo / meta?.discNumber 等、実プロパティに合わせて変更
-      const discNoRaw = toRawStringOrNull(meta.discNo ?? meta.diskNo ?? null);
+      const discNoRaw = toRawStringOrNull(meta?.discNo ?? meta?.diskNo ?? null);
 
       return {
         item,

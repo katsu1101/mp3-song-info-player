@@ -1,0 +1,1 @@
+export {getDirname} from "./getDirname";

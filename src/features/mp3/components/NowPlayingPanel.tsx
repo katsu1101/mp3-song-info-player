@@ -2,10 +2,11 @@
 
 import {PlayerVariant}                      from "@/components/AppShell/AppShell";
 import {ArtworkSquare}                      from "@/features/mp3/components/Artwork/ArtworkSquare";
+import type {AlbumView}                     from "@/features/mp3/types/albumView";
 import {AppCommands}                        from "@/hooks/useAppCommands";
 import {useProgressScroll}                  from "@/hooks/useProgressScroll";
+import {getDirname}                         from "@/lib/path";
 import {getBasename}                        from "@/lib/path/getBasename";
-import type {AlbumView}                     from "@/features/mp3/types/albumView";
 import {TrackView}                          from "@/types/views";
 import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
 import React, {JSX, useMemo, useRef}        from "react";
@@ -22,21 +23,6 @@ type NowPlayingPanelProps = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   commands: AppCommands;
   isPlaying: boolean;
-};
-
-/**
- * 指定されたファイルパスからディレクトリ名を抽出して返します。
- *
- * この関数は、ファイルパスを表す文字列を受け取り、ファイル名または指定されたパスの最後のセグメントを除去することで親ディレクトリを返します。
- * パスが単一のセグメントのみを含む場合、または空の場合、空の文字列が返されます。
- *
- * @param {string} path - ディレクトリ名を抽出するファイルパス。
- * @returns {string} パスから抽出されたディレクトリ名。パスに親ディレクトリが含まれていない場合は空文字列。
- */
-const getDirname = (path: string): string => {
-  const parts = path.split("/").filter(Boolean);
-  if (parts.length <= 1) return "";
-  return parts.slice(0, -1).join("/");
 };
 
 /**
