@@ -26,7 +26,7 @@ export const startTrackIndoWorker = async (args: Args): Promise<void> => {
   const runOne = async (): Promise<void> => {
     while (cursor < items.length) {
 
-      // if (runIdRef.current !== runId) return;
+      if (runIdRef.current !== runId) return;
 
 
       const entry = items[cursor++]!;

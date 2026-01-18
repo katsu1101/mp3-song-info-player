@@ -79,7 +79,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   const infoRunId = ++infoRunIdRef.current;
   void startTrackIndoWorker({
     items,
-    runIdRef: lyricsRunIdRef,
+    runIdRef: infoRunIdRef,
     runId: infoRunId,
     setMetaByPath,
   });
