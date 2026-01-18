@@ -6,6 +6,7 @@ import {runMetaScanner}           from "@/features/mp3/workers/runMetaScanner";
 import {startDirCoverWorker}      from "@/features/mp3/workers/startDirCoverWorker";
 import {scanMediaTree}            from "@/lib/fsAccess/scanMediaTree";
 import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
+import {startLyricsTextWorker}    from "@/lib/mp3/workers/startLyricsTextWorker";
 import {startTrackCoverWorker}    from "@/lib/mp3/workers/startTrackCoverWorker";
 import {Dispatch, SetStateAction} from "react";
 
@@ -21,6 +22,7 @@ type BuildMp3LibraryArgs = {
   // 後追いキャンセル
   dirCoverRunIdRef: RunIdRef;
   metaRunIdRef: RunIdRef;
+  lyricsRunIdRef: RunIdRef;
 
   // state setters
   setFolderName: Dispatch<SetStateAction<string>>;
@@ -55,6 +57,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     track,
     dirCoverRunIdRef,
     metaRunIdRef,
+    lyricsRunIdRef,
     setFolderName,
     setMp3List,
     setMetaByPath,
@@ -102,6 +105,15 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     setCoverUrlByPath,
     shouldDeferTag: (entry) => !!extractPrefixIdFromPath(entry.path),
   });
+
+  // ✅ 外部 .txt 歌詞も後追い（補完のみ）
+  const lyricsRunId = ++lyricsRunIdRef.current;
+  void startLyricsTextWorker({
+    items,
+    runIdRef: lyricsRunIdRef,
+    runId: lyricsRunId,
+    setMetaByPath,
+  });
 };
 
 export type ReadLibraryResult = {
@@ -144,13 +156,14 @@ export const readLibraryFromDirectory = async (
 
   const items: Mp3Entry[] = audioBundles.map((bundle, index) => {
     const audio = bundle.audio!;
+    const lyrics = bundle.lyricsTxt?.handle;
     return {
       id: index + 1,
       path: audio.path,
       name: audio.handle.name,
       lastModified: null,
       fileHandle: audio.handle,
-      // TODO: lyricsTextHandle: bundle.lyricsTxt?.handle,
+      lyricsTextHandle: lyrics
     };
   });
 

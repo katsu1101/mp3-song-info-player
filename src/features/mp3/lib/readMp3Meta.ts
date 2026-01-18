@@ -1,3 +1,4 @@
+// src/features/mp3/lib/readMp3Meta.ts
 import {Mp3Tag}                     from "@/features/mp3/types";
 import {IAudioMetadata, ILyricsTag} from "music-metadata";
 

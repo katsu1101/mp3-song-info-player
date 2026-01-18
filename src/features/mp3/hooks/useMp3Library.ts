@@ -55,6 +55,9 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   const [dirCoverUrlByDir, setDirCoverUrlByDir] = useState<Record<string, string | null>>({});
   const dirCoverRunIdRef = useRef(0);
 
+  // ===== lyrics (progressive) =====
+  const lyricsRunIdRef = useRef(0);
+
   // ===== Fantia mapping (progressive) =====
   const [fantiaEntryByPath, setFantiaEntryByPath] =
     useState<Record<string, FantiaMappingRow | undefined>>({});
@@ -86,6 +89,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
       dirCoverRunIdRef,
       metaRunIdRef,
+      lyricsRunIdRef,
 
       setFolderName,
       setMp3List,

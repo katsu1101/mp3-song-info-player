@@ -56,10 +56,25 @@ export const runMetaScanner = async (args: Args): Promise<void> => {
         });
       }
 
-      setMetaByPath((previous) => ({
-        ...previous,
-        [entry.path]: tag,
-      }));
+      setMetaByPath((prev) => {
+        const current = prev[entry.path];
+        if (!current) return prev;
+
+        const nextMeta = {
+          ...current,
+          title: current.title?.trim() ? current.title : (tag.title ?? current.title),
+          artist: current.artist?.trim() ? current.artist : (tag.artist ?? current.artist),
+          album: current.album?.trim() ? current.album : (tag.album ?? current.album),
+          year: current.year ?? tag.year,
+          trackNo: current.trackNo ?? tag.trackNo,
+
+          // ✅ 歌詞はここでは「入ってなければ」くらいにしておく（txt優先は別worker）
+          lyrics: current.lyrics?.trim() ? current.lyrics : (tag.lyrics ?? current.lyrics),
+          lyricsLrc: current.lyricsLrc?.trim() ? current.lyricsLrc : (tag.lyricsLrc ?? current.lyricsLrc),
+        };
+
+        return {...prev, [entry.path]: nextMeta};
+      });
     } catch {
       // ignore
     }
