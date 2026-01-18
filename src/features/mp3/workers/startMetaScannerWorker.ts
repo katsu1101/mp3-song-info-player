@@ -72,7 +72,6 @@ export const startMetaScannerWorker = async (args: Args): Promise<void> => {
           lyrics: current.lyrics?.trim() ? current.lyrics : (tag.lyrics ?? current.lyrics),
           lyricsLrc: current.lyricsLrc?.trim() ? current.lyricsLrc : (tag.lyricsLrc ?? current.lyricsLrc),
         };
-        console.log(nextMeta)
 
         return {...prev, [entry.path]: nextMeta};
       });

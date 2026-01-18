@@ -1,13 +1,15 @@
 // src/types/soundInfo.ts
-export type SoundInfo = {
-  title?: string
-  artist?: string
+export type SoundInfoV1 = {
+  schemaVersion: 1;
 
-  albumTitle?: string
-  albumArtist?: string
+  title?: string;
+  artist?: string;
 
-  discNo?: number
-  trackNo?: number
+  albumTitle?: string;
+  albumArtist?: string;
 
-  pictureFileName?: string; // または pictureRelPath?: string
+  discNo?: number;
+  trackNo?: number;
+
+  artworkFileName?: string; // 同フォルダ画像ファイル名
 }

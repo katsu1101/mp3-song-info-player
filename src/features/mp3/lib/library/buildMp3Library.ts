@@ -1,14 +1,14 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
-import type {TrackMetaByPath}   from "@/features/mp3/types/trackMeta";
-import {startMetaScannerWorker} from "@/features/mp3/workers/startMetaScannerWorker";
-import {startDirArtworkWorker}  from "@/features/mp3/workers/startDirArtworkWorker";
-import {startTrackIndoWorker}   from "@/features/mp3/workers/startTrackIndoWorker";
+import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
+import {startDirArtworkWorker}    from "@/features/mp3/workers/startDirArtworkWorker";
+import {startLyricsTextWorker}    from "@/features/mp3/workers/startLyricsTextWorker";
+import {startMetaScannerWorker}   from "@/features/mp3/workers/startMetaScannerWorker";
+import {startTrackArtworkWorker}  from "@/features/mp3/workers/startTrackArtworkWorker";
+import {startTrackIndoWorker}     from "@/features/mp3/workers/startTrackIndoWorker";
 import {scanMediaTree}            from "@/lib/fsAccess/scanMediaTree";
 import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
-import {startLyricsTextWorker}    from "@/features/mp3/workers/startLyricsTextWorker";
-import {startTrackArtworkWorker}  from "@/features/mp3/workers/startTrackArtworkWorker";
 import {Dispatch, SetStateAction} from "react";
 
 
@@ -168,13 +168,15 @@ export const readLibraryFromDirectory = async (
   const items: Mp3Entry[] = audioBundles.map((bundle, index) => {
     const audio = bundle.audio!;
     const lyrics = bundle.lyricsTxt?.handle;
+    const info = bundle.trackInfo?.handle;
     return {
       id: index + 1,
       path: audio.path,
       name: audio.handle.name,
       lastModified: null,
       fileHandle: audio.handle,
-      lyricsTextHandle: lyrics
+      lyricsTextHandle: lyrics,
+      infoHandle: info,
     };
   });
 

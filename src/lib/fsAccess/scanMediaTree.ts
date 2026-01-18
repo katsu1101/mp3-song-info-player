@@ -37,7 +37,7 @@ export type SidecarBundle = {
     ext: string;
   };
 
-  sidecarJson?: {
+  trackInfo?: {
     path: string;
     handle: FileSystemFileHandle
   };
@@ -147,7 +147,7 @@ export const scanMediaTree = async (
       }
 
       if (SOUND_INFO_EXT.has(ext)) {
-        bundle.sidecarJson = {
+        bundle.trackInfo = {
           path: currentPath,
           handle: handle as FileSystemFileHandle,
         };
