@@ -7,4 +7,5 @@ export type PlayActions = {
   playNext: () => Promise<void>;
   playPrev: () => Promise<void>;
   stop: () => void;
+  pause: () => void;
 }

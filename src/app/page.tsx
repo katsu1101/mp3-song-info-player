@@ -9,6 +9,7 @@ import {TrackList}                           from "@/features/mp3/components/Tra
 import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudioPlaybackState";
 import {useAudioPlayer}                      from "@/features/mp3/hooks/useAudioPlayer";
 import {useFantiaMapping}                    from "@/features/mp3/hooks/useFantiaMapping";
+import {useMediaSessionControls}             from "@/features/mp3/hooks/useMediaSessionControls";
 import {useMp3Library}                       from "@/features/mp3/hooks/useMp3Library"; // ← I/F変更後を想定
 import {usePlaylistPlayer}                   from "@/features/mp3/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
 import {useTrackViews}                       from "@/features/mp3/hooks/useTrackViews";
@@ -73,6 +74,14 @@ export default function Page(): JSX.Element {
     settings,
     albumViews: sortedDirAlbums, // ✅ こっちに
     stopAndClear,
+  });
+
+  // 例: playlist 作成の直後
+  useMediaSessionControls({
+    playAction: () => playlist.playActions.playAtIndex(0),
+    pauseAction: playlist.playActions.pause,
+    nextAction: playlist.playActions.playNext,
+    prevAction: playlist.playActions.playPrev,
   });
 
   const commands = useAppCommands({

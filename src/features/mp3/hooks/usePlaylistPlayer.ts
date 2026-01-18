@@ -130,6 +130,12 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     stopAndClear?.();
   }, [stopAndClear]);
 
+  const pause = useCallback(async (): Promise<void> => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause()
+  }, [audioRef]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -211,8 +217,9 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         playNext,
         playPrev,
         stop,
+        pause,
       } as PlayActions,
     }),
-    [playAtIndex, playNext, playPrev, stop]
+    [pause, playAtIndex, playNext, playPrev, stop]
   );
 };
