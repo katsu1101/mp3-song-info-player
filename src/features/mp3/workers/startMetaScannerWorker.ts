@@ -24,7 +24,7 @@ const yieldToBrowser = async (): Promise<void> => {
   await new Promise<void>((r) => setTimeout(r, 0));
 };
 
-const createArtworkUrl = (track: (url: string) => void, picture?: Picture): string | null => {
+export const createArtworkUrl = (track: (url: string) => void, picture?: Picture): string | null => {
   if (!picture) return null;
   const copied = new Uint8Array(picture.data);
   const blob = new Blob([copied], {type: picture.format});

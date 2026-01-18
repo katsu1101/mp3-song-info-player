@@ -10,6 +10,7 @@ import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudio
 import {useAudioPlayer}                      from "@/features/mp3/hooks/useAudioPlayer";
 import {useFantiaMapping}                    from "@/features/mp3/hooks/useFantiaMapping";
 import {useMediaSessionControls}             from "@/features/mp3/hooks/useMediaSessionControls";
+import {useMediaSessionPosition}             from "@/features/mp3/hooks/useMediaSessionPosition";
 import {useMp3Library}                       from "@/features/mp3/hooks/useMp3Library"; // ← I/F変更後を想定
 import {usePlaylistPlayer}                   from "@/features/mp3/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
 import {useTrackViews}                       from "@/features/mp3/hooks/useTrackViews";
@@ -24,7 +25,7 @@ export default function Page(): JSX.Element {
 
   // ===== Player（audio + 再生状態）=====
   const {audioRef, nowPlayingID, playEntry, stopAndClear} = useAudioPlayer();
-
+  useMediaSessionPosition(audioRef);
   const {isPlaying} = useAudioPlaybackState(audioRef);
 
   // ===== Mapping（Fantia対応表）=====
@@ -80,7 +81,7 @@ export default function Page(): JSX.Element {
   useMediaSessionControls({
     trackViews: trackViews,
     nowPlayingID: nowPlayingID,
-    playAction: () => playlist.playActions.playAtIndex(0),
+    playAction: playlist.playActions.pause,
     pauseAction: playlist.playActions.pause,
     nextAction: playlist.playActions.playNext,
     prevAction: playlist.playActions.playPrev,
