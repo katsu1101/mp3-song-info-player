@@ -9,7 +9,7 @@ export type TrackView = {
 
   originalArtist: string | null; // ✅ アーティスト優先、無ければ原曲
 
-  coverUrl: string | null;
+  artworkUrl: string | null;
 
   trackNoRaw: string | null; // "1/12"
   discNoRaw: string | null;  // "1/2"

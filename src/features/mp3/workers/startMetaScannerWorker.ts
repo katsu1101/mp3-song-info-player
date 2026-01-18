@@ -1,4 +1,4 @@
-// src/lib/mp3/workers/runMetaScanner.ts
+// src/features/mp3/workers/runMetaScanner.ts
 
 import {readMp3Meta}          from "@/features/mp3/lib/readMp3Meta";
 import type {Mp3Entry}        from "@/features/mp3/types/mp3Entry";
@@ -15,7 +15,7 @@ type Args = {
   track: (url: string) => void;
 
   setMetaByPath: React.Dispatch<React.SetStateAction<TrackMetaByPath>>;
-  setCoverUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
+  setArtworkUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
 
   shouldDeferTag?: (entry: Mp3Entry) => boolean;
 };
@@ -24,7 +24,7 @@ const yieldToBrowser = async (): Promise<void> => {
   await new Promise<void>((r) => setTimeout(r, 0));
 };
 
-const createCoverUrl = (track: (url: string) => void, picture?: Picture): string | null => {
+const createArtworkUrl = (track: (url: string) => void, picture?: Picture): string | null => {
   if (!picture) return null;
   const copied = new Uint8Array(picture.data);
   const blob = new Blob([copied], {type: picture.format});
@@ -33,8 +33,8 @@ const createCoverUrl = (track: (url: string) => void, picture?: Picture): string
   return url;
 };
 
-export const runMetaScanner = async (args: Args): Promise<void> => {
-  const {items, runIdRef, track, setMetaByPath, setCoverUrlByPath, shouldDeferTag} = args;
+export const startMetaScannerWorker = async (args: Args): Promise<void> => {
+  const {items, runIdRef, track, setMetaByPath, setArtworkUrlByPath, shouldDeferTag} = args;
 
   const myRunId = ++runIdRef.current;
 
@@ -45,14 +45,14 @@ export const runMetaScanner = async (args: Args): Promise<void> => {
       const file = await entry.fileHandle.getFile();
       const tag = await readMp3Meta(file);
 
-      const createdCoverUrl = createCoverUrl(track, tag.picture ?? undefined);
+      const createdArtworkUrl = createArtworkUrl(track, tag.picture ?? undefined);
 
       if (runIdRef.current !== myRunId) return;
 
-      if (createdCoverUrl) {
-        setCoverUrlByPath((prev) => {
+      if (createdArtworkUrl) {
+        setArtworkUrlByPath((prev) => {
           if (prev[entry.path]) return prev;
-          return {...prev, [entry.path]: createdCoverUrl};
+          return {...prev, [entry.path]: createdArtworkUrl};
         });
       }
 
@@ -72,6 +72,7 @@ export const runMetaScanner = async (args: Args): Promise<void> => {
           lyrics: current.lyrics?.trim() ? current.lyrics : (tag.lyrics ?? current.lyrics),
           lyricsLrc: current.lyricsLrc?.trim() ? current.lyricsLrc : (tag.lyricsLrc ?? current.lyricsLrc),
         };
+        console.log(nextMeta)
 
         return {...prev, [entry.path]: nextMeta};
       });

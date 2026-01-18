@@ -1,5 +1,5 @@
-import {Covers}                  from "@/features/mp3/types";
-import {FantiaMappingRow}        from "@/features/mp3/types/fantia";
+import {Artworks}         from "@/features/mp3/types";
+import {FantiaMappingRow} from "@/features/mp3/types/fantia";
 import type {Mp3Entry}           from "@/features/mp3/types/mp3Entry";
 import {TrackMetaByPath}         from "@/features/mp3/types/trackMeta";
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
@@ -16,7 +16,7 @@ import React                     from "react";
  * プロパティ:
  * - `mp3List`: トラックビューの主要な構成要素であるMP3エントリのコレクション。
  * - `metaByPath`: トラックに関連付けられたメタデータの集約。パスによって識別される。
- * - `covers`: カバーデータの表現。構造体はトラックとフォルダ代表に関する情報を保持する。
+ * - `artworks`: カバーデータの表現。構造体はトラックとフォルダ代表に関する情報を保持する。
  * - `mappingByPrefixId`: プレフィックスIDとFantiaマッピングエントリとの読み取り専用マッピング。
  */
 type UseTrackViewsArgs = {
@@ -25,8 +25,8 @@ type UseTrackViewsArgs = {
   // ✅ TrackMeta の集約を受け取る
   metaByPath: TrackMetaByPath;
 
-  // ✅ cover（曲 > フォルダ代表）はこのまま
-  covers: Covers;
+  // ✅ artwork（曲 > フォルダ代表）はこのまま
+  artworks: Artworks;
 
   mappingByPrefixId: ReadonlyMap<string, FantiaMappingRow>;
 };
@@ -51,7 +51,7 @@ const normalizeText = (value: unknown): string | null => {
  * @param {UseTrackViewsArgs} args - 以下のプロパティを含むオブジェクト：
  *   - `mp3List` (配列): MP3ファイルオブジェクトのリスト。
  *   - `metaByPath` (オブジェクト): ファイルパスとメタデータ（タイトル、アルバム、アーティストなどの詳細を含む）のマッピング。
- *   - `covers` (オブジェクト): ファイルパスおよびディレクトリごとのカバー画像URLのマッピングを含むオブジェクト。
+ *   - `artworks` (オブジェクト): ファイルパスおよびディレクトリごとのカバー画像URLのマッピングを含むオブジェクト。
  *   - `mappingByPrefixId` (マップ): プレフィックスIDとマッピングオブジェクトのマップ。通常、トラックに関連する追加情報（例: タイトル、オリジナルアーティスト）を含む。
  * @returns {TrackView[]} トラックビューの配列。各トラックビューには、処理済みメタデータ、順序ラベル、およびMP3ファイルに関連するその他の属性が含まれます。
  *
@@ -63,7 +63,7 @@ const normalizeText = (value: unknown): string | null => {
  * - `index` や生の `item` データを含む、追加の技術的詳細。
  */
 export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
-  const {mp3List, metaByPath, covers, mappingByPrefixId} = args;
+  const {mp3List, metaByPath, artworks, mappingByPrefixId} = args;
 
   return React.useMemo(() => {
     return mp3List.map((item, index) => {
@@ -96,7 +96,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const originalArtist = mappingOriginal ?? tagArtist;
 
       const dirPath = getDirname(item.path);
-      const coverUrl = covers.coverUrlByPath[item.path] ?? covers.dirCoverUrlByDir[dirPath] ?? null;
+      const artworkUrl = artworks.artworkUrlByPath[item.path] ?? artworks.dirArtworkUrlByDir[dirPath] ?? null;
 
       // ② track/disc を “生文字列” に正規化（number混入を防ぐ）
       const trackNoRaw = toRawStringOrNull(meta?.trackNo ?? null);
@@ -117,7 +117,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
 
         displayTitle,
         originalArtist,
-        coverUrl,
+        artworkUrl: artworkUrl,
 
         trackNoRaw,  // ✅ string|null
         discNoRaw,   // ✅ string|null
@@ -129,7 +129,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       } as TrackView;
 
     });
-  }, [mp3List, metaByPath, mappingByPrefixId, covers.coverUrlByPath, covers.dirCoverUrlByDir]);
+  }, [mp3List, metaByPath, mappingByPrefixId, artworks.artworkUrlByPath, artworks.dirArtworkUrlByDir]);
 };
 
 const pickText = (...candidates: Array<string | null | undefined>): string | null => {

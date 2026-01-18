@@ -168,7 +168,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           }}
         >
           <ArtworkSquare
-            url={nowTrackView?.coverUrl}
+            url={nowTrackView?.artworkUrl}
             fallbackText={nowTrackView?.displayTitle ?? ""}
             seed={nowTrackView?.displayTitle ?? ""}
           />
@@ -261,7 +261,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         {currentAlbum ? (
           <div style={{display: "grid", gridTemplateColumns: "44px minmax(0,1fr)", gap: 10, alignItems: "center"}}>
             <ArtworkSquare
-              url={currentAlbum.coverUrl}
+              url={currentAlbum.artworkUrl}
               radius={12}
               fallbackText={currentAlbum.title}
               seed={currentAlbum.title}
@@ -277,12 +277,12 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           </div>
         ) : null}
         <div
-          className={styles.coverFrame}
+          className={styles.artworkFrame}
           data-has-lyrics={hasLyrics ? "1" : "0"}
           style={{maxWidth: COVER_MAX}} // 既存の制約があるなら残す
         >
           <ArtworkSquare
-            url={nowTrackView?.coverUrl}
+            url={nowTrackView?.artworkUrl}
             fallbackText={nowTrackView?.displayTitle ?? ""}
             seed={nowTrackView?.displayTitle ?? ""}
           />

@@ -6,7 +6,7 @@ import {buildDirAlbums}                                         from "@/features
 import {buildMp3Library}                                        from "@/features/mp3/lib/library/buildMp3Library";
 import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/features/mp3/lib/library/mp3LibraryActions";
 import type {AlbumInfo}                                         from "@/features/mp3/types/albumInfo";
-import type {Covers}                                            from "@/features/mp3/types/covers";
+import type {Artworks}                                          from "@/features/mp3/types/artworks";
 import {FantiaMappingRow}                                       from "@/features/mp3/types/fantia";
 import type {Mp3Entry}                                          from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}                                   from "@/features/mp3/types/trackMeta";
@@ -18,7 +18,7 @@ import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
 // return 型（もし明示してるなら）に albums を足す
 export type UseMp3LibraryResult = {
   mp3List: Mp3Entry[];
-  covers: Covers;
+  artworks: Artworks;
   settingState: SettingState;
   settingActions: SettingActions;
   fantiaEntryByPath: Record<string, FantiaMappingRow | undefined>;
@@ -28,7 +28,7 @@ export type UseMp3LibraryResult = {
 
 /**
  * 暫定: mp3List だけ最優先で返す。
- * - meta/covers/dirCover は全て空（UIを壊さないためのダミー）
+ * - meta/artworks/dirArtwork は全て空（UIを壊さないためのダミー）
  */
 export const useMp3Library = (): UseMp3LibraryResult => {
 
@@ -46,14 +46,15 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   // ===== library list =====
   const [mp3List, setMp3List] = useState<Mp3Entry[]>([]);
 
+  const infoRunIdRef = useRef(0);
   // ===== per-track meta (progressive) =====
   const [metaByPath, setMetaByPath] = useState<TrackMetaByPath>({});
   const metaRunIdRef = useRef(0);
 
-  // ===== covers (progressive) =====
-  const [coverUrlByPath, setCoverUrlByPath] = useState<Record<string, string | null>>({});
-  const [dirCoverUrlByDir, setDirCoverUrlByDir] = useState<Record<string, string | null>>({});
-  const dirCoverRunIdRef = useRef(0);
+  // ===== artwork (progressive) =====
+  const [artworkUrlByPath, setArtworkUrlByPath] = useState<Record<string, string | null>>({});
+  const [dirArtworkUrlByDir, setDirArtworkUrlByDir] = useState<Record<string, string | null>>({});
+  const dirArtworkRunIdRef = useRef(0);
 
   // ===== lyrics (progressive) =====
   const lyricsRunIdRef = useRef(0);
@@ -64,7 +65,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
   // ===== internal utilities =====
   const resetView = useCallback(() => {
-    dirCoverRunIdRef.current += 1;
+    dirArtworkRunIdRef.current += 1;
     metaRunIdRef.current += 1;
 
     setErrorMessage("");
@@ -73,8 +74,8 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
     setMp3List([]);
     setMetaByPath({});
-    setCoverUrlByPath({});
-    setDirCoverUrlByDir({});
+    setArtworkUrlByPath({});
+    setDirArtworkUrlByDir({});
     setFantiaEntryByPath({});
 
     revokeAll();
@@ -87,15 +88,16 @@ export const useMp3Library = (): UseMp3LibraryResult => {
       handle,
       track,
 
-      dirCoverRunIdRef,
+      infoRunIdRef,
+      dirArtworkRunIdRef: dirArtworkRunIdRef,
       metaRunIdRef,
       lyricsRunIdRef,
 
       setFolderName,
       setMp3List,
       setMetaByPath,
-      setCoverUrlByPath,
-      setDirCoverUrlByDir,
+      setArtworkUrlByPath: setArtworkUrlByPath,
+      setDirArtworkUrlByDir: setDirArtworkUrlByDir,
     });
   }, [track]);
 
@@ -111,17 +113,17 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   // ===== unmount cleanup =====
   useEffect(() => {
     return () => {
-      dirCoverRunIdRef.current += 1;
+      dirArtworkRunIdRef.current += 1;
       metaRunIdRef.current += 1;
       revokeAll();
     };
   }, [revokeAll]);
 
   // ===== derived values =====
-  const covers: Covers = useMemo(() => ({
-    coverUrlByPath,
-    dirCoverUrlByDir,
-  }), [coverUrlByPath, dirCoverUrlByDir]);
+  const artworks: Artworks = useMemo(() => ({
+    artworkUrlByPath: artworkUrlByPath,
+    dirArtworkUrlByDir: dirArtworkUrlByDir,
+  }), [artworkUrlByPath, dirArtworkUrlByDir]);
 
   // ===== public actions =====
   const pickFolderAndLoad = useCallback(async () => {
@@ -172,12 +174,12 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
     return buildDirAlbums({
       mp3List,
-      dirCoverUrlByDir: covers.dirCoverUrlByDir,
+      dirArtworkUrlByDir: artworks.dirArtworkUrlByDir,
     });
-  }, [mp3List, covers.dirCoverUrlByDir]);
+  }, [mp3List, artworks.dirArtworkUrlByDir]);
 
   return {
-    mp3List, covers, settingState, settingActions, fantiaEntryByPath,
+    mp3List, artworks: artworks, settingState, settingActions, fantiaEntryByPath,
     albums
   };
 };

@@ -67,7 +67,7 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
           <span className={styles.artBox} aria-hidden>
             <span className={styles.artInner}>
               <ArtworkSquare
-                url={t.coverUrl}
+                url={t.artworkUrl}
                 fallbackText={t.displayTitle ?? ""}
                 seed={t.displayTitle ?? ""}
               />

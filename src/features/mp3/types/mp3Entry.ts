@@ -10,4 +10,6 @@ export type Mp3Entry = {
   fileHandle: FileSystemFileHandle;
 
   lyricsTextHandle?: FileSystemFileHandle; // 歌詞ファイルへのハンドル
+
+  infoHandle?: FileSystemFileHandle; // jsonファイルのハンドル
 };

@@ -17,6 +17,6 @@ export type AlbumView = {
   kind: AlbumKind;      // 並び順・表示分岐に使う
   title: string;
   trackCount: number;
-  coverUrl: string | null;
+  artworkUrl: string | null;
   tracks: AlbumTrackRow[];
 };

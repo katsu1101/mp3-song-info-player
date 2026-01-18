@@ -8,7 +8,7 @@ import type {TrackView}                      from "@/types/views";
 export type BuildAlbumViewsFantiaFirstArgs = {
   trackViews: readonly TrackView[];
   folderName: string;
-  dirCoverUrlByDir: Record<string, string | null>;
+  dirArtworkUrlByDir: Record<string, string | null>;
 };
 
 type GroupKind = "fantia" | "dir" | "tag";
@@ -21,7 +21,7 @@ const groupOrder: Record<GroupKind, number> = {
 };
 
 export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs): AlbumView[] => {
-  const {trackViews, folderName, dirCoverUrlByDir} = args;
+  const {trackViews, folderName, dirArtworkUrlByDir} = args;
   if (trackViews.length === 0) return [];
 
   // 1) trackViews -> AlbumTrackRow にしておく（indexは元リスト順）
@@ -62,9 +62,9 @@ export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs)
 
   for (const g of groupRows.values()) {
     const tracks = sortAlbumTracks(g.rows);
-    const coverUrl =
-      (g.kind === "dir" ? (dirCoverUrlByDir[g.dirKey] ?? null) : null)
-      ?? tracks[0]?.t.coverUrl
+    const artworkUrl =
+      (g.kind === "dir" ? (dirArtworkUrlByDir[g.dirKey] ?? null) : null)
+      ?? tracks[0]?.t.artworkUrl
       ?? null;
 
     views.push({
@@ -73,7 +73,7 @@ export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs)
       dirPath: g.dirKey,
       title: g.title,
       trackCount: tracks.length,
-      coverUrl,
+      artworkUrl: artworkUrl,
       tracks,
     });
   }

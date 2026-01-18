@@ -1,4 +1,4 @@
-// src/lib/mp3/workers/startTrackCoverWorker.ts
+// src/features/mp3/workers/startTrackArtworkWorker.ts
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
 import type {ScanMediaTreeResult} from "@/lib/fsAccess/scanMediaTree";
 import {getDirname}               from "@/lib/path";
@@ -14,7 +14,7 @@ type Args = {
   runId: number;
 
   track: (url: string) => void;
-  setCoverUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
+  setArtworkUrlByPath: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
 };
 
 const yieldToBrowser = async (): Promise<void> => {
@@ -33,8 +33,8 @@ const getBaseNameWithoutExt = (pathLike: string): string => {
 const getBundleKey = (dirPath: string, baseName: string): string =>
   dirPath ? `${dirPath}/${baseName}` : baseName;
 
-export const startTrackCoverWorker = async (args: Args): Promise<void> => {
-  const {scanResult, items, runIdRef, runId, track, setCoverUrlByPath} = args;
+export const startTrackArtworkWorker = async (args: Args): Promise<void> => {
+  const {scanResult, items, runIdRef, runId, track, setArtworkUrlByPath} = args;
 
   const concurrency = 2;
   let cursor = 0;
@@ -61,7 +61,7 @@ export const startTrackCoverWorker = async (args: Args): Promise<void> => {
         const url = URL.createObjectURL(file);
         track(url);
         // ✅ 外部画像は「未設定なら補完」(埋め込みジャケットと競合させない)
-        setCoverUrlByPath((prev) => {
+        setArtworkUrlByPath((prev) => {
           const current = prev[entry.path];
           if (current != null) return prev;
           return {...prev, [entry.path]: url};

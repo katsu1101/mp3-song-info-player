@@ -1,4 +1,4 @@
-// src/lib/mp3/workers/startDirCoverWorker.ts
+// src/features/mp3/workers/startDirArtworkWorker.ts
 
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
 import type {ScanMediaTreeResult} from "@/lib/fsAccess/scanMediaTree";
@@ -15,21 +15,21 @@ type Args = {
   runId: number;
 
   track: (url: string) => void;
-  setDirCoverUrlByDir: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
+  setDirArtworkUrlByDir: React.Dispatch<React.SetStateAction<Record<string, string | null>>>;
 };
 
 const yieldToBrowser = async (): Promise<void> => {
   await new Promise<void>((r) => setTimeout(r, 0));
 };
 
-export const startDirCoverWorker = async (args: Args): Promise<void> => {
-  const {scanResult, items, runIdRef, runId, track, setDirCoverUrlByDir} = args;
+export const startDirArtworkWorker = async (args: Args): Promise<void> => {
+  const {scanResult, items, runIdRef, runId, track, setDirArtworkUrlByDir} = args;
 
   // 対象フォルダ（"" はルート扱い）
   const dirPaths = Array.from(new Set(items.map((x) => getDirname(x.path))));
 
   // 先に null で埋める（UI都合で undefined を避ける）
-  setDirCoverUrlByDir(() => {
+  setDirArtworkUrlByDir(() => {
     const next: Record<string, string | null> = {};
     for (const dirPath of dirPaths) next[dirPath] = null;
     return next;
@@ -50,7 +50,7 @@ export const startDirCoverWorker = async (args: Args): Promise<void> => {
       const file = await imgHandle.getFile();
       const url = URL.createObjectURL(file);
       track(url);
-      setDirCoverUrlByDir((prev) => {
+      setDirArtworkUrlByDir((prev) => {
         if (prev[dirPath] === url) return prev;
         return {...prev, [dirPath]: url};
       });

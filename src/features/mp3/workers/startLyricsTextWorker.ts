@@ -1,3 +1,4 @@
+// src/features/mp3/workers/startLyricsTextWorker.ts
 import {decodeTextFileBytes, hasMeaningfulText, normalizeLyricsText} from "@/features/mp3/lib/lyrics/lyricsText";
 import type {Mp3Entry}                                               from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}                                        from "@/features/mp3/types/trackMeta";
@@ -51,7 +52,7 @@ export const startLyricsTextWorker = async (args: Args): Promise<void> => {
           if (!current) return prev;
 
           if (hasMeaningfulText(current.lyrics)) return prev;
-          return {...prev, [entry.path]: {...current, lyrics}};
+          return {...prev, [entry.path]: {...current, lyrics}} as TrackMetaByPath;
         });
       } catch {
         // ignore

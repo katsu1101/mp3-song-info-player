@@ -5,7 +5,9 @@ import {
   getLowerExt,
   IMAGE_EXT,
   LYRICS_TEXT_EXT,
+  normalizeFileStem,
   SOUND_EXT,
+  SOUND_INFO_EXT,
   VIDEO_EXT
 } from "@/const/constants";
 
@@ -34,7 +36,11 @@ export type SidecarBundle = {
     handle: FileSystemFileHandle;
     ext: string;
   };
-  // TODO: json（例: meta json）
+
+  sidecarJson?: {
+    path: string;
+    handle: FileSystemFileHandle
+  };
 };
 
 export type ScanMediaTreeResult = {
@@ -54,13 +60,6 @@ const getBundleKey = (dirPath: string, baseName: string): string => {
   return dirPath ? `${dirPath}/${baseName}` : baseName;
 };
 
-const dirBestImageByDir = new Map<string, { priority: number; handle: FileSystemFileHandle }>();
-
-const normalizeStem = (fileName: string): string => {
-  const dot = fileName.lastIndexOf(".");
-  const stem = dot > 0 ? fileName.slice(0, dot) : fileName;
-  return stem.trim().toLowerCase();
-};
 const getPriority = (stem: string): number => {
   const idx = DIR_COVER_PATTERNS.findIndex((re) => re.test(stem));
   return idx >= 0 ? idx : Number.POSITIVE_INFINITY;
@@ -71,6 +70,8 @@ export const scanMediaTree = async (
 ): Promise<ScanMediaTreeResult> => {
   const bundleByKey = new Map<string, SidecarBundle>();
   const dirPathSet = new Set<string>();
+
+  const dirBestImageByDir = new Map<string, { priority: number; handle: FileSystemFileHandle }>();
 
   const walk = async (
     dirHandle: FileSystemDirectoryHandle,
@@ -120,19 +121,16 @@ export const scanMediaTree = async (
       }
 
       if (IMAGE_EXT.has(ext)) {
-        const stem = normalizeStem(name);
+        const stem = normalizeFileStem(name);
         const priority = getPriority(stem);
 
         // ✅ dir代表画像: 優先パターンにマッチする画像だけ採用
-        // （どれにもマッチしない画像を代表にしたいなら下の条件を外す）
-        if (priority !== Number.POSITIVE_INFINITY) {
-          const current = dirBestImageByDir.get(dirPath);
-          if (!current || priority < current.priority) {
-            dirBestImageByDir.set(dirPath, {
-              priority,
-              handle: handle as FileSystemFileHandle,
-            });
-          }
+        const current = dirBestImageByDir.get(dirPath);
+        if (!current || priority < current.priority) {
+          dirBestImageByDir.set(dirPath, {
+            priority,
+            handle: handle as FileSystemFileHandle,
+          });
         }
 
         // ✅ 曲画像（同名sidecar）としても必要なら従来通り
@@ -148,7 +146,13 @@ export const scanMediaTree = async (
         continue;
       }
 
-      // TODO:  json 等はここに追加
+      if (SOUND_INFO_EXT.has(ext)) {
+        bundle.sidecarJson = {
+          path: currentPath,
+          handle: handle as FileSystemFileHandle,
+        };
+        bundleByKey.set(key, bundle);
+      }
     }
   };
 

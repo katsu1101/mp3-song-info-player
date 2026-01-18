@@ -83,7 +83,7 @@ export function TrackList(props: TrackListProps): JSX.Element {
               {/* TODO ✅ アルバム見出し（将来ここを button にしてアコーディオン化） */}
               <div className={styles.albumHeader}>
                 <ArtworkSquare
-                  url={album.coverUrl} size={56} radius={12}
+                  url={album.artworkUrl} size={56} radius={12}
                   fallbackText={album.title} seed={album.title}
                 />
                 <div className={styles.albumHeaderText}>

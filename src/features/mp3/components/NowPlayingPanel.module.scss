@@ -1,4 +1,4 @@
-.coverFrame {
+.artworkFrame {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -9,7 +9,7 @@
 }
 
 /* ArtworkSquare 内部の img を薄くする（※中身が img 前提） */
-.coverFrame[data-has-lyrics="1"] :global(img) {
+.artworkFrame[data-has-lyrics="1"] :global(img) {
   //opacity: 0.45;              /* ← 0.22 からUP（おすすめは 0.4〜0.55） */
   filter: saturate(1.05) contrast(1.02); /* 彩度/コントラストを少し戻す */
   transition: opacity 160ms ease, filter 160ms ease;

@@ -32,12 +32,14 @@ export const STORAGE = {
  *
  * このセットは、ファイルタイプの検証や画像ファイルのフィルタリングを行う際に、画像拡張子を素早く参照できるようにします。
  */
-export const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif"]);
-export const SOUND_EXT = new Set(["mp3", "wav", "ogg"]);
-export const VIDEO_EXT = new Set(["mp4", "m4v", "webm", "mov"]);
-export const LYRICS_TEXT_EXT = new Set(["txt"]);
+export const IMAGE_EXT: ReadonlySet<string> = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
+export const SOUND_EXT: ReadonlySet<string> = new Set(["mp3", "wav", "ogg"]);
+export const VIDEO_EXT: ReadonlySet<string> = new Set(["mp4", "m4v", "webm", "mov"]);
+export const LYRICS_TEXT_EXT: ReadonlySet<string> = new Set(["txt"]);
+export const SOUND_INFO_EXT: ReadonlySet<string> = new Set(["json"]);
 export const DIR_COVER_PATTERNS: readonly RegExp[] = [
   // 強: 明示カバー
+  /^artwork(?:[.\s_-].+)?$/i,
   /^cover(?:[.\s_-].+)?$/i,
   /^album(?:[.\s_-].+)?$/i,
 
@@ -56,11 +58,6 @@ export const normalizeFileStem = (fileName: string): string => {
   const dot = fileName.lastIndexOf(".");
   const stem = dot > 0 ? fileName.slice(0, dot) : fileName;
   return stem.trim().toLowerCase();
-};
-
-export const getDirCoverPriority = (stem: string): number => {
-  const idx = DIR_COVER_PATTERNS.findIndex((re) => re.test(stem));
-  return idx >= 0 ? idx : Number.POSITIVE_INFINITY;
 };
 
 // ✅ 追加: 拡張子を除いた basename を得る（同名判定に使う）

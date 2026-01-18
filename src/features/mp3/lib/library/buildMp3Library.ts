@@ -1,13 +1,14 @@
 // src/lib/mp3/library/buildMp3Library.ts
 
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
-import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
-import {runMetaScanner}           from "@/features/mp3/workers/runMetaScanner";
-import {startDirCoverWorker}      from "@/features/mp3/workers/startDirCoverWorker";
+import type {TrackMetaByPath}   from "@/features/mp3/types/trackMeta";
+import {startMetaScannerWorker} from "@/features/mp3/workers/startMetaScannerWorker";
+import {startDirArtworkWorker}  from "@/features/mp3/workers/startDirArtworkWorker";
+import {startTrackIndoWorker}   from "@/features/mp3/workers/startTrackIndoWorker";
 import {scanMediaTree}            from "@/lib/fsAccess/scanMediaTree";
 import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
-import {startLyricsTextWorker}    from "@/lib/mp3/workers/startLyricsTextWorker";
-import {startTrackCoverWorker}    from "@/lib/mp3/workers/startTrackCoverWorker";
+import {startLyricsTextWorker}    from "@/features/mp3/workers/startLyricsTextWorker";
+import {startTrackArtworkWorker}  from "@/features/mp3/workers/startTrackArtworkWorker";
 import {Dispatch, SetStateAction} from "react";
 
 
@@ -20,7 +21,8 @@ type BuildMp3LibraryArgs = {
   track: (url: string) => void;
 
   // 後追いキャンセル
-  dirCoverRunIdRef: RunIdRef;
+  infoRunIdRef: RunIdRef
+  dirArtworkRunIdRef: RunIdRef;
   metaRunIdRef: RunIdRef;
   lyricsRunIdRef: RunIdRef;
 
@@ -28,8 +30,8 @@ type BuildMp3LibraryArgs = {
   setFolderName: Dispatch<SetStateAction<string>>;
   setMp3List: Dispatch<SetStateAction<Mp3Entry[]>>;
   setMetaByPath: Dispatch<SetStateAction<TrackMetaByPath>>;
-  setDirCoverUrlByDir: Dispatch<SetStateAction<Record<string, string | null>>>;
-  setCoverUrlByPath: Dispatch<SetStateAction<Record<string, string | null>>>;
+  setDirArtworkUrlByDir: Dispatch<SetStateAction<Record<string, string | null>>>;
+  setArtworkUrlByPath: Dispatch<SetStateAction<Record<string, string | null>>>;
 };
 
 const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => {
@@ -39,7 +41,7 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
       discNo: null, diskNo: null,
       albumArtist: null,
       picture: null,
-      title: e.fileHandle.name,
+      title: "", // e.fileHandle.name,
       artist: "",
       album: "",
       trackNo: null,
@@ -55,14 +57,15 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   const {
     handle,
     track,
-    dirCoverRunIdRef,
+    infoRunIdRef,
+    dirArtworkRunIdRef,
     metaRunIdRef,
     lyricsRunIdRef,
     setFolderName,
     setMp3List,
     setMetaByPath,
-    setDirCoverUrlByDir,
-    setCoverUrlByPath,
+    setDirArtworkUrlByDir,
+    setArtworkUrlByPath,
   } = args;
 
   setFolderName(handle.name);
@@ -73,36 +76,44 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   setMp3List(items);
   setMetaByPath(() => buildInitialMetaByPath(items));
 
-// ✅ cover系は同じ runId を共有（ここで1回だけ増やす）
-  const coverRunId = ++dirCoverRunIdRef.current;
+  const infoRunId = ++infoRunIdRef.current;
+  void startTrackIndoWorker({
+    items,
+    runIdRef: lyricsRunIdRef,
+    runId: infoRunId,
+    setMetaByPath,
+  });
+
+// ✅ artwork系は同じ runId を共有（ここで1回だけ増やす）
+  const artworkRunId = ++dirArtworkRunIdRef.current;
 
 // ✅ 曲の外部画像（同名）を先に補完
-  void startTrackCoverWorker({
+  void startTrackArtworkWorker({
     scanResult,
     items,
-    runIdRef: dirCoverRunIdRef,
-    runId: coverRunId,
+    runIdRef: dirArtworkRunIdRef,
+    runId: artworkRunId,
     track,
-    setCoverUrlByPath,
+    setArtworkUrlByPath: setArtworkUrlByPath,
   });
 
   // ✅ フォルダ代表画像だけ後追い開始
-  void startDirCoverWorker({
+  void startDirArtworkWorker({
     scanResult,
     items,
-    runIdRef: dirCoverRunIdRef,
-    runId: coverRunId, // ✅ 同じ値
+    runIdRef: dirArtworkRunIdRef,
+    runId: artworkRunId, // ✅ 同じ値
     track,
-    setDirCoverUrlByDir,
+    setDirArtworkUrlByDir: setDirArtworkUrlByDir,
   });
 
   // ✅ metaも後追い（1曲ずつ）
-  void runMetaScanner({
+  void startMetaScannerWorker({
     items,
     runIdRef: metaRunIdRef,
     track,
     setMetaByPath,
-    setCoverUrlByPath,
+    setArtworkUrlByPath: setArtworkUrlByPath,
     shouldDeferTag: (entry) => !!extractPrefixIdFromPath(entry.path),
   });
 

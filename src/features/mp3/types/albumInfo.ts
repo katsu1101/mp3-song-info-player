@@ -7,7 +7,7 @@ export type AlbumInfo = {
   kind: AlbumKind;          // "dir"
   dirKey: string;           // getDirname(path) の結果
   trackPaths: string[];     // そのアルバムに属する path 一覧
-  dirCoverUrl: string | null; // フォルダ代表画像（暫定表示）
+  dirArtworkUrl: string | null; // フォルダ代表画像（暫定表示）
 };
 
 export type AlbumTrackRef = {
