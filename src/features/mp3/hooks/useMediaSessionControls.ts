@@ -46,7 +46,10 @@ export function useMediaSessionControls(actions: {
         artist: track.originalArtist ?? "",
         album: track.albumTitle ?? "",
         artwork: src
-          ? [{src, sizes: "512x512"}]
+          ? [
+            { src, sizes: "512x512" },
+            { src, sizes: "256x256" },
+            { src,  sizes: "96x96" },]
           : undefined,
       });
     };
