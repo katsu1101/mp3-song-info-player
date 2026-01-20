@@ -6,6 +6,7 @@ export type PlayActions = {
   playAtIndex: (index: number) => Promise<void>;
   playNext: () => Promise<void>;
   playPrev: () => Promise<void>;
+  play: () => void;
   stop: () => void;
   pause: () => void;
 }

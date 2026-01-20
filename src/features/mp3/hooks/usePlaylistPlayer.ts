@@ -126,6 +126,12 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     if (prevIndex !== undefined) await playAtIndex(prevIndex);
   }, [playAtIndex, queueIndices]);
 
+  const play = React.useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    void audio.play(); // ユーザー操作(通知)なので多くの端末で許可される
+  }, [audioRef]);
+  
   const stop = useCallback(async (): Promise<void> => {
     stopAndClear?.();
   }, [stopAndClear]);
@@ -216,10 +222,11 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
         playAtIndex,
         playNext,
         playPrev,
+        play,
         stop,
         pause,
       } as PlayActions,
     }),
-    [pause, playAtIndex, playNext, playPrev, stop]
+    [pause, play, playAtIndex, playNext, playPrev, stop]
   );
 };

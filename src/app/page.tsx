@@ -81,7 +81,7 @@ export default function Page(): JSX.Element {
   useMediaSessionControls({
     trackViews: trackViews,
     nowPlayingID: nowPlayingID,
-    playAction: playlist.playActions.pause,
+    playAction: playlist.playActions.play,
     pauseAction: playlist.playActions.pause,
     nextAction: playlist.playActions.playNext,
     prevAction: playlist.playActions.playPrev,
