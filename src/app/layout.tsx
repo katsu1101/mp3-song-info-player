@@ -1,5 +1,6 @@
 import {Providers}               from "@/app/providers";
 import {appMeta}                 from "@/config/appMeta";
+import {getBasePath}             from "@/config/getBasePath";
 import type {Metadata, Viewport} from "next";
 import {Geist, Geist_Mono}       from "next/font/google";
 import React, {JSX}              from "react";
@@ -36,6 +37,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const basePath = getBasePath();
+
 /**
  * アプリケーションに関する情報を含むメタデータオブジェクト。
  */
@@ -43,6 +46,12 @@ export const metadata: Metadata = {
   applicationName: appMeta.name,
   title: appMeta.title,
   description: appMeta.description,
+  icons: {
+    icon: [
+      { url: `${basePath}/favicon.ico` },
+      // TODO(推奨): SVG favicon も追加するならここ
+    ],
+  },
   // TODO: OGP, appleWebApp（iOS向け）などを追加
 };
 
