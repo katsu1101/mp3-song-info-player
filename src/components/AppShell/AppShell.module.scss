@@ -1,3 +1,4 @@
+// src/components/AppShell/AppShell.module.scss
 .root {
   height: 100dvh;
   display: grid;
@@ -91,7 +92,7 @@
 
 /* タブレット：sidebarはドロワー、main + playerは維持（player幅は可変でOK） */
 @media (max-width: 1024px) {
-  :root {
+  .root {
     --mini-player-height: 76px;
     --mini-player-gap: 18px;
     --mini-player-bottom: calc(var(--mini-player-gap) + env(safe-area-inset-bottom, 0px));

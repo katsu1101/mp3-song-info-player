@@ -1,10 +1,11 @@
-import {Providers}         from "@/app/providers";
-import type {Metadata}     from "next";
-import {Geist, Geist_Mono} from "next/font/google";
-import React, {JSX}        from "react";
-
+import {Providers}               from "@/app/providers";
+import {appMeta}                 from "@/config/appMeta";
+import type {Metadata, Viewport} from "next";
+import {Geist, Geist_Mono}       from "next/font/google";
+import React, {JSX}              from "react";
 import "./globals.css";
 import "./globals.scss";
+import {RegisterServiceWorker}   from "./_components/RegisterServiceWorker";
 
 /**
  * `geistSans`変数は`Geist`関数で作成された設定オブジェクトであり、Geist Sansフォントに関する一連のフォント関連設定を定義します。
@@ -39,8 +40,14 @@ const geistMono = Geist_Mono({
  * アプリケーションに関する情報を含むメタデータオブジェクト。
  */
 export const metadata: Metadata = {
-  title: "とじょりんMP3プレイヤー",
-  description: "とじょりん関連のMP3ファイルの曲を再生するアプリ",
+  applicationName: appMeta.name,
+  title: appMeta.title,
+  description: appMeta.description,
+  // TODO: OGP, appleWebApp（iOS向け）などを追加
+};
+
+export const viewport: Viewport = {
+  themeColor: appMeta.themeColor,
 };
 
 /**
@@ -59,6 +66,7 @@ export default function RootLayout({children,}: Readonly<{
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
     <Providers>
+      <RegisterServiceWorker/>
       {children}
     </Providers>
     </body>

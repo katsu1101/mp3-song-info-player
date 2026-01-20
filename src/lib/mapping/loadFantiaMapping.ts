@@ -1,21 +1,6 @@
+import {getBasePath}            from "@/config/getBasePath";
 import {FantiaMappingRow}       from "@/features/mp3/types/fantia";
 import {parseFantiaMappingText} from "@/lib/mapping/parseFantiaMapping";
-
-/**
- * アプリケーションのベースパスを取得し、末尾にスラッシュが付かないことを保証します。
- *
- * この関数は、`NEXT_PUBLIC_BASE_PATH`環境変数の使用を前提としています。
- * これは、GitHub Pagesデプロイや類似の環境で一般的に利用されます。
- * 変数が定義されていない場合、空の文字列が返されます。
- *
- * 返されるベースパス文字列は、末尾のスラッシュが常に削除されます。
- *
- * @returns {string} 末尾のスラッシュを含まないアプリケーションのベースパス。
- */
-const getBasePath = (): string => {
-  // GitHub Pagesで basePath を使っている前提（あなたのプロジェクトに合わせて）
-  return (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
-};
 
 /**
  * 指定されたURLからテキストデータを取得し、UTF-8としてデコードします。

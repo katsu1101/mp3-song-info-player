@@ -1,3 +1,4 @@
+// src/components/AppShell/AppShell.tsx
 import React, {JSX, useCallback, useEffect, useId, useMemo, useState} from "react";
 import styles                                                         from "./AppShell.module.scss";
 

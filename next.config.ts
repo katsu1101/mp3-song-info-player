@@ -1,6 +1,9 @@
+// next.config.ts
+
+import {getBasePath}     from "@/config/getBasePath";
 import type {NextConfig} from "next";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const basePath = getBasePath();
 
 const nextConfig: NextConfig = {
   // GitHub Pages向け: 静的ファイル一式を out/ に出す

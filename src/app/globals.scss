@@ -84,9 +84,9 @@
 
     /* トグル */
     --toggle-track-off: rgba(255, 255, 255, 0.14); /* 0.08 -> 0.14 */
-    --toggle-track-on: rgba(255, 255, 255, 0.26);  /* 0.18 -> 0.26 */
-    --toggle-border: rgba(255, 255, 255, 0.22);    /* 0.18 -> 0.22 */
-    --toggle-knob: rgba(255, 255, 255, 0.90);      /* 0.85 -> 0.90 */
+    --toggle-track-on: rgba(255, 255, 255, 0.26); /* 0.18 -> 0.26 */
+    --toggle-border: rgba(255, 255, 255, 0.22); /* 0.18 -> 0.22 */
+    --toggle-knob: rgba(255, 255, 255, 0.90); /* 0.85 -> 0.90 */
     --toggle-knob-shadow: rgba(0, 0, 0, 0.35);
 
     /* TrackList（ライト） */
@@ -197,4 +197,276 @@ button {
 /* 4) ボタン内の子要素で cursor が変わらないように */
 button * {
   cursor: inherit;
+}
+
+.root {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: var(--background);
+  border-bottom: 1px solid var(--panel-border);
+
+  /*TODO(レイアウト): header の横はみ出し対策として暫定で `max-width: 100vw` を使用中。*/
+  /*- 根本原因(どこかの子要素が viewport 幅を超える / 位置が負にずれる / hydration後にサイズが変わる等)は未解決。*/
+  /*- `100vw` は「ビューポート幅で強制クリップ」するため横スクロールは止まるが、以下の副作用がありえる:*/
+  /*  1) スクロールバー幅を含む環境では `100vw` が実表示幅より僅かに広くなり、別条件で横ズレ/欠け/ガタつきが起きうる*/
+  /*  2) iOS Safari などで dynamic viewport(アドレスバー表示/非表示)により幅/レイアウトが揺れ、1pxズレや再レイアウトが発生しうる*/
+  /*  3) 子要素が本当に溢れている場合、見切れ(特に右端のボタン/ラベル)が発生しても気づきにくい*/
+  /*  4) 将来 header に要素追加した際、"溢れても見えない" ことでUI欠損を検知しにくい*/
+  /*- 恒久対応案:*/
+  /*  A) 横はみ出しの真犯人を特定して修正(scrollWidth/BoundingClientRectで特定)*/
+  /*  B) headerInner/headerContent に `min-width: 0` を入れ、長文は ellipsis 化*/
+  /*  C) 必要なら `.header { overflow-x: clip; }` を併用して `max-width: 100%` に戻す*/
+  max-width: 100vw;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 12px;
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) 360px;
+  gap: 12px;
+  padding: 0 12px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.scrollPane {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.playerInner {
+  position: sticky;
+  top: 10px;
+}
+
+.sidebarToggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--foreground);
+  cursor: pointer;
+  user-select: none;
+}
+
+.playerSheet {
+  display: none;
+}
+
+.miniPlayerBar {
+  display: none;
+}
+
+.drawerTitle {
+  display: none;
+}
+
+.drawerClose {
+  display: none;
+}
+
+/* タブレット：sidebarはドロワー、main + playerは維持（player幅は可変でOK） */
+@media (max-width: 1024px) {
+  :root {
+    --mini-player-height: 76px;
+    --mini-player-gap: 18px;
+    --mini-player-bottom: calc(var(--mini-player-gap) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /*.sidebarToggle {*/
+  /*    display: inline-flex;*/
+  /*}*/
+  .sidebarPane {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 86vw);
+    z-index: 80;
+    transform: translateX(-105%);
+    transition: transform 160ms ease-out;
+    padding: 10px 12px;
+    background: var(--elev-bg);
+    color: var(--foreground);
+    box-shadow: var(--shadow-drawer);
+    border-right: 1px solid var(--elev-border);
+  }
+
+  .drawerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 12px;
+    border-bottom: 1px solid var(--panel-border);
+    margin-bottom: 12px;
+  }
+
+  .drawerTitle {
+    font-weight: 900;
+    letter-spacing: 0.02em;
+  }
+
+  .drawerClose {
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--foreground);
+    cursor: pointer;
+  }
+
+  .drawerClose:hover {
+    background: var(--panel-hover);
+  }
+
+  .drawerSub {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .sidebarToggle {
+    display: inline-flex;
+  }
+
+  .sidebarPane[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease-out;
+  }
+
+  .backdrop[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 右ペインはスマホでは使わない */
+  .playerPane {
+    display: none;
+  }
+
+  /* ミニプレイヤー固定 */
+  .miniPlayerBar {
+    padding: 0;
+    overflow: hidden; /* ジャケを角丸で切るなら効く */
+    align-items: stretch; /* 高さいっぱいに伸ばす */
+    position: sticky;
+    left: 10px;
+    right: 10px;
+    bottom: var(--mini-player-bottom);
+    height: var(--mini-player-height);
+    z-index: 76;
+    border-radius: 18px;
+    border: 1px solid var(--elev-border);
+    box-shadow: var(--shadow-elev);
+    display: flex;
+    cursor: pointer;
+    background: var(--elev-bg);
+    color: var(--foreground);
+  }
+
+  /* ボトムシート */
+  .playerSheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: min(86dvh, 780px);
+    z-index: 90;
+    border-radius: 18px 18px 0 0;
+    transform: translateY(105%);
+    transition: transform 180ms ease-out;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: var(--elev-bg);
+    color: var(--foreground);
+    border-top: 1px solid var(--elev-border);
+  }
+
+  .playerSheet[data-open="true"] {
+    transform: translateY(0);
+  }
+
+  .sheetBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease-out;
+  }
+
+  .sheetBackdrop[data-open="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sheetHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+  }
+
+  .sheetHandle {
+    width: 44px;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--sheet-handle);
+    margin: 0 auto;
+  }
+
+  .sheetClose {
+    border-radius: 9999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border: 1px solid var(--sheet-close-border);
+    background: var(--sheet-close-bg);
+    color: var(--foreground);
+  }
+
+  .sheetBody {
+    overflow: auto;
+    min-height: 0;
+    padding: 10px 12px;
+  }
 }
