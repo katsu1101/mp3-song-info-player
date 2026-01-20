@@ -1,9 +1,13 @@
+// src/components/ui/ToggleControl/ToggleControl.module.scss
 .toggle {
   width: 44px;
   height: 26px;
   border-radius: 999px;
-  border: 1px solid var(--list-border);
-  background: var(--panel);
+
+  /* ✅ トグル専用トークンを使う */
+  border: 1px solid var(--toggle-border);
+  background: var(--toggle-track-off);
+
   cursor: pointer;
   position: relative;
   padding: 0;
@@ -14,11 +18,8 @@
   transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 
   &:hover {
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.10);
-  }
-
-  &:focus {
-    outline: none;
+    /* ✅ 黒固定の影をやめて、foreground を薄く混ぜる */
+    box-shadow: 0 1px 6px color-mix(in oklab, var(--foreground) 14%, transparent);
   }
 
   &:focus-visible {
@@ -33,7 +34,9 @@
 
   &[aria-pressed="true"] {
     border-color: var(--sel-ring);
-    background: color-mix(in srgb, var(--sel-ring) 16%, var(--panel));
+
+    /* ✅ ON は専用トークン */
+    background: var(--toggle-track-on);
   }
 }
 
@@ -41,11 +44,14 @@
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel) 90%, #000 8%);
-  border: 1px solid var(--list-border);
+
+  /* ✅ ノブも専用トークン */
+  background: var(--toggle-knob);
+  border: 1px solid var(--toggle-border);
+  box-shadow: 0 6px 14px var(--toggle-knob-shadow);
 
   transform: translateX(2px);
-  transition: transform 120ms ease, border-color 120ms ease;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
 
   .toggle[aria-pressed="true"] & {
     transform: translateX(20px);

@@ -1,3 +1,5 @@
+/* src/features/mp3/components/NowPlayingPanel.module.scss */
+
 .artworkFrame {
   position: relative;
   width: 100%;
@@ -10,8 +12,9 @@
 
 /* ArtworkSquare 内部の img を薄くする（※中身が img 前提） */
 .artworkFrame[data-has-lyrics="1"] :global(img) {
-  //opacity: 0.45;              /* ← 0.22 からUP（おすすめは 0.4〜0.55） */
-  filter: saturate(1.05) contrast(1.02); /* 彩度/コントラストを少し戻す */
+  /* opacity は好みなのでコメント維持 */
+  // opacity: 0.45;
+  filter: saturate(1.05) contrast(1.02);
   transition: opacity 160ms ease, filter 160ms ease;
 }
 
@@ -23,9 +26,24 @@
   align-content: start;
   gap: 10px;
 
-  /* 読みやすさの“膜” */
-  background: radial-gradient(120% 100% at 50% 0%, rgba(0, 0, 0, 0.12), transparent 55%),
-  linear-gradient(to bottom, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.50));
+  /*
+    読みやすさの“膜”をモード追従にする
+    - 白固定/黒固定をやめる
+    - var(--panel) と var(--background) がライト/ダークで変わる前提で組む
+    - vignette もスクロールバー同様「雰囲気の影」なので、color-mix で調整
+  */
+  background:
+          radial-gradient(
+                          120% 100% at 50% 0%,
+                          color-mix(in oklab, var(--foreground) 14%, transparent),
+                          transparent 55%
+          ),
+          linear-gradient(
+                          to bottom,
+                          color-mix(in oklab, var(--background) 78%, transparent),
+                          color-mix(in oklab, var(--background) 56%, transparent)
+          );
+
   backdrop-filter: blur(6px);
 }
 
@@ -33,6 +51,10 @@
   overflow: auto;
   max-height: 100%;
   padding-right: 6px; /* 細いスクロールバー分の余白 */
+
+  /* ✅ グローバルのスクロールバー変数に追従 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
 }
 
 /* 歌詞の表示 */
@@ -41,32 +63,89 @@
   word-break: break-word;
   line-height: 1.65;
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.82);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+
+  /*
+    text-shadow も白固定をやめる
+    - foreground を少し混ぜた“薄影”にしてダークでも破綻しにくく
+  */
+  text-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent);
+
+  color: var(--foreground);
+  opacity: 0.92;
 }
 
-/* 目立たないスクロールバー */
-.lyricsBox {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
-}
-
+/* Chrome / Edge / Safari */
 .lyricsBox::-webkit-scrollbar {
   width: 8px;
 }
 
 .lyricsBox::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--sb-track);
 }
 
 .lyricsBox::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
+  background: var(--sb-thumb);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 .lyricsBox::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.26);
+  background: var(--sb-thumb-hover);
+  background-clip: content-box;
+}
+
+.panelRoot {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  overflow-x: hidden;
+  max-width: 100%;
+  color: var(--foreground);
+  position: relative;
+}
+
+.panelGrid {
+  display: grid;
+  place-items: start;
+}
+
+.lyricsStandalone {
+  width: 100%;
+}
+
+.lyricsStandaloneBox {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel);
+  max-height: 280px; /* 好みで */
+  overflow: auto;
+
+  /* ✅ ここも統一しておく（単独表示側） */
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+.lyricsStandaloneBox::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lyricsStandaloneBox::-webkit-scrollbar-track {
+  background: var(--sb-track);
+}
+
+.lyricsStandaloneBox::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.lyricsStandaloneBox::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
   background-clip: content-box;
 }

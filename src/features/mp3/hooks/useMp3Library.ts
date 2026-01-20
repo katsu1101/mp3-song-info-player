@@ -1,6 +1,7 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
+import {useLyricsAutoFillFromPublic}                            from "@/features/mp3/hooks/useLyricsAutoFillFromPublic";
 import {useMp3LibraryBoot}                                      from "@/features/mp3/hooks/useMp3LibraryBoot";
 import {buildDirAlbums}                                         from "@/features/mp3/lib/album/buildDirAlbums"; // あとで作る/すでにある前提
 import {buildMp3Library}                                        from "@/features/mp3/lib/library/buildMp3Library";
@@ -124,6 +125,13 @@ export const useMp3Library = (): UseMp3LibraryResult => {
     artworkUrlByPath: artworkUrlByPath,
     dirArtworkUrlByDir: dirArtworkUrlByDir,
   }), [artworkUrlByPath, dirArtworkUrlByDir]);
+
+  useLyricsAutoFillFromPublic({
+    mp3List,
+    metaByPath,
+    lyricsRunIdRef,
+    setMetaByPathAction: setMetaByPath,
+  });
 
   // ===== public actions =====
   const pickFolderAndLoad = useCallback(async () => {

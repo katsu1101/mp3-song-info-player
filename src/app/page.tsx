@@ -97,7 +97,7 @@ export default function Page(): JSX.Element {
     <AppShell
       header={
         <TopBar
-          title="MP3曲情報エディター"
+          title="とじょりんMP3プレイヤー"
           folderName={settingState.folderName}
         />
       }
@@ -140,6 +140,7 @@ export default function Page(): JSX.Element {
           audioRef={audioRef}
           commands={commands}
           isPlaying={isPlaying}
+          metaByPath={settingState.metaByPath}
         />
       )}
     />

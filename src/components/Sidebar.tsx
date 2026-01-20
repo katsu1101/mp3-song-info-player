@@ -55,7 +55,7 @@ export function SidebarStub({state, commands, closeSidebar}: SidebarMenuProps): 
   );
 
   const handleForget = (): void => {
-    const ok = window.confirm("保存しているフォルダの記憶を消します。よろしいですか？");
+    const ok = window.confirm("保存している情報リセットします。よろしいですか？");
     if (!ok) return;
     void commands.forget();
     closeSidebar();
@@ -144,7 +144,7 @@ export function SidebarStub({state, commands, closeSidebar}: SidebarMenuProps): 
         <>
           <SectionTitle>危険操作</SectionTitle>
           <SideButton onClick={() => void handleForget()} variant="danger">
-            記憶を消す
+            リセット
           </SideButton>
         </>
       ) : null}

@@ -31,7 +31,6 @@ export const startTrackIndoWorker = async (args: Args): Promise<void> => {
 
       const entry = items[cursor++]!;
       const handle = entry.infoHandle;
-      console.log("handle", handle)
 
       if (!handle) {
         await yieldToBrowser();

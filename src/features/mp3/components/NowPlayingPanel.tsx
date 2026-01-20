@@ -3,6 +3,7 @@
 import {PlayerVariant}                      from "@/components/AppShell/AppShell";
 import {ArtworkSquare}                      from "@/features/mp3/components/Artwork/ArtworkSquare";
 import type {AlbumView}                     from "@/features/mp3/types/albumView";
+import {TrackMetaByPath}                    from "@/features/mp3/types/trackMeta";
 import {AppCommands}                        from "@/hooks/useAppCommands";
 import {useProgressScroll}                  from "@/hooks/useProgressScroll";
 import {getDirname}                         from "@/lib/path";
@@ -23,6 +24,7 @@ type NowPlayingPanelProps = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   commands: AppCommands;
   isPlaying: boolean;
+  metaByPath: TrackMetaByPath;
 };
 
 /**
@@ -44,6 +46,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     audioRef,
     commands,
     isPlaying,
+    metaByPath,
   } = props;
 
   const lyricsBoxRef = useRef<HTMLDivElement | null>(null);
@@ -115,8 +118,14 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     };
   }, [currentAlbum, currentTrack]);
 
-  const lyrics = nowTrackView?.lyrics ?? null;
-  const hasLyrics = Boolean(lyrics && lyrics.trim().length > 0);
+  const currentPath = currentTrack?.item.path ?? "";
+
+  const lyricsText =
+    nowTrackView?.lyrics
+    ?? (currentPath ? (metaByPath[currentPath]?.lyrics ?? "") : "")
+    ?? "";
+
+  const hasLyrics = lyricsText.trim().length > 0;
 
   useProgressScroll({
     audioRef,
@@ -127,6 +136,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   });
 
   const variant = props.variant ?? "full";
+  const hasArtwork = Boolean(nowTrackView?.artworkUrl);
+  const showOverlayLyrics = hasLyrics && hasArtwork;
   if (variant === "mini") {
     // まずは暫定: ここを「ミニUI」に差し替えていく
     // return <MiniNowPlayingBar ... />;
@@ -245,19 +256,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   const COVER_MAX = 280;
 
   return (
-    <section
-      style={{
-        marginTop: 12,
-        padding: 12,
-        borderRadius: 16,
-        border: "1px solid var(--panel-border)",
-        background: "var(--panel)",
-        overflowX: "hidden",
-        maxWidth: "100%",
-        color: "var(--foreground)",
-      }}
-    >
-      <div style={{display: "grid", placeItems: "left"}}>
+    <section className={styles.panelRoot}>
+      <div className={styles.panelGrid}>
         {currentAlbum ? (
           <div style={{display: "grid", gridTemplateColumns: "44px minmax(0,1fr)", gap: 10, alignItems: "center"}}>
             <ArtworkSquare
@@ -281,21 +281,38 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           data-has-lyrics={hasLyrics ? "1" : "0"}
           style={{maxWidth: COVER_MAX}} // 既存の制約があるなら残す
         >
-          <ArtworkSquare
-            url={nowTrackView?.artworkUrl}
-            fallbackText={nowTrackView?.displayTitle ?? ""}
-            seed={nowTrackView?.displayTitle ?? ""}
-          />
-          {hasLyrics ? (
-            <div className={styles.overlay}>
-              <div className={styles.lyricsBox} ref={lyricsBoxRef} aria-label="歌詞">
-                <div className={styles.lyricsText}>{lyrics}</div>
+          {hasArtwork ? (
+            <>
+              <ArtworkSquare
+                url={nowTrackView?.artworkUrl}
+                fallbackText={nowTrackView?.displayTitle ?? ""}
+                seed={nowTrackView?.displayTitle ?? ""}
+              />
+              {showOverlayLyrics ? (
+                <div className={styles.overlay}>
+                  <div className={styles.lyricsBox} ref={lyricsBoxRef} aria-label="歌詞">
+                    <div className={styles.lyricsText}>{lyricsText}</div>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : (
+            // ✅ 画像なし時：同じ枠の中に歌詞を表示（下に増やさない）
+            hasLyrics ? (
+              <div className={styles.lyricsStandaloneInFrame} ref={lyricsBoxRef} aria-label="歌詞">
+                <div className={styles.lyricsText}>{lyricsText}</div>
               </div>
-            </div>
-          ) : null}
+            ) : (
+              // 歌詞も無い場合は従来のフォールバック（任意）
+              <ArtworkSquare
+                url={null}
+                fallbackText={nowTrackView?.displayTitle ?? ""}
+                seed={nowTrackView?.displayTitle ?? ""}
+              />
+            )
+          )}
         </div>
       </div>
-
       <div style={{marginTop: 10, display: "flex", alignItems: "center", gap: 10, minWidth: 0}}>
         <div
           style={{

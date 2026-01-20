@@ -39,8 +39,8 @@ const geistMono = Geist_Mono({
  * アプリケーションに関する情報を含むメタデータオブジェクト。
  */
 export const metadata: Metadata = {
-  title: "MP3 曲情報エディター",
-  description: "MP3ファイルの曲情報を編集するアプリ",
+  title: "とじょりんMP3プレイヤー",
+  description: "とじょりん関連のMP3ファイルの曲を再生するアプリ",
 };
 
 /**
