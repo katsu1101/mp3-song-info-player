@@ -1,8 +1,8 @@
 // src/features/mp3/hooks/useLyricsAutoFillFromPublic.ts
 "use client";
 
-import {fetchPublicLyricsByTitle} from "@/features/mp3/lib/lyrics/fetchPublicLyricsByTitle";
-import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
+import {fetchPublicLyricsByTitle}                           from "@/features/mp3/lib/lyrics/fetchPublicLyricsByTitle";
+import type {Mp3Entry}                                      from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}                               from "@/features/mp3/types/trackMeta";
 import React, {Dispatch, SetStateAction, useEffect, useRef} from "react";
 
@@ -10,7 +10,7 @@ type Args = {
   mp3List: readonly Mp3Entry[];
   metaByPath: TrackMetaByPath;
   lyricsRunIdRef: { current: number };
-  setMetaByPathAction:  Dispatch<SetStateAction<TrackMetaByPath>>;
+  setMetaByPathAction: Dispatch<SetStateAction<TrackMetaByPath>>;
 };
 
 // 既に試したpathを覚える（無限fetch防止）
@@ -51,15 +51,11 @@ export function useLyricsAutoFillFromPublic(args: Args): void {
         // 判定対象タイトル（あなたのTrackMetaの実体に合わせて候補を用意）
         const titleCandidate = currentMeta.title + path;
 
-        if (!titleCandidate) continue;
-
         // 4曲以外なら null が返る想定（内部で keyword 判定）
         const lyrics = await fetchPublicLyricsByTitle(titleCandidate);
-        triedPathSetRef.current.add(path); // ✅ 成否に関わらず「このpathは試した」扱い
 
-        if (isCanceled) return;
-        if (lyricsRunIdRef.current !== runId) return;
         if (!lyrics) continue;
+        triedPathSetRef.current.add(path); // ✅ 成否に関わらず「このpathは試した」扱い
 
         setMetaByPathAction((prev) => {
           const now = prev[path];
