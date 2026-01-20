@@ -4,6 +4,7 @@ import {AppShell}                            from "@/components/AppShell/AppShel
 import {useSettings}                         from "@/components/Settings/SettingsProvider";
 import {SidebarStub}                         from "@/components/Sidebar";
 import {TopBar}                              from "@/components/TopBar";
+import {appMeta}                             from "@/config/appMeta";
 import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
 import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
 import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudioPlaybackState";
@@ -97,7 +98,7 @@ export default function Page(): JSX.Element {
     <AppShell
       header={
         <TopBar
-          title="とじょりんMP3プレイヤー"
+          title={appMeta.name}
           folderName={settingState.folderName}
         />
       }

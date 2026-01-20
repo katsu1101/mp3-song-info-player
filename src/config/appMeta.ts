@@ -6,10 +6,10 @@ import type {Metadata, MetadataRoute, Viewport} from "next";
 const basePath = getBasePath();
 
 export const appMeta = {
-  name: "とじょりんMP3プレイヤー",
-  shortName: "とじょプレ",
-  title: "とじょりんMP3プレイヤー",
-  description: "とじょりん関連のMP3ファイルの曲を再生するアプリ",
+  name: "とじょりん音楽プレイヤー",
+  shortName: "とじょ音プレ",
+  title: "とじょりん音楽プレイヤー",
+  description: "とじょりん関連の音楽ファイル（mp3など）の曲を再生するアプリ",
 
   themeColor: "#ffd9d9",
   backgroundColor: "#ffffff",
@@ -33,10 +33,22 @@ export const nextMetadata: Metadata = {
   applicationName: appMeta.name,
   title: appMeta.title,
   description: appMeta.description,
+  icons: {
+    icon: [
+      { url: `${basePath}/favicon.ico` },
+      // TODO(推奨): SVG favicon も追加するならここ
+    ],
+  },
+  // TODO: OGP, appleWebApp（iOS向け）などを追加
 };
 
 export const nextViewport: Viewport = {
   themeColor: appMeta.themeColor,
+  // TODO: ダーク用のテーマ色を決める
+  // themeColor: [
+  //   { media: "(prefers-color-scheme: light)", color: appMeta.themeColor },
+  //   { media: "(prefers-color-scheme: dark)", color: "#111111" },
+  // ],
 };
 
 // Next.js (app/manifest.ts) 用

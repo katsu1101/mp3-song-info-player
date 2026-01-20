@@ -1,12 +1,15 @@
-import {Providers}               from "@/app/providers";
-import {appMeta}                 from "@/config/appMeta";
-import {getBasePath}             from "@/config/getBasePath";
-import type {Metadata, Viewport} from "next";
+import {Providers}          from "@/app/providers";
+import {Metadata, Viewport} from "next";
+
 import {Geist, Geist_Mono}       from "next/font/google";
 import React, {JSX}              from "react";
 import "./globals.css";
 import "./globals.scss";
 import {RegisterServiceWorker}   from "./_components/RegisterServiceWorker";
+import { nextMetadata, nextViewport } from "@/config/appMeta";
+
+export const metadata: Metadata = nextMetadata;
+export const viewport: Viewport = nextViewport;
 
 /**
  * `geistSans`変数は`Geist`関数で作成された設定オブジェクトであり、Geist Sansフォントに関する一連のフォント関連設定を定義します。
@@ -36,28 +39,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-const basePath = getBasePath();
-
-/**
- * アプリケーションに関する情報を含むメタデータオブジェクト。
- */
-export const metadata: Metadata = {
-  applicationName: appMeta.name,
-  title: appMeta.title,
-  description: appMeta.description,
-  icons: {
-    icon: [
-      { url: `${basePath}/favicon.ico` },
-      // TODO(推奨): SVG favicon も追加するならここ
-    ],
-  },
-  // TODO: OGP, appleWebApp（iOS向け）などを追加
-};
-
-export const viewport: Viewport = {
-  themeColor: appMeta.themeColor,
-};
 
 /**
  * アプリケーションのルートレイアウトをレンダリングします。
