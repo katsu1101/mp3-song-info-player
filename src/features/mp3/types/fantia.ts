@@ -1,16 +1,4 @@
 /**
- * Fantiaマッピングを管理するための状態を表します。
- *
- * この型は、Fantiaシステムにおけるマッピング処理に使用される構造体と、状態管理に関連するメタデータを定義します。
- */
-export type FantiaMappingState = {
-  mapping: FantiaMappingRow[];
-  mappingByPrefixId: ReadonlyMap<string, FantiaMappingRow>;
-  error: string;
-  isLoading: boolean;
-};
-
-/**
  * Fantiaマッピング行の入力構造を表します。
  */
 export type FantiaMappingRow = {

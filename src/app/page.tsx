@@ -20,7 +20,6 @@ import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sort
 import {useAppCommands}                      from "@/hooks/useAppCommands";
 import React, {JSX}                          from "react";
 
-
 export default function Page(): JSX.Element {
   const {settings} = useSettings();
 
@@ -30,9 +29,9 @@ export default function Page(): JSX.Element {
   const {isPlaying} = useAudioPlaybackState(audioRef);
 
   // ===== Mapping（Fantia対応表）=====
-  const mapping = useFantiaMapping();
-  const {mappingByPrefixId, error: mappingError, isLoading: mappingLoading} = mapping;
+  const mappingByPrefixId = useFantiaMapping();
 
+  // ===== MP3 Library =====
   const {mp3List, artworks, settingState, settingActions} = useMp3Library();
 
   // ===== 表示用（trackViews）=====
@@ -118,9 +117,6 @@ export default function Page(): JSX.Element {
           {settingState.needsReconnect ? (
             <p style={{opacity: 0.7}}>フォルダへの再接続が必要です（権限）。</p>
           ) : null}
-
-          {mappingError ? <p style={{color: "crimson"}}>対応表エラー: {mappingError}</p> : null}
-          {mappingLoading ? <p style={{opacity: 0.7}}>対応表読み込み中…</p> : null}
 
           <TrackList
             albums={dirAlbums}
