@@ -2,7 +2,7 @@ import type {ArtworkUrlByPath, FantiaMappingRow, Mp3Entry, TrackMetaByPath} from
 
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import {getDirname}              from "@/lib/path";
-import {TrackView}               from "@/types/views";
+import {TrackView}               from "@/types";
 import React                     from "react";
 
 /**

@@ -2,11 +2,7 @@
 
 import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
-import {startDirArtworkWorker}    from "@/features/mp3/workers/startDirArtworkWorker";
-import {startLyricsTextWorker}    from "@/features/mp3/workers/startLyricsTextWorker";
-import {startMetaScannerWorker}   from "@/features/mp3/workers/startMetaScannerWorker";
-import {startTrackArtworkWorker}  from "@/features/mp3/workers/startTrackArtworkWorker";
-import {startTrackIndoWorker}     from "@/features/mp3/workers/startTrackIndoWorker";
+import * as workers               from "@/features/mp3/workers";
 import {scanMediaTree}            from "@/lib/fsAccess/scanMediaTree";
 import {extractPrefixIdFromPath}  from "@/lib/mapping/extractPrefixId";
 import {Dispatch, SetStateAction} from "react";
@@ -75,7 +71,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   setMetaByPath(() => buildInitialMetaByPath(items));
 
   const infoRunId = ++infoRunIdRef.current;
-  void startTrackIndoWorker({
+  void workers.startTrackIndoWorker({
     items,
     runIdRef: infoRunIdRef,
     runId: infoRunId,
@@ -86,7 +82,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   const artworkRunId = ++dirArtworkRunIdRef.current;
 
 // ✅ 曲の外部画像（同名）を先に補完
-  void startTrackArtworkWorker({
+  void workers.startTrackArtworkWorker({
     scanResult,
     items,
     runIdRef: dirArtworkRunIdRef,
@@ -96,7 +92,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   });
 
   // ✅ フォルダ代表画像だけ後追い開始
-  void startDirArtworkWorker({
+  void workers.startDirArtworkWorker({
     scanResult,
     items,
     runIdRef: dirArtworkRunIdRef,
@@ -106,7 +102,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
   });
 
   // ✅ metaも後追い（1曲ずつ）
-  void startMetaScannerWorker({
+  void workers.startMetaScannerWorker({
     items,
     runIdRef: metaRunIdRef,
     track,
@@ -117,7 +113,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
 
   // ✅ 外部 .txt 歌詞も後追い（補完のみ）
   const lyricsRunId = ++lyricsRunIdRef.current;
-  void startLyricsTextWorker({
+  void workers.startLyricsTextWorker({
     items,
     runIdRef: lyricsRunIdRef,
     runId: lyricsRunId,

@@ -4,9 +4,9 @@ import {AppShell}                            from "@/components/AppShell/AppShel
 import {useSettings}                         from "@/components/Settings/SettingsProvider";
 import {SidebarStub}                         from "@/components/Sidebar";
 import {TopBar}                              from "@/components/TopBar";
-import {appMeta}                             from "@/config/appMeta";
-import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
-import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
+import {appMeta}         from "@/config/appMeta";
+import {NowPlayingPanel} from "@/features/mp3/components/NowPlayingPanel/NowPlayingPanel";
+import {TrackList}       from "@/features/mp3/components/TrackList/TrackList";
 import * as hooks                            from "@/features/mp3/hooks";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";

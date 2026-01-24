@@ -1,12 +1,13 @@
-import {Providers}          from "@/app/providers";
-import {Metadata, Viewport} from "next";
+import {Providers}                  from "@/app/providers";
+import {nextMetadata, nextViewport} from "@/config/appMeta";
+import {Metadata, Viewport}         from "next";
+import {Geist, Geist_Mono}          from "next/font/google";
+import React, {JSX}                 from "react";
 
-import {Geist, Geist_Mono}       from "next/font/google";
-import React, {JSX}              from "react";
 import "./globals.css";
 import "./globals.scss";
-import {RegisterServiceWorker}   from "./_components/RegisterServiceWorker";
-import { nextMetadata, nextViewport } from "@/config/appMeta";
+
+import {RegisterServiceWorker} from "./_components/RegisterServiceWorker";
 
 export const metadata: Metadata = nextMetadata;
 export const viewport: Viewport = nextViewport;

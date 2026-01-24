@@ -1,6 +1,8 @@
 "use client";
 
-import {defaultSettings, Settings, SETTINGS_STORAGE_KEY}                               from "@/types/setting";
+import type {Settings}                         from "@/types/setting";
+import {defaultSettings, SETTINGS_STORAGE_KEY} from "@/types/setting";
+
 import React, {createContext, JSX, useContext, useEffect, useMemo, useReducer, useRef} from "react";
 
 /**

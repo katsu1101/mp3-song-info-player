@@ -1,11 +1,10 @@
 // src/hooks/usePlaylistPlayer.ts
-import type {AlbumView} from "@/features/mp3/types/albumView"; // ✅ 追加
+import type {AlbumView} from "@/features/mp3/types/albumView";
 import type {Mp3Entry}  from "@/features/mp3/types/mp3Entry";
-import {isTypingTarget} from "@/lib/dom/isTypingTarget";
 
-import {PlayActions}                                    from "@/types/actions";
-import {Settings}                                       from "@/types/setting";
-import {TrackView}                                      from "@/types/views";
+import {isTypingTarget}                   from "@/lib/dom/isTypingTarget";
+import {PlayActions, Settings, TrackView} from "@/types";
+
 import React, {useCallback, useEffect, useMemo, useRef} from "react";
 
 // ✅ 追加: Fisher–Yates（副作用なし）
@@ -131,7 +130,7 @@ export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
     if (!audio) return;
     void audio.play(); // ユーザー操作(通知)なので多くの端末で許可される
   }, [audioRef]);
-  
+
   const stop = useCallback(async (): Promise<void> => {
     stopAndClear?.();
   }, [stopAndClear]);
