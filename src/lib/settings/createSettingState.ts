@@ -2,7 +2,7 @@
 import type {TrackMetaByPath} from "@/features/mp3/types/trackMeta";
 import type {SettingState}    from "@/types/setting";
 
-export const createMp3SettingState = (args: {
+export const createSettingState = (args: {
   folderName: string;
   errorMessage: string;
   metaByPath: TrackMetaByPath;
