@@ -30,7 +30,6 @@ type BuildMp3LibraryArgs = {
   setFolderName: Dispatch<SetStateAction<string>>;
   setMp3List: Dispatch<SetStateAction<Mp3Entry[]>>;
   setMetaByPath: Dispatch<SetStateAction<TrackMetaByPath>>;
-  setDirArtworkUrlByDir: Dispatch<SetStateAction<Record<string, string | null>>>;
   setArtworkUrlByPath: Dispatch<SetStateAction<Record<string, string | null>>>;
 };
 
@@ -64,7 +63,6 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     setFolderName,
     setMp3List,
     setMetaByPath,
-    setDirArtworkUrlByDir,
     setArtworkUrlByPath,
   } = args;
 
@@ -104,7 +102,7 @@ export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> 
     runIdRef: dirArtworkRunIdRef,
     runId: artworkRunId, // ✅ 同じ値
     track,
-    setDirArtworkUrlByDir: setDirArtworkUrlByDir,
+    setArtworkUrlByPath: setArtworkUrlByPath,
   });
 
   // ✅ metaも後追い（1曲ずつ）

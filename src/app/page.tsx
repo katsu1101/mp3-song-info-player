@@ -7,14 +7,7 @@ import {TopBar}                              from "@/components/TopBar";
 import {appMeta}                             from "@/config/appMeta";
 import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel";
 import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
-import {useAudioPlaybackState}               from "@/features/mp3/hooks/useAudioPlaybackState";
-import {useAudioPlayer}                      from "@/features/mp3/hooks/useAudioPlayer";
-import {useFantiaMapping}                    from "@/features/mp3/hooks/useFantiaMapping";
-import {useMediaSessionControls}             from "@/features/mp3/hooks/useMediaSessionControls";
-import {useMediaSessionPosition}             from "@/features/mp3/hooks/useMediaSessionPosition";
-import {useMp3Library}                       from "@/features/mp3/hooks/useMp3Library"; // ← I/F変更後を想定
-import {usePlaylistPlayer}                   from "@/features/mp3/hooks/usePlaylistPlayer"; // ← playlistInfo追加を想定
-import {useTrackViews}                       from "@/features/mp3/hooks/useTrackViews";
+import * as hooks                            from "@/features/mp3/hooks";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
 import {useAppCommands}                      from "@/hooks/useAppCommands";
@@ -24,22 +17,22 @@ export default function Page(): JSX.Element {
   const {settings} = useSettings();
 
   // ===== Player（audio + 再生状態）=====
-  const {audioRef, nowPlayingID, playEntry, stopAndClear} = useAudioPlayer();
-  useMediaSessionPosition(audioRef);
-  const {isPlaying} = useAudioPlaybackState(audioRef);
+  const {audioRef, nowPlayingID, playEntry, stopAndClear} = hooks.useAudioPlayer();
+  hooks.useMediaSessionPosition(audioRef);
+  const {isPlaying} = hooks.useAudioPlaybackState(audioRef);
 
   // ===== Mapping（Fantia対応表）=====
-  const mappingByPrefixId = useFantiaMapping();
+  const mappingByPrefixId = hooks.useFantiaMapping();
 
   // ===== MP3 Library =====
-  const {mp3List, artworks, settingState, settingActions} = useMp3Library();
+  const {mp3List, artworkUrlByPath, settingState, settingActions} = hooks.useMp3Library();
 
   // ===== 表示用（trackViews）=====
   // ✅ mp3List の順序を正本とする（メタ後追いで並べ替えしない）
-  const trackViews = useTrackViews({
+  const trackViews = hooks.useTrackViews({
     mp3List,
     metaByPath: settingState.metaByPath,
-    artworks: artworks,
+    artworkUrlByPath,
     mappingByPrefixId,
   });
 
@@ -47,9 +40,9 @@ export default function Page(): JSX.Element {
     return buildAlbumViewsFantiaFirst({
       trackViews,
       folderName: settingState.folderName,
-      dirArtworkUrlByDir: artworks.dirArtworkUrlByDir,
+      dirArtworkUrlByDir: artworkUrlByPath,
     });
-  }, [trackViews, settingState.folderName, artworks.dirArtworkUrlByDir]);
+  }, [trackViews, settingState.folderName, artworkUrlByPath]);
 
 // ✅ 追加：ここで “アルバム内＆アルバム順” を確定させる（UIとプレイヤー共通）
   const sortedDirAlbums = React.useMemo(() => {
@@ -67,7 +60,7 @@ export default function Page(): JSX.Element {
   }, [dirAlbums]);
 
 // ===== Playlist =====
-  const playlist = usePlaylistPlayer({
+  const playlist = hooks.usePlaylistPlayer({
     audioRef,
     playEntry,
     trackViews,
@@ -78,7 +71,7 @@ export default function Page(): JSX.Element {
   });
 
   // 例: playlist 作成の直後
-  useMediaSessionControls({
+  hooks.useMediaSessionControls({
     trackViews: trackViews,
     nowPlayingID: nowPlayingID,
     playAction: playlist.playActions.play,

@@ -9,8 +9,3 @@ export type AlbumInfo = {
   trackPaths: string[];     // そのアルバムに属する path 一覧
   dirArtworkUrl: string | null; // フォルダ代表画像（暫定表示）
 };
-
-export type AlbumTrackRef = {
-  path: string;        // 安定キー: ファイルパス
-  index: number;       // 再生用: mp3List / trackViews のグローバルindex
-};

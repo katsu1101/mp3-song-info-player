@@ -1,4 +1,4 @@
-// src/lib/mp3/library/mp3LibraryActions.ts
+// src/lib/mp3/library/libraryActions.ts
 import {clearDirectoryHandle, saveDirectoryHandle} from "@/lib/fsAccess/dirHandleStore";
 import {ensureDirectoryPicker, requestRead}        from "@/lib/fsAccess/permission";
 

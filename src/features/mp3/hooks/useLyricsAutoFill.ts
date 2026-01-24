@@ -1,9 +1,10 @@
 // src/features/mp3/hooks/useLyricsAutoFillFromPublic.ts
 "use client";
 
-import {fetchPublicLyricsByTitle}                           from "@/features/mp3/lib/lyrics/fetchPublicLyricsByTitle";
-import type {Mp3Entry}                                      from "@/features/mp3/types/mp3Entry";
-import type {TrackMetaByPath}                               from "@/features/mp3/types/trackMeta";
+import {fetchPublicLyricsByTitle} from "@/features/mp3/lib/lyrics/fetchPublicLyricsByTitle";
+import type {Mp3Entry}            from "@/features/mp3/types/mp3Entry";
+import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
+
 import React, {Dispatch, SetStateAction, useEffect, useRef} from "react";
 
 type Args = {
@@ -18,7 +19,7 @@ const useTriedPathSet = (): React.RefObject<Set<string>> => {
   return useRef<Set<string>>(new Set());
 };
 
-export function useLyricsAutoFillFromPublic(args: Args): void {
+export function useLyricsAutoFill(args: Args): void {
   const {mp3List, metaByPath, lyricsRunIdRef, setMetaByPathAction} = args;
   const triedPathSetRef = useTriedPathSet();
 

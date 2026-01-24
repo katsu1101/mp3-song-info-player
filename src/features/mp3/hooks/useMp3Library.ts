@@ -1,30 +1,27 @@
 // src/hooks/useMp3Library.ts
 "use client";
 
-import {useLyricsAutoFillFromPublic}                            from "@/features/mp3/hooks/useLyricsAutoFillFromPublic";
-import {useMp3LibraryBoot}                                      from "@/features/mp3/hooks/useMp3LibraryBoot";
-import {buildDirAlbums}                                         from "@/features/mp3/lib/album/buildDirAlbums"; // あとで作る/すでにある前提
-import {buildMp3Library}                                        from "@/features/mp3/lib/library/buildMp3Library";
-import {forgetAction, pickFolderAndLoadAction, reconnectAction} from "@/features/mp3/lib/library/mp3LibraryActions";
-import type {AlbumInfo}                                         from "@/features/mp3/types/albumInfo";
-import type {Artworks}                                          from "@/features/mp3/types/artworks";
-import {FantiaMappingRow}                                       from "@/features/mp3/types/fantia";
-import type {Mp3Entry}                                          from "@/features/mp3/types/mp3Entry";
-import type {TrackMetaByPath}                                   from "@/features/mp3/types/trackMeta";
-import {useObjectUrlPool}                                       from "@/hooks/useObjectUrlPool";
-import {createMp3SettingState}                                  from "@/lib/settings/createMp3SettingState";
-import {SettingActions, SettingState}                           from "@/types/setting";
-import {useCallback, useEffect, useMemo, useRef, useState}      from "react";
+import {useLyricsAutoFill}  from "@/features/mp3/hooks/useLyricsAutoFill";
+import {useMp3LibraryBoot}  from "@/features/mp3/hooks/useMp3LibraryBoot";
+import {buildDirAlbums}     from "@/features/mp3/lib/album/buildDirAlbums"; // あとで作る/すでにある前提
+import {buildMp3Library}    from "@/features/mp3/lib/library/buildMp3Library";
+import * as LibraryActions  from "@/features/mp3/lib/library/libraryActions";
+import type * as Mp3Types   from "@/features/mp3/types";
+import {useObjectUrlPool}   from "@/hooks/useObjectUrlPool";
+import {createSettingState} from "@/lib/settings/createSettingState";
+import * as setting         from "@/types/setting";
+
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 // return 型（もし明示してるなら）に albums を足す
 export type UseMp3LibraryResult = {
-  mp3List: Mp3Entry[];
-  artworks: Artworks;
-  settingState: SettingState;
-  settingActions: SettingActions;
-  fantiaEntryByPath: Record<string, FantiaMappingRow | undefined>;
+  mp3List: Mp3Types.Mp3Entry[];
+  artworkUrlByPath: Mp3Types.ArtworkUrlByPath;
+  settingState: setting.SettingState;
+  settingActions: setting.SettingActions;
+  fantiaEntryByPath: Record<string, Mp3Types.FantiaMappingRow | undefined>;
 
-  albums: AlbumInfo[]; // ✅ 追加
+  albums: Mp3Types.AlbumInfo[]; // ✅ 追加
 };
 
 /**
@@ -45,16 +42,15 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   const [needsReconnect, setNeedsReconnect] = useState(false);
 
   // ===== library list =====
-  const [mp3List, setMp3List] = useState<Mp3Entry[]>([]);
+  const [mp3List, setMp3List] = useState<Mp3Types.Mp3Entry[]>([]);
 
   const infoRunIdRef = useRef(0);
   // ===== per-track meta (progressive) =====
-  const [metaByPath, setMetaByPath] = useState<TrackMetaByPath>({});
+  const [metaByPath, setMetaByPath] = useState<Mp3Types.TrackMetaByPath>({});
   const metaRunIdRef = useRef(0);
 
   // ===== artwork (progressive) =====
   const [artworkUrlByPath, setArtworkUrlByPath] = useState<Record<string, string | null>>({});
-  const [dirArtworkUrlByDir, setDirArtworkUrlByDir] = useState<Record<string, string | null>>({});
   const dirArtworkRunIdRef = useRef(0);
 
   // ===== lyrics (progressive) =====
@@ -62,7 +58,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
   // ===== Fantia mapping (progressive) =====
   const [fantiaEntryByPath, setFantiaEntryByPath] =
-    useState<Record<string, FantiaMappingRow | undefined>>({});
+    useState<Record<string, Mp3Types.FantiaMappingRow | undefined>>({});
 
   // ===== internal utilities =====
   const resetView = useCallback(() => {
@@ -76,7 +72,6 @@ export const useMp3Library = (): UseMp3LibraryResult => {
     setMp3List([]);
     setMetaByPath({});
     setArtworkUrlByPath({});
-    setDirArtworkUrlByDir({});
     setFantiaEntryByPath({});
 
     revokeAll();
@@ -98,7 +93,6 @@ export const useMp3Library = (): UseMp3LibraryResult => {
       setMp3List,
       setMetaByPath,
       setArtworkUrlByPath: setArtworkUrlByPath,
-      setDirArtworkUrlByDir: setDirArtworkUrlByDir,
     });
   }, [track]);
 
@@ -120,13 +114,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
     };
   }, [revokeAll]);
 
-  // ===== derived values =====
-  const artworks: Artworks = useMemo(() => ({
-    artworkUrlByPath: artworkUrlByPath,
-    dirArtworkUrlByDir: dirArtworkUrlByDir,
-  }), [artworkUrlByPath, dirArtworkUrlByDir]);
-
-  useLyricsAutoFillFromPublic({
+  useLyricsAutoFill({
     mp3List,
     metaByPath,
     lyricsRunIdRef,
@@ -135,7 +123,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
 
   // ===== public actions =====
   const pickFolderAndLoad = useCallback(async () => {
-    await pickFolderAndLoadAction({
+    await LibraryActions.pickFolderAndLoadAction({
       resetView,
       buildList,
       setNeedsReconnect,
@@ -145,7 +133,7 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   }, [resetView, buildList]);
 
   const reconnect = useCallback(async () => {
-    await reconnectAction({
+    await LibraryActions.reconnectAction({
       savedHandle,
       resetView,
       buildList,
@@ -155,14 +143,14 @@ export const useMp3Library = (): UseMp3LibraryResult => {
   }, [savedHandle, resetView, buildList]);
 
   const forget = useCallback(async () => {
-    await forgetAction({
+    await LibraryActions.forgetAction({
       resetView,
       setSavedHandle,
       setNeedsReconnect,
     });
   }, [resetView]);
 
-  const settingState = useMemo(() => createMp3SettingState({
+  const settingState = useMemo(() => createSettingState({
     folderName,
     errorMessage,
     metaByPath,
@@ -170,24 +158,24 @@ export const useMp3Library = (): UseMp3LibraryResult => {
     needsReconnect,
   }), [folderName, errorMessage, metaByPath, savedHandle, needsReconnect]);
 
-  const settingActions: SettingActions = {
+  const settingActions: setting.SettingActions = {
     pickFolderAndLoad,
     reconnect,
     forget,
   };
 
-  const albums: AlbumInfo[] = useMemo(() => {
+  const albums: Mp3Types.AlbumInfo[] = useMemo(() => {
     // mp3List が未確定の瞬間があると落ちるのでガード
     if (!Array.isArray(mp3List) || mp3List.length === 0) return [];
 
     return buildDirAlbums({
       mp3List,
-      dirArtworkUrlByDir: artworks.dirArtworkUrlByDir,
+      dirArtworkUrlByDir: artworkUrlByPath,
     });
-  }, [mp3List, artworks.dirArtworkUrlByDir]);
+  }, [mp3List, artworkUrlByPath]);
 
   return {
-    mp3List, artworks: artworks, settingState, settingActions, fantiaEntryByPath,
+    mp3List, artworkUrlByPath, settingState, settingActions, fantiaEntryByPath,
     albums
   };
 };

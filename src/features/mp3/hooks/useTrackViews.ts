@@ -1,7 +1,5 @@
-import {Artworks}         from "@/features/mp3/types";
-import {FantiaMappingRow} from "@/features/mp3/types/fantia";
-import type {Mp3Entry}           from "@/features/mp3/types/mp3Entry";
-import {TrackMetaByPath}         from "@/features/mp3/types/trackMeta";
+import type {ArtworkUrlByPath, FantiaMappingRow, Mp3Entry, TrackMetaByPath} from "@/features/mp3/types/";
+
 import {extractPrefixIdFromPath} from "@/lib/mapping/extractPrefixId";
 import {getDirname}              from "@/lib/path";
 import {TrackView}               from "@/types/views";
@@ -26,7 +24,7 @@ type UseTrackViewsArgs = {
   metaByPath: TrackMetaByPath;
 
   // ✅ artwork（曲 > フォルダ代表）はこのまま
-  artworks: Artworks;
+  artworkUrlByPath: ArtworkUrlByPath;
 
   mappingByPrefixId: ReadonlyMap<string, FantiaMappingRow>;
 };
@@ -63,7 +61,7 @@ const normalizeText = (value: unknown): string | null => {
  * - `index` や生の `item` データを含む、追加の技術的詳細。
  */
 export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
-  const {mp3List, metaByPath, artworks, mappingByPrefixId} = args;
+  const {mp3List, metaByPath, artworkUrlByPath, mappingByPrefixId} = args;
 
   return React.useMemo(() => {
     return mp3List.map((item, index) => {
@@ -96,7 +94,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const originalArtist = mappingOriginal ?? tagArtist;
 
       const dirPath = getDirname(item.path);
-      const artworkUrl = artworks.artworkUrlByPath[item.path] ?? artworks.dirArtworkUrlByDir[dirPath] ?? null;
+      const artworkUrl = artworkUrlByPath[item.path] ?? artworkUrlByPath[dirPath] ?? null;
 
       // ② track/disc を “生文字列” に正規化（number混入を防ぐ）
       const trackNoRaw = toRawStringOrNull(meta?.trackNo ?? null);
@@ -129,7 +127,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       } as TrackView;
 
     });
-  }, [mp3List, metaByPath, mappingByPrefixId, artworks.artworkUrlByPath, artworks.dirArtworkUrlByDir]);
+  }, [mp3List, metaByPath, mappingByPrefixId, artworkUrlByPath]);
 };
 
 const pickText = (...candidates: Array<string | null | undefined>): string | null => {
