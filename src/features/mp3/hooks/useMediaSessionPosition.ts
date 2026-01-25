@@ -19,6 +19,12 @@ export type UseMediaSessionPositionArgs = {
 
 export type SyncPositionStateAction = (force: boolean) => void;
 
+const isAndroidChrome = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return ua.includes("Android") && ua.includes("Chrome/");
+};
+
 /**
  * メディアセッションの位置状態をオーディオ要素の現在の状態と同期します。
  * 戻り値として、任意タイミングで同期できる関数(syncPositionStateAction)を返します。
@@ -53,16 +59,19 @@ export function useMediaSessionPosition(args: UseMediaSessionPositionArgs): {
     if (!Number.isFinite(position) || position < 0) return;
     if (!Number.isFinite(playbackRate) || playbackRate <= 0) return;
 
+    const mediaSessionPlaybackRate =
+      (isPlaying && isAndroidChrome()) ? 1e-100 : playbackRate;
+
     try {
       navigator.mediaSession.setPositionState({
         duration,
-        playbackRate,
+        playbackRate: mediaSessionPlaybackRate,
         position: clamp(position, 0, duration),
       });
     } catch {
       // 端末差で例外が出ることがあるので握りつぶします
     }
-  }, [audioRef]);
+  }, [audioRef, isPlaying]);
 
   // ✅ 再生状態（通知UIの整合性アップ）
   useEffect(() => {
@@ -105,6 +114,34 @@ export function useMediaSessionPosition(args: UseMediaSessionPositionArgs): {
       audio.removeEventListener("pause", onPause);
     };
   }, [audioRef, trackKey, syncPositionStateAction]);
+  const intervalIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!canUsePositionState()) return;
+
+    // 再生していないなら停止
+    if (!isPlaying) {
+      if (intervalIdRef.current !== null) {
+        window.clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+      return;
+    }
+
+    // ✅ 再生中だけ定期更新（Androidでtimeupdateが止まる保険）
+    if (intervalIdRef.current === null) {
+      intervalIdRef.current = window.setInterval(() => {
+        syncPositionStateAction(false);
+      }, 500);
+    }
+
+    return () => {
+      if (intervalIdRef.current !== null) {
+        window.clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
+  }, [isPlaying, trackKey, syncPositionStateAction]);
 
   return {syncPositionStateAction};
 }
