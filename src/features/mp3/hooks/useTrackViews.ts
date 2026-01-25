@@ -97,7 +97,7 @@ export const useTrackViews = (args: UseTrackViewsArgs): TrackView[] => {
       const artworkUrl = artworkUrlByPath[item.path] ?? artworkUrlByPath[dirPath] ?? null;
 
       // ② track/disc を “生文字列” に正規化（number混入を防ぐ）
-      const trackNoRaw = toRawStringOrNull(meta?.trackNo ?? null);
+      const trackNoRaw = mapping?.track ??  toRawStringOrNull(meta?.trackNo ?? null);
 
       // TODO: Mp3Tag 側に discNo があるならここに差し替え
       // 例）meta?.discNo / meta?.diskNo / meta?.discNumber 等、実プロパティに合わせて変更
