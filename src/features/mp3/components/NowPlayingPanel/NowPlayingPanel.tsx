@@ -10,7 +10,7 @@ import {useProgressScroll}                             from "@/hooks/useProgress
 import {getDirname}                                    from "@/lib/path";
 import {getBasename}                                   from "@/lib/path/getBasename";
 import {TrackView}                                     from "@/types/views";
-import {ImagePlus, Pause, Play, SkipBack, SkipForward} from "lucide-react";
+import {ImagePlus, Pause, Play, SkipBack, SkipForward, Rewind, FastForward} from "lucide-react";
 import React, {JSX, useMemo, useRef}                   from "react";
 import styles                                          from "./NowPlayingPanel.module.scss";
 
@@ -179,11 +179,20 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     // まずは暫定: ここを「ミニUI」に差し替えていく
     // return <MiniNowPlayingBar ... />;
 
+    const onRewind: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void commands.playRewind()
+    };
+
+    const onForward: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void commands.playForward()
+    };
+
     const onPrev: React.MouseEventHandler<HTMLButtonElement> = (e) => {
       e.stopPropagation();
       void commands.playPrev();
     };
-
     const onToggle: React.MouseEventHandler<HTMLButtonElement> = (e) => {
       e.stopPropagation();
       void togglePlayPauseLikeSpace();
@@ -264,6 +273,16 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
             <button
               type="button"
+              onClick={onRewind}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="巻き戻し"
+            >
+              <Rewind />
+            </button>
+
+            <button
+              type="button"
               onClick={onToggle}
               disabled={!canControl}
               style={miniBarButtonStyle(!canControl)}
@@ -272,6 +291,16 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               {isPlaying
                 ? <Pause size={20} strokeWidth={2.5} aria-hidden/>
                 : <Play size={20} strokeWidth={2.5} aria-hidden/>}
+            </button>
+
+            <button
+              type="button"
+              onClick={onForward}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="先送り"
+            >
+              <FastForward />
             </button>
 
             <button
@@ -350,7 +379,15 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           )}
         </div>
       </div>
-      <div style={{marginTop: 10, display: "flex", alignItems: "center", gap: 10, minWidth: 0}}>
+      <div
+        style={{
+          marginTop: 10, display: "flex", gap: 10, minWidth: 0,
+          flex: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "10px 12px",
+        }}
+      >
         <div
           style={{
             minWidth: 0,
@@ -384,9 +421,19 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             onClick={() => void commands.playPrev()}
             disabled={!canControl}
             style={fullIconButtonStyle(!canControl)}
-            title="前へ"
+            title="前へ（↑）"
           >
             <SkipBack size={20} strokeWidth={2.5} aria-hidden/>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => void commands.playRewind()}
+            disabled={!canControl}
+            style={miniBarButtonStyle(!canControl)}
+            title="巻き戻し（←）"
+          >
+            <Rewind />
           </button>
 
           <button
@@ -403,10 +450,19 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
 
           <button
             type="button"
+            onClick={() => void commands.playForward()}
+            disabled={!canControl}
+            style={miniBarButtonStyle(!canControl)}
+            title="先送り（→）"
+          >
+            <FastForward />
+          </button>
+          <button
+            type="button"
             onClick={() => void commands.playNext()}
             disabled={!canControl}
             style={fullIconButtonStyle(!canControl)}
-            title="次へ"
+            title="次へ（↓）"
           >
             <SkipForward size={20} strokeWidth={2.5} aria-hidden/>
           </button>

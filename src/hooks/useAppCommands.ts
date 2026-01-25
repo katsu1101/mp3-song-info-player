@@ -14,6 +14,8 @@ export type AppCommands = {
   playPrev: () => Promise<void>;
   playNext: () => Promise<void>;
 
+  playRewind: () => Promise<void>;
+  playForward: () => Promise<void>;
   playAtIndex: (index: number) => Promise<void>;
 
   // TODO: setShuffle / setRepeat などは次段で追加
@@ -23,6 +25,28 @@ type UseAppCommandsArgs = {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   playActions: PlayActions | null | undefined;
   settingActions: SettingActions;
+};
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
+const canUseDuration = (duration: number): boolean =>
+  Number.isFinite(duration) && duration > 0;
+
+const seekTo = (audio: HTMLAudioElement, nextTime: number): void => {
+  const duration = audio.duration;
+
+  const maxTime = canUseDuration(duration) ? duration : Number.POSITIVE_INFINITY;
+  const safeTime = clamp(nextTime, 0, maxTime);
+
+  // fastSeek があれば優先（対応ブラウザのみ）
+  const maybeFastSeek = (audio as unknown as { fastSeek?: (t: number) => void }).fastSeek;
+  if (typeof maybeFastSeek === "function") {
+    maybeFastSeek(safeTime);
+    return;
+  }
+
+  audio.currentTime = safeTime;
 };
 
 /**
@@ -40,7 +64,7 @@ type UseAppCommandsArgs = {
  * - `playNext`: サポートされている場合、次のメディア項目を再生します。
  * - `playAtIndex`: サポートされている場合、指定したインデックスのメディア項目を再生します。
  */
-export const useAppCommands = (args: UseAppCommandsArgs): AppCommands => {
+export const useAppCommands = (args: UseAppCommandsArgs):AppCommands => {
   const {audioRef, playActions, settingActions} = args;
 
   const stopPlayback = React.useCallback(() => {
@@ -58,6 +82,23 @@ export const useAppCommands = (args: UseAppCommandsArgs): AppCommands => {
 
     audio.src = "";
   }, [playActions, audioRef]);
+  const SEEK_SECONDS = 10;
+
+  const playRewind = React.useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const nextTime = audio.currentTime - SEEK_SECONDS;
+    seekTo(audio, nextTime);
+  }, [audioRef]);
+  const playForward = React.useCallback(() => {
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const nextTime = audio.currentTime + SEEK_SECONDS;
+    seekTo(audio, nextTime);
+  }, [audioRef]);
 
   const pickFolder = React.useCallback(async () => {
     stopPlayback();
@@ -83,10 +124,10 @@ export const useAppCommands = (args: UseAppCommandsArgs): AppCommands => {
     }),
     playNext: playActions?.playNext ?? (async () => {
     }),
+    playRewind,
+    playForward,
     playAtIndex: playActions?.playAtIndex ?? (async () => {
     }),
-  }), [
-    stopPlayback, pickFolder, reconnect,
-    forget, playActions?.playPrev, playActions?.playNext, playActions?.playAtIndex
-  ]);
+  } as AppCommands), [stopPlayback, pickFolder, reconnect, forget, playActions?.playPrev,
+    playActions?.playNext, playActions?.playAtIndex, playRewind, playForward]);
 };
