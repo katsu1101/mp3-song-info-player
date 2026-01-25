@@ -4,6 +4,7 @@ import {saveCoverImageForNowPlaying} from "@/features/mp3/lib/cover/saveCoverIma
 import React                         from "react";
 
 type Args = {
+  isWindows: boolean;
   rootDirHandle: FileSystemDirectoryHandle | null;
 
   /**
@@ -22,7 +23,7 @@ const isFileDrag = (dt: DataTransfer | null): boolean => {
 };
 
 export const useGlobalImageDropToNowPlaying = (args: Args) => {
-  const {rootDirHandle, nowPlayingPath, onSavedAction, onErrorAction} = args;
+  const {isWindows, rootDirHandle, nowPlayingPath, onSavedAction, onErrorAction} = args;
 
   const [isDragging, setIsDragging] = React.useState(false);
   const dragCounterRef = React.useRef(0);
@@ -104,5 +105,6 @@ export const useGlobalImageDropToNowPlaying = (args: Args) => {
     };
   }, [rootDirHandle, nowPlayingPath, onSavedAction, onErrorAction]);
 
+  if (!isWindows) return {isDragging: false};
   return {isDragging};
 };

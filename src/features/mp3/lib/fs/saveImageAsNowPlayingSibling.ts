@@ -11,8 +11,6 @@ export type SaveImageAsNowPlayingSiblingArgs = {
   imageFile: File;
 };
 
-const IMAGE_MIME_PREFIX = "image/";
-
 const normalizePath = (path: string): string =>
   path.replaceAll("\\", "/").replace(/^\/+/, "");
 
@@ -72,10 +70,6 @@ export const saveImageAsNowPlayingSibling = async (
   args: SaveImageAsNowPlayingSiblingArgs,
 ): Promise<{ savedPath: string }> => {
   const {rootDirHandle, nowPlayingPath, imageFile} = args;
-
-  if (!imageFile.type.startsWith(IMAGE_MIME_PREFIX)) {
-    throw new Error("画像ファイルではありません。");
-  }
 
   const dirParts = getDirParts(nowPlayingPath);
   const targetDir = await getDirHandleByParts(rootDirHandle, dirParts);

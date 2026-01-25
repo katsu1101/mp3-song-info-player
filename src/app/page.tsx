@@ -11,6 +11,7 @@ import * as hooks                            from "@/features/mp3/hooks";
 import {useGlobalImageDropToNowPlaying}      from "@/features/mp3/hooks/useGlobalImageDropToNowPlaying";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
+import {isWindows}                           from "@/features/mp3/lib/env/isWindows";
 import {useAppCommands}                      from "@/hooks/useAppCommands";
 import React, {JSX}                          from "react";
 
@@ -113,6 +114,7 @@ export default function Page(): JSX.Element {
   }, [mp3List, nowPlayingID]);
 
   const {isDragging} = useGlobalImageDropToNowPlaying({
+    isWindows: isWindows(),
     rootDirHandle: settingState.savedHandle ?? null, // ←実際のプロパティ名に差し替え
     nowPlayingPath,
     onSavedAction: (savedPath) => {

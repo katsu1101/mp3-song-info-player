@@ -1,18 +1,23 @@
 "use client";
 
-import {PlayerVariant}                                 from "@/components/AppShell/AppShell";
-import {ArtworkSquare}                                 from "@/features/mp3/components/Artwork/ArtworkSquare";
-import {saveCoverImageForNowPlaying}                   from "@/features/mp3/lib/cover/saveCoverImageForNowPlaying";
-import type {AlbumView}                                from "@/features/mp3/types/albumView";
-import {TrackMetaByPath}                               from "@/features/mp3/types/trackMeta";
-import {AppCommands}                                   from "@/hooks/useAppCommands";
-import {useProgressScroll}                             from "@/hooks/useProgressScroll";
-import {getDirname}                                    from "@/lib/path";
-import {getBasename}                                   from "@/lib/path/getBasename";
-import {TrackView}                                     from "@/types/views";
-import {ImagePlus, Pause, Play, SkipBack, SkipForward, Rewind, FastForward} from "lucide-react";
-import React, {JSX, useMemo, useRef}                   from "react";
-import styles                                          from "./NowPlayingPanel.module.scss";
+import {PlayerVariant}                                                      from "@/components/AppShell/AppShell";
+import {
+  ArtworkSquare
+}                                                                           from "@/features/mp3/components/Artwork/ArtworkSquare";
+import {
+  saveCoverImageForNowPlaying
+}                                                                           from "@/features/mp3/lib/cover/saveCoverImageForNowPlaying";
+import {isWindows}                                                          from "@/features/mp3/lib/env/isWindows";
+import type {AlbumView}                                                     from "@/features/mp3/types/albumView";
+import {TrackMetaByPath}                                                    from "@/features/mp3/types/trackMeta";
+import {AppCommands}                                                        from "@/hooks/useAppCommands";
+import {useProgressScroll}                                                  from "@/hooks/useProgressScroll";
+import {getDirname}                                                         from "@/lib/path";
+import {getBasename}                                                        from "@/lib/path/getBasename";
+import {TrackView}                                                          from "@/types/views";
+import {FastForward, ImagePlus, Pause, Play, Rewind, SkipBack, SkipForward} from "lucide-react";
+import React, {JSX, useMemo, useRef}                                        from "react";
+import styles                                                               from "./NowPlayingPanel.module.scss";
 
 /**
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
@@ -59,6 +64,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     return trackViews.find((t) => t.item.id === nowPlayingID) ?? null;
   }, [nowPlayingID, trackViews]);
 
+  const isWin = isWindows()
   const title = nowTrackView?.displayTitle ?? "";
 
   const filePath = nowTrackView?.item.path;
@@ -278,7 +284,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               style={miniBarButtonStyle(!canControl)}
               title="巻き戻し"
             >
-              <Rewind />
+              <Rewind/>
             </button>
 
             <button
@@ -300,7 +306,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
               style={miniBarButtonStyle(!canControl)}
               title="先送り"
             >
-              <FastForward />
+              <FastForward/>
             </button>
 
             <button
@@ -404,7 +410,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         </div>
 
         <div style={{marginLeft: "auto", display: "flex", alignItems: "center", gap: 10}}>
-          <button
+          {isWin ? <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -415,7 +421,8 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             title="ジャケット画像を選ぶ"
           >
             <ImagePlus size={20} strokeWidth={2.5} aria-hidden/>
-          </button>
+          </button> : null}
+
           <button
             type="button"
             onClick={() => void commands.playPrev()}
@@ -433,7 +440,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             style={miniBarButtonStyle(!canControl)}
             title="巻き戻し（←）"
           >
-            <Rewind />
+            <Rewind/>
           </button>
 
           <button
@@ -455,7 +462,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
             style={miniBarButtonStyle(!canControl)}
             title="先送り（→）"
           >
-            <FastForward />
+            <FastForward/>
           </button>
           <button
             type="button"
