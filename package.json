@@ -4,7 +4,8 @@
   "private": true,
   "packageManager": "pnpm@10.26.2",
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "dev": "next dev",
+    "dev:lan": "concurrently -k -n NEXT,CADDY \"next dev -H 0.0.0.0 -p 3000\" \"caddy run --config C:\\tools\\caddy\\Caddyfile --adapter caddyfile\"",
     "build": "cross-env NODE_ENV=production NEXT_PUBLIC_BASE_PATH=/mp3-song-info-player next build",
     "lint": "eslint",
     "test": "pnpm tsc --noEmit"
@@ -28,6 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/wicg-file-system-access": "^2023.10.7",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "eslint-plugin-sonarjs": "^3.0.5",
