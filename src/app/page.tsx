@@ -86,8 +86,8 @@ export default function Page(): JSX.Element {
 
   // ===== Media Session Controls =====
   hooks.useMediaSessionControls({
-    trackViews: trackViews,
-    nowPlayingID: nowPlayingID,
+    trackViews,
+    nowPlayingID,
     playAction: playlist.playActions.play,
     pauseAction: playlist.playActions.pause,
     nextAction: playlist.playActions.playNext,
