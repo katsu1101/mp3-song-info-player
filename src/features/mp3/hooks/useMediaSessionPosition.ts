@@ -11,13 +11,23 @@ const canUsePositionState = (): boolean =>
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
-/**
- * メディアセッションの位置状態をオーディオ要素の現在の状態と同期します。
- */
-export function useMediaSessionPosition(
-  audioRef: React.RefObject<HTMLAudioElement | null>,
-): void {
+type Args = {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  isPlaying: boolean;
+  trackKey: string | number;
+};
+
+export function useMediaSessionPosition(args: Args): void {
+  const {audioRef, isPlaying, trackKey} = args;
+
   const lastSentMsRef = useRef<number>(0);
+  const intervalIdRef = useRef<number | null>(null);
+
+  // 再生状態を通知側に伝える（重要）
+  useEffect(() => {
+    if (!canUseMediaSession()) return;
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
 
   useEffect(() => {
     if (!canUsePositionState()) return;
@@ -25,56 +35,84 @@ export function useMediaSessionPosition(
     const audio = audioRef.current;
     if (!audio) return;
 
-    const sync = (): void => {
-      // 4Hzくらいに間引き（通知UIが安定しやすい）
-      const nowMs = Date.now();
-      if (nowMs - lastSentMsRef.current < 250) return;
-      lastSentMsRef.current = nowMs;
+    const sync = (force: boolean): void => {
+      // pauseや曲切替では force=true で間引きしない
+      if (!force) {
+        const nowMs = Date.now();
+        if (nowMs - lastSentMsRef.current < 250) return;
+        lastSentMsRef.current = nowMs;
+      } else {
+        lastSentMsRef.current = 0;
+      }
 
-      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-      const position = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-      const playbackRate = Number.isFinite(audio.playbackRate) ? audio.playbackRate : 1;
+      const duration = audio.duration;
+      const position = audio.currentTime;
+      const playbackRate = audio.playbackRate;
 
-      // duration 0 / NaN の間は送らない（UI崩れ対策）
-      if (duration <= 0) return;
-
-      const safePosition = clamp(position, 0, duration);
+      if (!Number.isFinite(duration) || duration <= 0) return;
+      if (!Number.isFinite(position) || position < 0) return;
+      if (!Number.isFinite(playbackRate) || playbackRate <= 0) return;
 
       try {
         navigator.mediaSession.setPositionState({
           duration,
           playbackRate,
-          position: safePosition,
+          position: clamp(position, 0, duration),
         });
       } catch {
-        // 端末差・一時的な不整合で例外になることがあるので握りつぶす
+        // 端末差で例外が出ることがあるので握りつぶし
       }
     };
 
-    const onLoadedMetadata = (): void => {
-      // 曲切替直後は間引きリセットして即反映
-      lastSentMsRef.current = 0;
-      sync();
+    const startPollingIfNeeded = (): void => {
+      if (!isPlaying) return;
+      if (intervalIdRef.current !== null) return;
+
+      // Android保険: timeupdateが止まっても進捗を更新
+      intervalIdRef.current = window.setInterval(() => {
+        sync(false);
+      }, 500);
     };
 
-    audio.addEventListener("timeupdate", sync);
-    audio.addEventListener("loadedmetadata", onLoadedMetadata);
-    audio.addEventListener("ratechange", sync);
-    audio.addEventListener("seeking", sync);
-    audio.addEventListener("seeked", sync);
-    audio.addEventListener("play", sync);
-    audio.addEventListener("pause", sync);
+    const stopPolling = (): void => {
+      if (intervalIdRef.current === null) return;
+      window.clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    };
 
-    onLoadedMetadata();
+    const onLoadedMetadata = (): void => sync(true);
+    const onPlay = (): void => {
+      startPollingIfNeeded();
+      // 再生開始直後は1拍おいて同期（Androidで効くことがある）
+      window.setTimeout(() => sync(true), 0);
+    };
+    const onPause = (): void => {
+      // pause時は必ず確定値を送って“暴走推定”を止める
+      sync(true);
+      stopPolling();
+    };
+
+    audio.addEventListener("loadedmetadata", onLoadedMetadata);
+    audio.addEventListener("timeupdate", () => sync(false));
+    audio.addEventListener("seeking", () => sync(true));
+    audio.addEventListener("seeked", () => sync(true));
+    audio.addEventListener("ratechange", () => sync(true));
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+
+    // 曲切替直後にも即同期
+    sync(true);
+    startPollingIfNeeded();
 
     return () => {
-      audio.removeEventListener("timeupdate", sync);
+      stopPolling();
       audio.removeEventListener("loadedmetadata", onLoadedMetadata);
-      audio.removeEventListener("ratechange", sync);
-      audio.removeEventListener("seeking", sync);
-      audio.removeEventListener("seeked", sync);
-      audio.removeEventListener("play", sync);
-      audio.removeEventListener("pause", sync);
+      audio.removeEventListener("timeupdate", () => sync(false)); // TODO: ここは無名関数を避けてハンドラ変数化（次ステップで直す）
+      audio.removeEventListener("seeking", () => sync(true));     // TODO: 同上
+      audio.removeEventListener("seeked", () => sync(true));      // TODO: 同上
+      audio.removeEventListener("ratechange", () => sync(true));  // TODO: 同上
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
     };
-  }, [audioRef]);
+  }, [audioRef, isPlaying, trackKey]);
 }

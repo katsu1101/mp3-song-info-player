@@ -30,8 +30,8 @@ export default function Page(): JSX.Element {
 
   // ===== Player（audio + 再生状態）=====
   const {audioRef, nowPlayingID, playEntry, stopAndClear} = hooks.useAudioPlayer();
-  hooks.useMediaSessionPosition(audioRef);
   const {isPlaying} = hooks.useAudioPlaybackState(audioRef);
+  hooks.useMediaSessionPosition({audioRef, isPlaying, trackKey: nowPlayingID});
 
   // ===== Mapping（Fantia対応表）=====
   const mappingByPrefixId = hooks.useFantiaMapping();
