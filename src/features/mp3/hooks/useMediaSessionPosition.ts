@@ -17,6 +17,12 @@ type Args = {
   trackKey: string | number;
 };
 
+const isAndroidChrome = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return ua.includes("Android") && ua.includes("Chrome/");
+};
+
 export function useMediaSessionPosition(args: Args): void {
   const {audioRef, isPlaying, trackKey} = args;
 
@@ -53,10 +59,15 @@ export function useMediaSessionPosition(args: Args): void {
       if (!Number.isFinite(position) || position < 0) return;
       if (!Number.isFinite(playbackRate) || playbackRate <= 0) return;
 
+      const actualPlaybackRate = Number.isFinite(audio.playbackRate) ? audio.playbackRate : 1;
+
+      // ✅ Android Chromeだけ、MediaSession側の推定を止める
+      const mediaSessionPlaybackRate = isAndroidChrome() ? 1e-100 : actualPlaybackRate;
+
       try {
         navigator.mediaSession.setPositionState({
           duration,
-          playbackRate,
+          playbackRate: mediaSessionPlaybackRate,
           position: clamp(position, 0, duration),
         });
       } catch {
