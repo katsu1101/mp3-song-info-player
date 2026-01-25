@@ -8,6 +8,7 @@ import {appMeta}                             from "@/config/appMeta";
 import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel/NowPlayingPanel";
 import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
 import * as hooks                            from "@/features/mp3/hooks";
+import {useGlobalImageDropToNowPlaying}      from "@/features/mp3/hooks/useGlobalImageDropToNowPlaying";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
 import {useAppCommands}                      from "@/hooks/useAppCommands";
@@ -103,53 +104,97 @@ export default function Page(): JSX.Element {
     settingActions,
   });
 
+  const nowPlayingPath = React.useMemo(() => {
+    if (!nowPlayingID) return null;
+
+    // TODO: trackViews のキーが nowPlayingID と一致しない場合、ここを合わせる
+    const hit = mp3List.find((t) => t.id === nowPlayingID);
+    return hit?.path ?? null;
+  }, [mp3List, nowPlayingID]);
+
+  const {isDragging} = useGlobalImageDropToNowPlaying({
+    rootDirHandle: settingState.savedHandle ?? null, // ←実際のプロパティ名に差し替え
+    nowPlayingPath,
+    onSavedAction: (savedPath) => {
+      console.log("saved:", savedPath);
+      // TODO: ジャケット検出を即反映したいなら、artwork再読み込み/再スキャンをここで呼ぶ
+      window.location.reload();
+    },
+    onErrorAction: (message) => {
+      console.warn(message);
+      // TODO: トーストなど通知UIに寄せる
+    },
+  });
+
   return (
-    <AppShell
-      header={
-        <TopBar
-          title={appMeta.name}
-          folderName={settingState.folderName}
-        />
-      }
-      sidebar={({closeSidebar}) => (
-        <SidebarStub
-          state={settingState}
-          commands={commands}
-          closeSidebar={closeSidebar}
-        />
-      )}
-      main={
-        <>
-          {settingState.errorMessage ? (
-            <p style={{color: "crimson"}}>エラー: {settingState.errorMessage}</p>
-          ) : null}
-
-          {settingState.needsReconnect ? (
-            <p style={{opacity: 0.7}}>フォルダへの再接続が必要です（権限）。</p>
-          ) : null}
-
-          <TrackList
-            albums={dirAlbums}
-            trackViews={trackViews}
-            nowPlayingID={nowPlayingID}
-            isPlaying={isPlaying}
+    <>
+      {isDragging ? (
+        <div
+          aria-hidden
+          style={{
+            position: "fixed",
+            inset: 12,
+            borderRadius: 20,
+            outline: "2px dashed rgba(0,0,0,0.25)",
+            background: "rgba(0,0,0,0.05)",
+            display: "grid",
+            placeItems: "center",
+            pointerEvents: "none",
+            zIndex: 9999,
+            fontSize: 14,
+          }}
+        >
+          画像をドロップすると保存します
+        </div>
+      ) : null}
+      <AppShell
+        header={
+          <TopBar
+            title={appMeta.name}
+            folderName={settingState.folderName}
+          />
+        }
+        sidebar={({closeSidebar}) => (
+          <SidebarStub
             state={settingState}
             commands={commands}
+            closeSidebar={closeSidebar}
           />
-        </>
-      }
-      renderPlayer={(variant) => (
-        <NowPlayingPanel
-          variant={variant}
-          nowPlayingID={nowPlayingID}
-          trackViews={trackViews}
-          albumViews={sortedDirAlbums}
-          audioRef={audioRef}
-          commands={commands}
-          isPlaying={isPlaying}
-          metaByPath={settingState.metaByPath}
-        />
-      )}
-    />
+        )}
+        main={
+          <>
+            {settingState.errorMessage ? (
+              <p style={{color: "crimson"}}>エラー: {settingState.errorMessage}</p>
+            ) : null}
+
+            {settingState.needsReconnect ? (
+              <p style={{opacity: 0.7}}>フォルダへの再接続が必要です（権限）。</p>
+            ) : null}
+
+            <TrackList
+              albums={dirAlbums}
+              trackViews={trackViews}
+              nowPlayingID={nowPlayingID}
+              isPlaying={isPlaying}
+              state={settingState}
+              commands={commands}
+            />
+          </>
+        }
+        renderPlayer={(variant) => (
+          <NowPlayingPanel
+            variant={variant}
+            nowPlayingID={nowPlayingID}
+            trackViews={trackViews}
+            albumViews={sortedDirAlbums}
+            audioRef={audioRef}
+            commands={commands}
+            isPlaying={isPlaying}
+            metaByPath={settingState.metaByPath}
+            rootDirHandle={settingState.savedHandle ?? null}
+          />
+        )}
+      />
+    </>
   );
 }

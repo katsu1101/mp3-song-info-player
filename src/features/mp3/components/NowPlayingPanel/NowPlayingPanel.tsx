@@ -1,17 +1,18 @@
 "use client";
 
-import {PlayerVariant}                      from "@/components/AppShell/AppShell";
-import {ArtworkSquare}                      from "@/features/mp3/components/Artwork/ArtworkSquare";
-import type {AlbumView}                     from "@/features/mp3/types/albumView";
-import {TrackMetaByPath}                    from "@/features/mp3/types/trackMeta";
-import {AppCommands}                        from "@/hooks/useAppCommands";
-import {useProgressScroll}                  from "@/hooks/useProgressScroll";
-import {getDirname}                         from "@/lib/path";
-import {getBasename}                        from "@/lib/path/getBasename";
-import {TrackView}                          from "@/types/views";
-import {Pause, Play, SkipBack, SkipForward} from "lucide-react";
-import React, {JSX, useMemo, useRef}        from "react";
-import styles                               from "./NowPlayingPanel.module.scss";
+import {PlayerVariant}                                 from "@/components/AppShell/AppShell";
+import {ArtworkSquare}                                 from "@/features/mp3/components/Artwork/ArtworkSquare";
+import {saveCoverImageForNowPlaying}                   from "@/features/mp3/lib/cover/saveCoverImageForNowPlaying";
+import type {AlbumView}                                from "@/features/mp3/types/albumView";
+import {TrackMetaByPath}                               from "@/features/mp3/types/trackMeta";
+import {AppCommands}                                   from "@/hooks/useAppCommands";
+import {useProgressScroll}                             from "@/hooks/useProgressScroll";
+import {getDirname}                                    from "@/lib/path";
+import {getBasename}                                   from "@/lib/path/getBasename";
+import {TrackView}                                     from "@/types/views";
+import {ImagePlus, Pause, Play, SkipBack, SkipForward} from "lucide-react";
+import React, {JSX, useMemo, useRef}                   from "react";
+import styles                                          from "./NowPlayingPanel.module.scss";
 
 /**
  * NowPlayingPanel コンポーネントに必要なプロパティを表します。
@@ -25,6 +26,7 @@ type NowPlayingPanelProps = {
   commands: AppCommands;
   isPlaying: boolean;
   metaByPath: TrackMetaByPath;
+  rootDirHandle: FileSystemDirectoryHandle | null;
 };
 
 /**
@@ -47,6 +49,7 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     commands,
     isPlaying,
     metaByPath,
+    rootDirHandle,
   } = props;
 
   const lyricsBoxRef = useRef<HTMLDivElement | null>(null);
@@ -135,123 +138,43 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
     useAnimationFrame: false,    // 必要なら true
   });
 
+  // ✅ 保存に使う nowPlayingPath（再生中でないなら null 扱いに）
+  const nowPlayingPath = filePath ?? null;
+
+  const canSaveCover = Boolean(rootDirHandle) && Boolean(nowPlayingPath) && canControl;
+
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const [isSavingCover, setIsSavingCover] = React.useState(false);
+
+  const openCoverPickerAction = () => {
+    if (!canSaveCover) return;
+    coverInputRef.current?.click();
+  };
+
+  const onPickCoverFileAction = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const imageFile = e.target.files?.[0] ?? null;
+
+    // 同じファイルを連続で選べるようにクリア
+    e.target.value = "";
+
+    if (!imageFile) return;
+
+    setIsSavingCover(true);
+    try {
+      await saveCoverImageForNowPlaying({
+        rootDirHandle,
+        nowPlayingPath,
+        imageFile,
+        reloadAfterSave: true, // ✅ あなたの方針：全画面リロードで即反映
+      });
+    } finally {
+      setIsSavingCover(false);
+    }
+  };
+
   const variant = props.variant ?? "full";
   const hasArtwork = Boolean(nowTrackView?.artworkUrl);
   const showOverlayLyrics = hasLyrics && hasArtwork;
-  if (variant === "mini") {
-    // まずは暫定: ここを「ミニUI」に差し替えていく
-    // return <MiniNowPlayingBar ... />;
-
-    const onPrev: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-      e.stopPropagation();
-      void commands.playPrev();
-    };
-
-    const onToggle: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-      e.stopPropagation();
-      void togglePlayPauseLikeSpace();
-    };
-
-    const onNext: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-      e.stopPropagation();
-      void commands.playNext();
-    };
-
-    return (
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          display: "flex",
-          alignItems: "stretch",
-          minWidth: 0,
-        }}
-      >
-        {/* 左：ジャケット（高さいっぱい・正方形） */}
-        <div
-          style={{
-            height: "100%",
-            aspectRatio: "1 / 1",
-            borderRight: "1px solid var(--panel-border)",
-            background: "var(--panel)",
-            display: "grid",
-            placeItems: "center",
-          }}
-        >
-          <ArtworkSquare
-            url={nowTrackView?.artworkUrl}
-            fallbackText={nowTrackView?.displayTitle ?? ""}
-            seed={nowTrackView?.displayTitle ?? ""}
-          />
-        </div>
-
-        {/* 右：上=タイトル / 下=ボタン */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "10px 12px",
-            gap: 8,
-          }}
-        >
-          {/* 上：タイトル */}
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 900,
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              color: "var(--foreground)",
-            }}
-            title={title}
-          >
-            {title}
-          </div>
-
-          {/* 下：ボタン */}
-          <div style={{display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end"}}>
-            <button
-              type="button"
-              onClick={onPrev}
-              disabled={!canControl}
-              style={miniBarButtonStyle(!canControl)}
-              title="前へ"
-            >
-              <SkipBack size={20} strokeWidth={2.5} aria-hidden/>
-            </button>
-
-            <button
-              type="button"
-              onClick={onToggle}
-              disabled={!canControl}
-              style={miniBarButtonStyle(!canControl)}
-              title={isPlaying ? "一時停止" : "再生"}
-            >
-              {isPlaying
-                ? <Pause size={20} strokeWidth={2.5} aria-hidden/>
-                : <Play size={20} strokeWidth={2.5} aria-hidden/>}
-            </button>
-
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={!canControl}
-              style={miniBarButtonStyle(!canControl)}
-              title="次へ"
-            >
-              <SkipForward size={20} strokeWidth={2.5} aria-hidden/>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // ====== full ======
   const COVER_MAX = 280;
 
@@ -332,6 +255,18 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
         <div style={{marginLeft: "auto", display: "flex", alignItems: "center", gap: 10}}>
           <button
             type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openCoverPickerAction();
+            }}
+            disabled={!canSaveCover || isSavingCover}
+            style={miniBarButtonStyle(!canSaveCover || isSavingCover)}
+            title="ジャケット画像を選ぶ"
+          >
+            <ImagePlus size={20} strokeWidth={2.5} aria-hidden/>
+          </button>
+          <button
+            type="button"
             onClick={() => void commands.playPrev()}
             disabled={!canControl}
             style={fullIconButtonStyle(!canControl)}
@@ -382,6 +317,14 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
           </div>
         </details>
       ) : null}
+      <input
+        ref={coverInputRef}
+        type="file"
+        accept="image/*"
+        multiple={false}
+        hidden
+        onChange={onPickCoverFileAction}
+      />
     </section>
   );
 }
