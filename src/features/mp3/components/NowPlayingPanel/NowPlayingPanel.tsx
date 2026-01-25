@@ -175,6 +175,120 @@ export function NowPlayingPanel(props: NowPlayingPanelProps): JSX.Element {
   const variant = props.variant ?? "full";
   const hasArtwork = Boolean(nowTrackView?.artworkUrl);
   const showOverlayLyrics = hasLyrics && hasArtwork;
+  if (variant === "mini") {
+    // まずは暫定: ここを「ミニUI」に差し替えていく
+    // return <MiniNowPlayingBar ... />;
+
+    const onPrev: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void commands.playPrev();
+    };
+
+    const onToggle: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void togglePlayPauseLikeSpace();
+    };
+
+    const onNext: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+      e.stopPropagation();
+      void commands.playNext();
+    };
+
+    return (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          alignItems: "stretch",
+          minWidth: 0,
+        }}
+      >
+        {/* 左：ジャケット（高さいっぱい・正方形） */}
+        <div
+          style={{
+            height: "100%",
+            aspectRatio: "1 / 1",
+            borderRight: "1px solid var(--panel-border)",
+            background: "var(--panel)",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          <ArtworkSquare
+            url={nowTrackView?.artworkUrl}
+            fallbackText={nowTrackView?.displayTitle ?? ""}
+            seed={nowTrackView?.displayTitle ?? ""}
+          />
+        </div>
+
+        {/* 右：上=タイトル / 下=ボタン */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "10px 12px",
+            gap: 8,
+          }}
+        >
+          {/* 上：タイトル */}
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 900,
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "var(--foreground)",
+            }}
+            title={title}
+          >
+            {title}
+          </div>
+
+          {/* 下：ボタン */}
+          <div style={{display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end"}}>
+            <button
+              type="button"
+              onClick={onPrev}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="前へ"
+            >
+              <SkipBack size={20} strokeWidth={2.5} aria-hidden/>
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggle}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title={isPlaying ? "一時停止" : "再生"}
+            >
+              {isPlaying
+                ? <Pause size={20} strokeWidth={2.5} aria-hidden/>
+                : <Play size={20} strokeWidth={2.5} aria-hidden/>}
+            </button>
+
+            <button
+              type="button"
+              onClick={onNext}
+              disabled={!canControl}
+              style={miniBarButtonStyle(!canControl)}
+              title="次へ"
+            >
+              <SkipForward size={20} strokeWidth={2.5} aria-hidden/>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ====== full ======
   const COVER_MAX = 280;
 
