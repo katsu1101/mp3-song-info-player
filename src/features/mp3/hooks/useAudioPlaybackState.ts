@@ -2,6 +2,9 @@
 
 import React, {useEffect, useState} from "react";
 
+/**
+ * オーディオ要素の再生状態を追跡し、返すカスタムフック。
+ */
 export function useAudioPlaybackState(
   audioRef: React.RefObject<HTMLAudioElement | null>,
 ): { isPlaying: boolean } {

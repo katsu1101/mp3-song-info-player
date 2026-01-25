@@ -24,7 +24,7 @@ const yieldToBrowser = async (): Promise<void> => {
   await new Promise<void>((r) => setTimeout(r, 0));
 };
 
-export const createArtworkUrl = (track: (url: string) => void, picture?: Picture): string | null => {
+const createArtworkUrl = (track: (url: string) => void, picture?: Picture): string | null => {
   if (!picture) return null;
   const copied = new Uint8Array(picture.data);
   const blob = new Blob([copied], {type: picture.format});
@@ -33,6 +33,26 @@ export const createArtworkUrl = (track: (url: string) => void, picture?: Picture
   return url;
 };
 
+/**
+ * メタスキャナーワーカーを起動し、MP3エントリのリストからメタデータを処理・抽出します。
+ *
+ * この関数は、指定されたMP3ファイルのリストを処理し、定義されたワークフローを使用してメタデータを抽出し、提供された状態管理関数内の関連するメタデータとアートワークURLを更新します。
+ * 各呼び出しごとに一意の実行識別子を比較することでタスクのキャンセル安全性を確保し、最新のタスク実行のみが共有状態を操作することを保証します。
+ *
+ * この操作は2つのパスに分かれます：
+ *  - 最初のパスは遅延処理されていない項目を処理します。
+ *  - 2番目のパスは、遅延関数が提供されている場合に遅延項目を処理します。
+ *
+ * @param {Args} args - 処理に必要な引数。
+ * @param {Mp3Entry[]} args.items - 処理対象のMP3エントリのリスト。
+ * @param {React.MutableRefObject<number>} args.runIdRef - タスクキャンセル時の安全性を確保するための可変実行IDへの参照。
+ * @param {(url: string) => void;} args.track - アートワークURL生成に使用する現在のトラックコンテキスト。
+ * @param {Function} args.setMetaByPath - ファイルパスでメタデータを更新する関数。引数として更新関数を期待する。
+ * @param {Function} args.setArtworkUrlByPath - ファイルパスでアートワークURLを更新する関数。引数として更新関数を期待します。
+ * @param {Function} [args.shouldDeferTag] - 特定のMP3エントリを後処理のために遅延処理すべきかを決定するオプションの関数。
+ *
+ * @returns {Promise<void>}すべてのメタデータ処理が完了したときに解決するプロミス。
+ */
 export const startMetaScannerWorker = async (args: Args): Promise<void> => {
   const {items, runIdRef, track, setMetaByPath, setArtworkUrlByPath, shouldDeferTag} = args;
 

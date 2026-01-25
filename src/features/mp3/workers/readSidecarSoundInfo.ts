@@ -68,6 +68,23 @@ const normalizeToV1 = (obj: UnknownRecord): SoundInfoV1 | null => {
   return effectiveSchemaVersion === 1 ? result : null;
 };
 
+/**
+ * 指定されたファイルハンドルを使用して、ファイルから音声情報を読み取り解析します。
+ *
+ * この関数は以下のことを試みます：
+ * 1. 指定された `FileSystemFileHandle` に関連付けられたファイルを取得します。
+ * 2. ファイルの内容をテキストとして読み込み、バイトオーダーマーク（BOM）と空白を削除します。
+ * 3. ファイルの内容が空または無効な場合、`null`を返します。
+ * 4. テキスト内容をJSONとして解析し、期待される条件を満たしているかを判定します。
+ * 5. 解析されたデータが有効な場合、正規化して`SoundInfoV1`オブジェクトとして返します。それ以外の場合は`null`を返します。
+ *
+ * エラーが発生した場合（例：ファイルアクセス問題、無効なJSON、型不一致）、関数はエラーをキャッチし、`null`を返します。
+ * これにより、アプリケーションのクラッシュなしに安全に実行できます。
+ *
+ * @param {FileSystemFileHandle} handle - サウンド情報を含むファイルへのハンドル。
+ * @returns {Promise<SoundInfoV1 | null>} 成功した場合、正規化された `SoundInfoV1` オブジェクトを解決するプロミスを返します。
+ * ファイルが空の場合、無効な場合、または処理中にエラーが発生した場合は `null` を返します。
+ */
 export const readSidecarSoundInfo = async (
   handle: FileSystemFileHandle
 ): Promise<SoundInfoV1 | null> => {

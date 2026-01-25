@@ -24,6 +24,17 @@ type UseProgressScrollArgs = {
   deadZoneRatio?: number; // 例: 0.05 = 前後5%
 };
 
+/**
+ * 要素のスクロールをオーディオ要素の再生進行状況と同期させます。
+ *
+ * @param {UseProgressScrollArgs} args - 動作を設定するための引数。
+ * @param {React.RefObject<HTMLAudioElement>} args.audioRef - 再生進捗をソースとして使用するオーディオ要素への参照。
+ * @param {React.RefObject<HTMLElement>} args.scrollRef - 再生進行状況を反映するスクロール可能要素への参照。
+ * @param {boolean} args.enabled - 同期動作を有効にするかどうかを決定します。
+ * @param {number} [args.pauseMs=2500] - ユーザー操作後のスクロールを一時停止する時間（ミリ秒単位）。
+ * @param {boolean} [args.useAnimationFrame=false] - より滑らかな更新のために `requestAnimationFrame` を使用するかどうか。false の場合、更新はオーディオの `timeupdate` および `seeked` イベントに連動する。
+ * @param {number} [args.deadZoneRatio=0.15] - オーディオ再生の開始時と終了時にスクロールがロックされる「デッドゾーン」の比率。0 から 0.49 の間で指定してください。
+ */
 export const useProgressScroll = (args: UseProgressScrollArgs): void => {
   const {
     audioRef,

@@ -4,15 +4,27 @@ import {AppShell}                            from "@/components/AppShell/AppShel
 import {useSettings}                         from "@/components/Settings/SettingsProvider";
 import {SidebarStub}                         from "@/components/Sidebar";
 import {TopBar}                              from "@/components/TopBar";
-import {appMeta}         from "@/config/appMeta";
-import {NowPlayingPanel} from "@/features/mp3/components/NowPlayingPanel/NowPlayingPanel";
-import {TrackList}       from "@/features/mp3/components/TrackList/TrackList";
+import {appMeta}                             from "@/config/appMeta";
+import {NowPlayingPanel}                     from "@/features/mp3/components/NowPlayingPanel/NowPlayingPanel";
+import {TrackList}                           from "@/features/mp3/components/TrackList/TrackList";
 import * as hooks                            from "@/features/mp3/hooks";
 import {buildAlbumViewsFantiaFirst}          from "@/features/mp3/lib/album/buildAlbumViewsFantiaFirst";
 import {type AlbumTrackRow, sortAlbumTracks} from "@/features/mp3/lib/album/sortAlbumTracks";
 import {useAppCommands}                      from "@/hooks/useAppCommands";
 import React, {JSX}                          from "react";
 
+/**
+ * オーディオ再生、プレイリスト処理、MP3トラック・アルバム・現在再生中の情報の表示のためのUI
+ * レンダリングを管理する各種フックと状態を統合したPageコンポーネントをレンダリングします。
+ *
+ * このコンポーネントは、以下のための適切な状態管理、メディアセッション制御、およびレンダリングロジックを設定します：
+ * - `useAudioPlayer`、`useAudioPlaybackState`、および`useMediaSessionPosition`を使用したオーディオ再生と制御。
+ * - `useMp3Library`と`useFantiaMapping`を使用してトラックのメタデータとアートワークを生成・マッピングする。
+ * - トラックとアルバムを並べ替え機能付きで表示し、プレイリストと連携します。
+ * - アプリコマンド、プレイヤー操作、サイドバーやトップバーなどのUI要素の処理。
+ *
+ * @return {JSX.Element} ヘッダー、サイドバー、トラックリスト、オーディオプレーヤーのUIを含むメインページのレイアウト。
+ */
 export default function Page(): JSX.Element {
   const {settings} = useSettings();
 
@@ -28,7 +40,7 @@ export default function Page(): JSX.Element {
   const {mp3List, artworkUrlByPath, settingState, settingActions} = hooks.useMp3Library();
 
   // ===== 表示用（trackViews）=====
-  // ✅ mp3List の順序を正本とする（メタ後追いで並べ替えしない）
+  // mp3List の順序を正本とする（メタ後追いで並べ替えしない）
   const trackViews = hooks.useTrackViews({
     mp3List,
     metaByPath: settingState.metaByPath,
@@ -36,6 +48,7 @@ export default function Page(): JSX.Element {
     mappingByPrefixId,
   });
 
+  // ===== Album Views（Fantia優先）=====
   const dirAlbums = React.useMemo(() => {
     return buildAlbumViewsFantiaFirst({
       trackViews,
@@ -44,7 +57,7 @@ export default function Page(): JSX.Element {
     });
   }, [trackViews, settingState.folderName, artworkUrlByPath]);
 
-// ✅ 追加：ここで “アルバム内＆アルバム順” を確定させる（UIとプレイヤー共通）
+  // ここで “アルバム内＆アルバム順” を確定させる（UIとプレイヤー共通）
   const sortedDirAlbums = React.useMemo(() => {
     const next = dirAlbums.map((album) => {
       const sortedTracks: AlbumTrackRow[] = sortAlbumTracks(album.tracks);
@@ -70,7 +83,7 @@ export default function Page(): JSX.Element {
     stopAndClear,
   });
 
-  // 例: playlist 作成の直後
+  // ===== Media Session Controls =====
   hooks.useMediaSessionControls({
     trackViews: trackViews,
     nowPlayingID: nowPlayingID,
@@ -80,6 +93,7 @@ export default function Page(): JSX.Element {
     prevAction: playlist.playActions.playPrev,
   });
 
+  // ===== App Commands =====
   const commands = useAppCommands({
     audioRef,
     playActions: playlist.playActions,

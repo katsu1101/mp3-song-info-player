@@ -20,6 +20,18 @@ const groupOrder: Record<GroupKind, number> = {
   dir: 2,
 };
 
+/**
+ * トラックビューに基づいて`AlbumView`オブジェクトの配列を構築し、Fantiaグループ、タググループ、フォルダグループなどのカテゴリにグループ化します。
+ * オプションで各グループをソートし、アートワークを割り当てます。
+ *
+ * この関数は以下の手順を実行します：
+ * 1. `trackViews` を元の順序を保持したまま中間オブジェクト `AlbumTrackRow` に変換します。
+ * 2. 利用可能なメタデータに基づき、トラックを Fantia グループ、タグベースのグループ、またはフォルダベースのグループにグループ化します：
+ *    - アルバムタイトルを持つトラックは、タイトルに基づいてタググループにグループ化されます。
+ *    - アルバムタイトルを持たないトラックは、ディレクトリ名に基づいてフォルダグループにグループ化されます。
+ * 3. グループ化された行を`AlbumView`オブジェクトに変換し、オプションでアートワークを割り当てます。
+ * 4. `AlbumView`オブジェクトをグループ優先度（Fantia > タグ > フォルダ）でソートし、その後タイトルのアルファベット順で並べ替えます。
+ */
 export const buildAlbumViewsFantiaFirst = (args: BuildAlbumViewsFantiaFirstArgs): AlbumView[] => {
   const {trackViews, folderName, dirArtworkUrlByDir} = args;
   if (trackViews.length === 0) return [];

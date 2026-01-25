@@ -69,6 +69,11 @@ const calcFontInViewBox = (label: string): number => {
   return 30;
 };
 
+/**
+ * オプションのフォールバック動作を備えた正方形のアートワーク画像を表示するReactコンポーネント。
+ * このコンポーネントは外観をカスタマイズするための様々なプロパティを受け取り、
+ * 指定された画像URLが無効または存在しない場合にフォールバックグラフィックをレンダリングして対応します。
+ */
 export const ArtworkSquare = (props: ArtworkSquareProps): React.ReactElement => {
   const {url, size, radius = 12, fallbackText, seed} = props;
 

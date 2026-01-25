@@ -8,24 +8,56 @@ import {Pause, Play}      from "lucide-react";
 import React              from "react";
 import styles             from "../TrackList/TrackList.module.scss";
 
-export type TrackRowVariant = "full" | "compact";
-
 type TrackRowProps = {
-  displayNo?: number; // ✅ 表示用番号（未指定なら index+1）
+  /**
+   * 表示識別子またはインデックスを表す数値。
+   * この変数はオプションであり、複数の表示要素を参照したり区別したりするために使用できます。
+   * （未指定なら index+1）
+   */
+  displayNo?: number;
+
+  /**
+   * `TrackView`クラスのインスタンスを表します。
+   * これは、アプリケーション内の特定のトラックまたはパスに関する情報を管理および表示するために使用されます。
+   *
+   * この変数は通常、対応するトラックデータのレンダリングや操作に必要なロジックとUI要素をカプセル化します。
+   * 例えば、詳細の表示、状態の監視、ユーザー操作の処理などが含まれます。
+   *
+   * `trackView`インスタンスは、トラック関連の機能が必要な大規模なUIコンポーネントやワークフローの一部として頻繁に利用されます。
+   */
   trackView: TrackView;
+
+  /**
+   * コレクションや配列内でインデックス付けに使用される現在の位置または数値識別子を表します。
+   * この変数は通常、その位置に基づいて特定の要素や位置を参照するために使用されます。
+   */
   index: number;
 
+  /**
+   * 現在再生中のメディア項目の固有識別子を表します。
+   * この値は通常、再生中のメディアを追跡または参照するために使用されます。
+   */
   nowPlayingID: number;
+
+  /**
+   * メディア項目（例：動画や音声）が現在再生中かどうかを示します。
+   * 再生がアクティブな場合は値が `true`、それ以外は `false` です。
+   */
   isPlaying: boolean;
 
+  /**
+   * 実行可能なアプリケーションレベルのコマンドの集合を表します。
+   * この変数は、AppCommandsインスタンス内にカプセル化された様々な機能や操作へのアクセスを提供します。
+   */
   commands: AppCommands;
 
   /** 再生中の行だけ scrollIntoView したいので、TrackList側でrefを持つ */
   setNowItemAction?: (el: HTMLButtonElement | null) => void;
-
-  variant?: TrackRowVariant; // TODO: 今回は未使用（TrackListはfull）
 };
 
+/**
+ * トラック行コンポーネントを、再生コントロールとメタデータ表示付きでレンダリングします。.
+ */
 export function TrackRow(props: TrackRowProps): React.JSX.Element {
   const {
     displayNo,
@@ -35,7 +67,6 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
     isPlaying,
     commands,
     setNowItemAction,
-    variant = "full",
   } = props;
 
   const shownNo = displayNo ?? (index + 1);
@@ -79,16 +110,13 @@ export function TrackRow(props: TrackRowProps): React.JSX.Element {
           {t.displayTitle ?? "（無題）"}
         </span>
 
-        {variant === "full" ? (
-          <>
-            <span className={styles.colYm}>{t.albumTitle}</span>
-            <span className={styles.colOrig}>{t.originalArtist}</span>
+        <span className={styles.colYm}>{t.albumTitle}</span>
+        <span className={styles.colOrig}>{t.originalArtist}</span>
 
-            <span className={styles.colPath} title={t.item.path ?? ""}>
-              {t.item.path ?? "なし"}
-            </span>
-          </>
-        ) : null}
+        <span className={styles.colPath} title={t.item.path ?? ""}>
+          {t.item.path ?? "なし"}
+        </span>
+
       </button>
     </li>
   );

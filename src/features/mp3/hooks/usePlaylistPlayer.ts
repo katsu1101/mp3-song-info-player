@@ -7,7 +7,9 @@ import {PlayActions, Settings, TrackView} from "@/types";
 
 import React, {useCallback, useEffect, useMemo, useRef} from "react";
 
-// ✅ 追加: Fisher–Yates（副作用なし）
+/**
+ * 配列の要素をその場でシャッフルし、新しいランダム化された配列を生成します。
+ */
 const shuffleArray = <T, >(list: readonly T[]): T[] => {
   const a = [...list];
   for (let i = a.length - 1; i > 0; i -= 1) {
@@ -27,6 +29,13 @@ const clamp = (value: number, min: number, max: number): number => {
 
 const canSeek = (audio: HTMLAudioElement): boolean => Number.isFinite(audio.currentTime);
 
+/**
+ * HTMLAudioElement の現在の再生位置を、指定された秒数だけ調整します。
+ *
+ * この関数は、指定された`audio`要素の`currentTime`プロパティを変更し、
+ * オーディオトラックを`deltaSeconds`だけ前進または後退させます。
+ * 新しい位置が有効な範囲内（利用可能な場合、オーディオトラックの持続時間である0からその持続時間まで）に保たれることを保証します。
+ */
 const seekBySeconds = (audio: HTMLAudioElement, deltaSeconds: number): void => {
   if (!canSeek(audio)) return;
 
@@ -51,6 +60,10 @@ type UsePlaylistPlayerArgs = {
   stopAndClear?: () => void;
 };
 
+/**
+ * オーディオ再生用のプレイリスト管理機能を提供するフック。
+ * シャッフル再生、連続再生、トラック間の移動、アルバムビューとの連携などの機能をサポートします。
+ */
 export const usePlaylistPlayer = (args: UsePlaylistPlayerArgs) => {
   const {audioRef, playEntry, trackViews, resetKey, settings, stopAndClear, albumViews} = args;
 

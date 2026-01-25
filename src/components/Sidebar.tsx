@@ -164,6 +164,9 @@ function SectionTitle({children}: { children: React.ReactNode }): React.JSX.Elem
   return <div className="text-sm font-extrabold opacity-90">{children}</div>;
 }
 
+/**
+ * カスタマイズ可能なスタイルと動作を備えた再利用可能なボタンコンポーネント。
+ */
 function SideButton(
   props: {
     children: React.ReactNode;

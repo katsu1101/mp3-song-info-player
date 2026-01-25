@@ -5,6 +5,10 @@ import React, {useEffect} from "react";
 const canUseMediaSession = (): boolean =>
   typeof navigator !== "undefined" && "mediaSession" in navigator;
 
+/**
+ * メディアセッションの位置状態をオーディオ要素の現在の状態と同期します。
+ * これにより、`MediaSession API`が関連するメディアの再生進行状況、再生時間、再生速度を正確に反映します。
+ */
 export function useMediaSessionPosition(audioRef: React.RefObject<HTMLAudioElement | null>): void {
   useEffect(() => {
     if (!canUseMediaSession()) return;

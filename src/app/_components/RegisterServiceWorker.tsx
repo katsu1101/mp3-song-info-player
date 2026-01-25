@@ -1,9 +1,16 @@
 "use client";
 
-import {appMeta}          from "@/config/appMeta";
-import React, {useEffect} from "react";
+import {appMeta}   from "@/config/appMeta";
+import {useEffect} from "react";
 
-export function RegisterServiceWorker(): React.JSX.Element | null {
+/**
+ * ブラウザがサポートしている場合、アプリケーションのサービスワーカーを登録します。
+ * サービスワーカーは指定されたパスとスコープで登録されます。
+ * 登録プロセス中のエラーを処理し、コンソールにログを出力します。
+ *
+ * @returns {null} このコンポーネントはUIをレンダリングしないため、nullを返します。
+ */
+export function RegisterServiceWorker(): null {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     const register = async (): Promise<void> => {

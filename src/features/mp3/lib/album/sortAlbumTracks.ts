@@ -4,6 +4,19 @@ import type {TrackView} from "@/types/views";
 
 export type AlbumTrackRow = { t: TrackView; index: number };
 
+/**
+ * 入力文字列を解析し、「index/total」形式の文字列から数値インデックスを抽出します。
+ *
+ * この関数は、文字列の最初の部分を「index/total」形式（例: 「3/10」→ 3）で正規化して抽出しようと試みます。
+ * 解析に失敗した場合、または入力が無効な場合、`null`が返されます。
+ *
+ * 動作:
+ * - 入力が `null` または `undefined` の場合、`null` を返します。
+ * - 入力が数値の場合、検証を行い有限値であればその数値を返す。それ以外の場合は`null`を返す。
+ * - 入力が文字列または数値でない場合、`null`を返す。
+ * - 入力が文字列の場合、空白をトリムし「/」で分割し、最初の数値部分を解析して返す。
+ *   無効または非数値の文字列は`null`を返す。
+ */
 const parseIndexOfTotal = (raw: unknown): number | null => {
   if (raw == null) return null;
 
@@ -42,6 +55,24 @@ const getSortRank = (t: TrackView): 0 | 1 | 2 => {
   return 2;
 };
 
+/**
+ * 特定の基準に基づいて`AlbumTrackRow`オブジェクトの配列をソートします。
+ *
+ * ソートロジックには複数のレベルのソートルールが含まれます：
+ * 1. **ソースによる分離**：トラックはソース順にグループ化されソートされます：
+ *    Fantia → mp3tag → ファイル名。
+ * 2. **Fantiaソート**: Fantiaトラックはリリース年と月（`releaseYm`）でソートされます：
+ *    - `releaseYm`がないトラックは末尾に配置されます。
+ *    - `releaseYm`が等しい場合、安定性のため元の順序（`index`）が保持されます。
+ * 3. **mp3tagソート**：
+ *    - `disc`（指定なし時はデフォルト1）でソート後、`track`（トラック番号なしは末尾配置）でソート。
+ *    - 同一値時は安定性のため元の順序（`index`）を保持。
+ * 4. **ファイル名によるソート**: トラックはファイル名の大文字小文字を区別しない順でソートされます。
+ *    - 同一順位のトラックについては、安定性を確保するため元の順序（`index`）が保持されます。
+ *
+ * @param {readonly AlbumTrackRow[]} rows - ソート対象の`AlbumTrackRow`オブジェクトの配列。この入力配列は変更されません。
+ * @returns {AlbumTrackRow[]} 指定された基準に従ってソートされた新しい`AlbumTrackRow`オブジェクトの配列。
+ */
 export const sortAlbumTracks = (rows: readonly AlbumTrackRow[]): AlbumTrackRow[] => {
   return [...rows].sort((a, b) => {
 

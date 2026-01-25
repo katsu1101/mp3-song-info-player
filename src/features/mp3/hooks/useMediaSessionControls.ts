@@ -7,6 +7,10 @@ import {useEffect} from "react";
 const canUseMediaSession = (): boolean =>
   typeof navigator !== "undefined" && "mediaSession" in navigator;
 
+/**
+ * ブラウザのメディアセッションAPI向けにメディアセッションコントロールを設定および管理します。
+ * これによりシステムレベルのメディアコントロールとの統合が可能となり、再生、一時停止、次のトラック、前のトラック操作が実現されます。
+ */
 export function useMediaSessionControls(actions: {
   trackViews: TrackView[];
   nowPlayingID: number;

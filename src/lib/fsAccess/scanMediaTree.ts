@@ -64,6 +64,22 @@ const getPriority = (stem: string): number => {
   const idx = DIR_COVER_PATTERNS.findIndex((re) => re.test(stem));
   return idx >= 0 ? idx : Number.POSITIVE_INFINITY;
 };
+
+/**
+ * ディレクトリツリーをスキャンし、ファイルとサブディレクトリを走査することでメディア関連情報を抽出する。
+ *
+ * この機能は、オーディオトラック、歌詞、画像、その他のサポートファイルなど、様々なメディアコンポーネントを識別し、
+ * ディレクトリパスとファイル名に基づいてそれらをバンドルに整理します。さらに、ディレクトリに最適な代表画像を決定し、
+ * 拡張子によるファイルフィルタリングをサポートします。
+ *
+ * @param {FileSystemDirectoryHandle} directoryHandle - スキャンを開始するルートディレクトリハンドル。
+ * @param {string} [basePath=""] - 相対ディレクトリパス用のベースパス。トラバース時にプレフィックスとして使用される。
+ * @returns {Promise<ScanMediaTreeResult>} 以下のオブジェクトを解決するプロミス：
+ * - `bundles`: メディアバンドルの配列。各バンドルは特定のグループに関連するメディアファイルを含みます。
+ * - `dirPaths`: スキャン中に検出された全ディレクトリパスの配列。
+ * - `bundleByKey`: 一意のキーと対応するメディアバンドルを関連付けるマップ。
+ * - `dirBestImageByDir`: 各ディレクトリパスと、そのディレクトリを代表する最良の画像ファイルハンドルを関連付けるマップ。
+ */
 export const scanMediaTree = async (
   directoryHandle: FileSystemDirectoryHandle,
   basePath: string = ""

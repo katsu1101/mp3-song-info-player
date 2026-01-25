@@ -25,6 +25,21 @@ type UseAppCommandsArgs = {
   settingActions: SettingActions;
 };
 
+/**
+ * メディア再生管理およびフォルダ設定操作のためのアプリケーションレベルコマンド群を提供するカスタムフック。
+ *
+ * @param {UseAppCommandsArgs} args - コマンド設定に必要な引数。オーディオ要素への参照、再生および設定用のアクションハンドラを含む。
+ * @returns {AppCommands} 再生制御、設定構成、その他のアプリケーションレベル操作を管理するコマンド関数を含むオブジェクト。
+ *
+ * 返されるオブジェクトが提供する機能：
+ * - `stopPlayback`: メディア再生を停止し、オーディオ要素をリセットします。
+ * - `pickFolder`: フォルダ選択をトリガーし、その内容をロードします。再生中の場合は停止します。
+ * - `reconnect`: 再生停止後、メディアソースへの再接続を試みます。
+ * - `forget`: 保存された設定をクリアし、再生を停止します。
+ * - `playPrev`: サポートされている場合、前のメディア項目を再生します。
+ * - `playNext`: サポートされている場合、次のメディア項目を再生します。
+ * - `playAtIndex`: サポートされている場合、指定したインデックスのメディア項目を再生します。
+ */
 export const useAppCommands = (args: UseAppCommandsArgs): AppCommands => {
   const {audioRef, playActions, settingActions} = args;
 

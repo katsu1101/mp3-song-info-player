@@ -4,6 +4,26 @@ import {ensureDirectoryPicker, requestRead}        from "@/lib/fsAccess/permissi
 
 const toMessage = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
+/**
+ * ファイルシステムアクセスAPIを使用してフォルダを選択するプロセスを処理し、その内容をロードし、
+ * それに応じて状態とビューを更新します。
+ *
+ * @function
+ * @async
+ * @param {Object} args - 必要なコールバック関数と状態設定関数を含むオブジェクト。
+ * @param {Function} args.resetView - ビューを初期状態にリセットするコールバック関数。
+ * @param {Function} args.buildList - {@link FileSystemDirectoryHandle}を受け取り
+ *     を受け取り、非同期でディレクトリの内容リストを構築するコールバック関数。
+ * @param {Function} args.setNeedsReconnect - 再接続が必要かどうかを設定する状態更新関数。
+ * @param {Function} args.setSavedHandle - 選択された{@link FileSystemDirectoryHandle}を保存する状態更新関数。
+ *     ディレクトリが選択されていない場合はnullを返す。
+ * @param {Function} args.setErrorMessage - フォルダ選択または読み込み中に問題が発生した際にエラーメッセージ文字列を設定する状態更新関数。
+ * @returns {Promise<void>} フォルダが正常に選択され、その内容が処理された際に解決する、またはエラーメッセージと共に拒否される Promise。
+ * @throws 以下の場合に適切なエラーメッセージで{@link args.setErrorMessage}を呼び出します：
+ *     - ディレクトリピッカーの起動に失敗した場合
+ *     - フォルダ選択プロセス中にエラーが発生した場合
+ *     - 選択されたディレクトリハンドルを保存または処理中に問題が発生した場合
+  */
 export const pickFolderAndLoadAction = async (args: {
   resetView: () => void;
   buildList: (handle: FileSystemDirectoryHandle) => Promise<void>;

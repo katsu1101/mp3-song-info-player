@@ -13,6 +13,9 @@ export type ToggleControlProps = {
   ariaLabel: string;
 };
 
+/**
+ * クリックすると2つの状態を切り替えるトグル制御コンポーネント。
+ */
 export function ToggleControl(props: ToggleControlProps): React.JSX.Element {
   const {checked, onChangeAction, disabled = false, ariaLabel} = props;
 

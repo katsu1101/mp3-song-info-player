@@ -13,14 +13,49 @@ import React, {JSX, useEffect, useRef} from "react";
 import styles                          from "./TrackList.module.scss";
 
 type TrackListProps = {
+  /**
+   * 不変のトラックビューオブジェクトのコレクションを表します。
+   * コレクションの各要素は、トラックの状態または構造の表現に対応します。
+   */
   trackViews: readonly TrackView[];
+
+  /**
+   * 現在再生中のメディア項目の固有識別子を表します。
+   * この値は、アクティブに再生中のメディアを追跡および管理するために使用されます。
+   * 通常、特定のメディアリソースに関連付けられた数値IDです。
+   */
   nowPlayingID: number;
+
+  /**
+   * メディアが現在アクティブで再生中かどうかを示します。
+   */
   isPlaying: boolean;
+
+  /**
+   * 設定または状態の現在の状態を表します。
+   * この変数は特定の設定の状態を追跡するために使用され、
+   * 状態に基づくロジックが適切に機能することを可能にします。
+   */
   state: SettingState;
+
+  /**
+   * アプリケーション内の実行可能コマンドの集合を表します。
+   * この変数は、事前定義された操作や機能を管理および呼び出すための
+   * 一元化されたインターフェースとして機能します。
+   */
   commands: AppCommands;
+
+  /**
+   * アルバムのコレクション。通常、AlbumViewオブジェクトのリストを表すために使用されます。
+   * このプロパティはオプションであり、指定された場合、不変です。つまり、内容を直接変更することはできません。
+   */
   albums?: readonly AlbumView[]; // ✅ ここを types/albumView の DirAlbumView に
 };
 
+/**
+ * トラックまたはアルバムのリストを表示し、オプション機能として現在再生中のトラックのマーク付け、ファイルパスの表示、
+ * 指定された設定と状態に基づくアルバムセクションの表示を行います。
+ */
 export function TrackList(props: TrackListProps): JSX.Element {
   const {trackViews, nowPlayingID, isPlaying, state, commands, albums} = props;
 
@@ -106,7 +141,6 @@ export function TrackList(props: TrackListProps): JSX.Element {
                     setNowItemAction={(node) => {
                       nowItemRef.current = node;
                     }}
-                    variant="full"
                   />
                 ))}
               </ul>
@@ -124,7 +158,6 @@ export function TrackList(props: TrackListProps): JSX.Element {
               setNowItemAction={(node) => {
                 nowItemRef.current = node;
               }}
-              variant="full"
             />
           ))
         )}

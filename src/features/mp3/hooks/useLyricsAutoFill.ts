@@ -8,13 +8,45 @@ import type {TrackMetaByPath}     from "@/features/mp3/types/trackMeta";
 import React, {Dispatch, SetStateAction, useEffect, useRef} from "react";
 
 type Args = {
+  /**
+   * 読み取り専用配列で、MP3エントリのリストを含みます。
+   * 配列の各エントリは、特定のMP3ファイルに関するメタデータまたは情報を表します。
+   *
+   * この配列は不変であり、初期化後にその構造や要素を変更することはできません。
+   */
   mp3List: readonly Mp3Entry[];
+
+  /**
+   * ファイルパスと対応するメタデータを関連付けるマッピング。
+   * ファイルパスはキーとして機能し、メタデータにはアプリケーションの文脈に応じて、
+   * ファイルタイプ、再生時間、アーティスト、アルバム、その他の関連属性などの情報が含まれる場合があります。
+   *
+   * @type {TrackMetaByPath}
+   */
   metaByPath: TrackMetaByPath;
+
+  /**
+   * 歌詞処理の実行における現在の識別子を保持する参照オブジェクト。
+   * これは通常、アクティブな実行IDを可変状態に追跡するために使用されます。
+   *
+   * @type {{ current: number }}
+   */
   lyricsRunIdRef: { current: number };
+
+  /**
+   * 特定のパスに関連付けられたメタデータを更新するために使用されるディスパッチ関数。
+   * これにより、`TrackMetaByPath` の状態を動的に更新することが可能になります。
+   *
+   * @param {Function} setMetaByPathAction - Reactの`Dispatch`関数で、`TrackMetaByPath`状態を変更するための`SetStateAction`を受け取ります。
+   */
   setMetaByPathAction: Dispatch<SetStateAction<TrackMetaByPath>>;
 };
 
-// 既に試したpathを覚える（無限fetch防止）
+/**
+ * カスタムフックで、文字列の`Set`を含むReact refオブジェクトを提供します。
+ * この`Set`は、一意のパス文字列のコレクションを保存・管理するために使用できます。
+ * 既に試したpathを覚える（無限fetch防止）
+ */
 const useTriedPathSet = (): React.RefObject<Set<string>> => {
   return useRef<Set<string>>(new Set());
 };

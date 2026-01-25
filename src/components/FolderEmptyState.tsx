@@ -9,6 +9,11 @@ type Props = {
   commands: AppCommands;
 };
 
+/**
+ * フォルダが空の状態画面を表示し、以前に開いたフォルダに再接続するか、新しいフォルダを選択するオプションを提供します。
+ *
+ * @return {React.JSX.Element} レンダリングされたフォルダ空状態コンポーネント。
+ */
 export function FolderEmptyState({state, commands}: Props): React.JSX.Element {
   const canReconnect = Boolean(state.savedHandle && state.needsReconnect);
 

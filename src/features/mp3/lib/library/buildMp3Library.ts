@@ -48,6 +48,23 @@ const buildInitialMetaByPath = (items: readonly Mp3Entry[]): TrackMetaByPath => 
   return next;
 };
 
+/**
+ * 指定されたディレクトリハンドルから、メタデータ、アートワーク、その他の関連情報を読み取り、非同期的にMP3ライブラリを構築します。
+ *
+ * @param {BuildMp3LibraryArgs} args - MP3ライブラリをスキャンおよび処理するために必要なすべてのパラメータと参照を含むオブジェクト。
+ * @returns {Promise<void>} MP3ライブラリの構築が正常に完了し、すべての処理ワーカーが初期化された時点で解決するプロミス。
+ *
+ * この関数は以下の手順を実行します：
+ * 1. 指定されたディレクトリハンドルを使用してフォルダ名を更新します。
+ * 2. 指定されたディレクトリハンドルからMP3ライブラリを読み取りスキャンし、アイテムリストとスキャン結果を取得します。
+ * 3. 取得したMP3ファイルの初期メタデータを設定します。
+ * 4. 各トラックの詳細なメタデータを取得・更新するワーカーを開始します。
+ * 5. アートワーク関連のワーカー用に一意の`runId`を共有し：
+ *    - 外部画像に基づいて個々のトラックのアートワークURLを更新します。
+ *    - 個々のトラックのアートワーク処理後にフォルダレベルのアートワークを更新します。
+ * 6. 各トラックのメタデータを処理するメタデータスキャナーワーカーを開始します（遅延タグスキャンを含む）。
+ * 7. トラックの外部`.txt`歌詞ファイルスキャンを完了させる歌詞ワーカーを開始します。
+ */
 export const buildMp3Library = async (args: BuildMp3LibraryArgs): Promise<void> => {
   const {
     handle,
@@ -126,6 +143,17 @@ export type ReadLibraryResult = {
   items: Mp3Entry[];
 };
 
+/**
+ * 指定されたディレクトリからメディアファイルのライブラリを読み込み、構造化された結果に整理します。
+ *
+ * @param {FileSystemDirectoryHandle} directoryHandle - メディアファイルをスキャンするディレクトリのハンドル。
+ * @param {string} basePath - 相対ファイルパスの参照元として使用されるベースパス。
+ * @returns {Promise<ReadLibraryResult>} スキャン結果と整理されたメディア項目のリストを含むオブジェクトに解決するプロミス。
+ *
+ * この関数はディレクトリ内のオーディオファイルと関連メタデータをスキャンし、それらをエントリの一覧に整理します。
+ * ファイルパスを一貫性のために正規化し、ロケールに依存する比較関数に基づいて結果をソートします。
+ * ライブラリ内の各オーディオ項目には、パス、名前、ファイルハンドルが含まれ、オプションで関連する歌詞やトラック情報のハンドルも扱います。
+ */
 export const readLibraryFromDirectory = async (
   directoryHandle: FileSystemDirectoryHandle,
   basePath: string

@@ -8,6 +8,13 @@ export type BuildDirAlbumsArgs = {
   dirArtworkUrlByDir: Record<string, string | null>;
 };
 
+/**
+ * 指定されたMP3ファイルのリストとディレクトリアートワークのURLに基づいて、アルバム情報オブジェクトの配列を構築します。
+ *
+ * この関数は、MP3ファイルのパス一覧を処理し、それぞれのディレクトリごとにグループ化し、各ディレクトリ用のメタデータを生成します。
+ * 各アルバム情報オブジェクトには、
+ * 一意のキー、ディレクトリ識別子、ディレクトリ内のトラックパスのリスト、およびオプションのアートワークURLが含まれます。
+ */
 export const buildDirAlbums = (args: BuildDirAlbumsArgs): AlbumInfo[] => {
   const {mp3List, dirArtworkUrlByDir} = args;
 

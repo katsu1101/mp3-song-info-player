@@ -108,6 +108,17 @@ const pickNativeText = (ids: string[], metadata: IAudioMetadata): string | null 
   return null;
 };
 
+/**
+ * MP3ファイルからメタデータを抽出します。
+ * 例えば、タイトル、アーティスト、アルバム、トラック番号、年、歌詞、埋め込まれたアルバムアートワーク、その他の関連情報など。
+ *
+ * この関数は、`music-metadata`ライブラリを使用してクライアント側でファイルを処理し、メタデータを解析します。
+ * これにより、サーバーサイドレンダリング（SSR）中に実行されることを回避します。
+ * メタデータは、標準のID3タグと共通メタデータフィールドの両方から取得されます。
+ *
+ * @param {File} file - メタデータを抽出する対象のMP3ファイル。
+ * @returns {Promise<Mp3Tag>} タイトル、アーティスト、アルバム、歌詞、アルバムアートワークを含む構造化されたMP3メタデータを含むオブジェクトを解決するプロミス。
+ */
 export const readMp3Meta = async (file: File): Promise<Mp3Tag> => {
   // ブラウザ側でだけ読み込ませる（SSRの巻き込みを避ける）
   const {parseBlob} = await import("music-metadata");
