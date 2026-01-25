@@ -31,7 +31,8 @@ export default function Page(): JSX.Element {
   // ===== Player（audio + 再生状態）=====
   const {audioRef, nowPlayingID, playEntry, stopAndClear} = hooks.useAudioPlayer();
   const {isPlaying} = hooks.useAudioPlaybackState(audioRef);
-  hooks.useMediaSessionPosition({audioRef, isPlaying, trackKey: nowPlayingID});
+  const {syncPositionStateAction} =
+    hooks.useMediaSessionPosition({audioRef, isPlaying, trackKey: nowPlayingID});
 
   // ===== Mapping（Fantia対応表）=====
   const mappingByPrefixId = hooks.useFantiaMapping();
@@ -91,6 +92,8 @@ export default function Page(): JSX.Element {
     pauseAction: playlist.playActions.pause,
     nextAction: playlist.playActions.playNext,
     prevAction: playlist.playActions.playPrev,
+    audioRef,
+    syncPositionStateAction,
   });
 
   // ===== App Commands =====
