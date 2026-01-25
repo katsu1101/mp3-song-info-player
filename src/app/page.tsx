@@ -193,7 +193,6 @@ export default function Page(): JSX.Element {
             commands={commands}
             isPlaying={isPlaying}
             metaByPath={settingState.metaByPath}
-            rootDirHandle={settingState.savedHandle ?? null}
           />
         )}
       />

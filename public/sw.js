@@ -11,7 +11,3 @@ self.addEventListener("install", () => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
-
-// fetch は “置くだけ”。何もしない（素通し）
-self.addEventListener("fetch", () => {
-});
