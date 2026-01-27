@@ -95,7 +95,7 @@ export const nextMetadata: Metadata = {
   applicationName: appMeta.name,
   title: appMeta.title,
   description: appMeta.description,
-  metadataBase: new URL(appMeta.startUrl),
+  metadataBase: new URL(appMeta.url),
   icons: {
     icon: [
       {url: appMeta.faviconIcoPath},
