@@ -96,6 +96,9 @@ export const nextMetadata: Metadata = {
   title: appMeta.title,
   description: appMeta.description,
   metadataBase: new URL(appMeta.url),
+  alternates: {
+    canonical: "./",
+  },
   icons: {
     icon: [
       {url: appMeta.faviconIcoPath},
