@@ -67,7 +67,7 @@ export const appMeta: AppMeta = {
   appleTouchIconPath: `${basePath}/icons/icon-192.png`,
 
   // OGP画像は「絶対URL」で指定しがちなので、pathとして持っておく
-  ogImagePath: "/og-image.png",
+  ogImagePath: "/og/og-image.png",
 } as const;
 
 /* ---------------------------
