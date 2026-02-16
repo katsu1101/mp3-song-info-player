@@ -1,0 +1,10 @@
+1:"$Sreact.fragment"
+2:I[87793,["/mp3-song-info-player/_next/static/chunks/262a30bab2fa6151.js"],"ClientPageRoot"]
+3:I[52683,["/mp3-song-info-player/_next/static/chunks/7cbf921396b74456.js","/mp3-song-info-player/_next/static/chunks/7500ddb6a296edd7.js","/mp3-song-info-player/_next/static/chunks/d282afa0f9511768.js"],"default"]
+6:I[95435,["/mp3-song-info-player/_next/static/chunks/262a30bab2fa6151.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+:HL["/mp3-song-info-player/_next/static/chunks/4bf061ef80b4add7.css","style"]
+0:{"buildId":"lmCyMK-JZdt48ENycHbWF","rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","link","0",{"rel":"stylesheet","href":"/mp3-song-info-player/_next/static/chunks/4bf061ef80b4add7.css","precedence":"next"}],["$","script","script-0",{"src":"/mp3-song-info-player/_next/static/chunks/7500ddb6a296edd7.js","async":true}],["$","script","script-1",{"src":"/mp3-song-info-player/_next/static/chunks/d282afa0f9511768.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"loading":null,"isPartial":false}
+4:{}
+5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
+8:null

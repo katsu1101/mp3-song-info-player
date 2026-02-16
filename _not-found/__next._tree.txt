@@ -1,0 +1,2 @@
+:HL["/mp3-song-info-player/_next/static/chunks/3f7da5c2283e91dc.css","style"]
+0:{"buildId":"lmCyMK-JZdt48ENycHbWF","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"/_not-found","paramType":null,"paramKey":"/_not-found","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
