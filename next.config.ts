@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
 
   // 末尾スラッシュを付けて静的配信の相性を上げることが多い
   trailingSlash: true,
+
+  experimental: {
+    // routes.d.ts の import 自体が生成されなくなる
+    typedRoutes: false,
+  },
 };
 
 export default nextConfig;

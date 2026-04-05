@@ -46,8 +46,8 @@ const normalizeToV1 = (obj: UnknownRecord): SoundInfoV1 | null => {
     pickNonEmptyString(obj.album);
 
   const discNo =
-    pickFiniteNumber(obj.discNo) ??
-    pickFiniteNumber(obj.diskNo);
+    pickNonEmptyString(obj.discNo) ??
+    pickNonEmptyString(obj.diskNo);
 
   const trackNo =
     pickFiniteNumber(obj.trackNo);

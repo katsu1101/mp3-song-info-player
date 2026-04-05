@@ -22,7 +22,7 @@ export type SoundInfoV1 = {
   albumTitle?: string;
   albumArtist?: string;
 
-  discNo?: number;
+  discNo?: string;
   trackNo?: number;
 
   artworkFileName?: string; // 同フォルダ画像ファイル名

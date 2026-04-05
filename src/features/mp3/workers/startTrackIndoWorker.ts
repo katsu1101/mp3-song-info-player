@@ -1,4 +1,5 @@
 // startTrackIndoWorker
+import {Mp3Tag}                        from "@/features/mp3/types";
 import type {Mp3Entry}                 from "@/features/mp3/types/mp3Entry";
 import type {TrackMetaByPath}          from "@/features/mp3/types/trackMeta";
 import {readSidecarSoundInfo}          from "@/features/mp3/workers/readSidecarSoundInfo";
@@ -79,15 +80,14 @@ export const startTrackIndoWorker = async (args: Args): Promise<void> => {
           const current = prev[entry.path];
           if (!current) return prev;
 
-          const nextMeta = {
+          const nextMeta: Mp3Tag = {
             ...current,
-            title: tag.title?.trim() ? tag.title : (current.title ?? tag.title),
-            artist: tag.artist?.trim() ? tag.artist : (current.artist ?? tag.artist),
-            album: tag.albumTitle?.trim() ? tag.albumTitle : (current.album ?? tag.albumTitle),
-            year: tag.albumArtist ?? current.albumArtist,
+            title: tag.title?.trim() ? tag.title : (current.title ?? tag.title ?? null),
+            artist: tag.artist?.trim() ? tag.artist : (current.artist ?? tag.artist ?? null),
+            album: tag.albumTitle?.trim() ? tag.albumTitle : (current.album ?? tag.albumTitle ?? null),
+            albumArtist: tag.albumArtist ?? current.albumArtist,
             discNo: tag.discNo ?? current.discNo,
             trackNo: tag.trackNo ?? current.trackNo,
-            artworkFileName: tag.artworkFileName ?? current.picture
           };
           return {...prev, [entry.path]: nextMeta} as TrackMetaByPath;
         });
